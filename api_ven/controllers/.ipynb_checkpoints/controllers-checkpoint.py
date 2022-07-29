@@ -65,6 +65,23 @@ def post_rcpt(self, rcpt):
                     is_error = True
                 break
                 
+                #DocumentTransCode
+                if rec['documentTransCode'] == "":
+                    error["Error"] = "Field documentTransCode is blank"
+                    is_error = True
+                break
+
+                #receiptDate
+                if rec["receiptDate"] == "":
+                    receipt_date = ""
+                else:
+                    try:
+                        receipt_date = datetime.strptime(rec["receiptDate"], '%d/%m/%Y').date()
+                    except ValueError:
+                        error["Error"] = "Wrong date format on receiptDate"
+                        is_error = True
+                    break
+                    
         except Exception as e:
             error["Error"] = str(e)
             is_error = True
