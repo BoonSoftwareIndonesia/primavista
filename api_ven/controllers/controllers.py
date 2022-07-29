@@ -60,10 +60,11 @@ def post_rcpt(self, rcpt):
                 break
                 
                 receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['poNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
-            if receipt_header['origin'] != rec['poNo']:
-                error["Error"] = "Receipt does not exist"
-                is_error = True
+                if receipt_header['origin'] != rec['poNo']:
+                    error["Error"] = "Receipt does not exist"
+                    is_error = True
                 break
+                
         except Exception as e:
             error["Error"] = str(e)
             is_error = True
