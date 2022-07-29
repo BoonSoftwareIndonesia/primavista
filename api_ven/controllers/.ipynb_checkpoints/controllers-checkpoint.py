@@ -32,14 +32,14 @@ def getRecord(self, model, field, wms):
         else:
             return -1
         
-@http.route('/api/authenticate', type='json', auth='none', methods=['POST'])
-    def authenticate(self, db, login, password):
-        try:
-            request.session.authenticate(db, login, password)
-            return request.env['ir.http'].session_info()
-        except:
+# @http.route('/api/authenticate', type='json', auth='none', methods=['POST'])
+#     def authenticate(self, db, login, password):
+#         try:
+#             request.session.authenticate(db, login, password)
+#             return request.env['ir.http'].session_info()
+#         except:
 #            Response.status = "401"
-            return {"Error": "Failed to authenticate user"}
+#             return {"Error": "Failed to authenticate user"}
 
 @http.route('/api/createasn', type='json', auth='user', methods=['POST'])
     def post_rcpt(self, rcpt):
