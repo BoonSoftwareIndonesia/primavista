@@ -78,7 +78,7 @@ def getRecord(self, model, field, wms):
 #             error['Error'] = str(e)
 #             is_error = True
         
-#        try:
+       try:
         for rec in rcpt:
             #check poNo
             if rec['poNo'] == "":
@@ -118,9 +118,10 @@ def getRecord(self, model, field, wms):
 
 
             response_msg = "GRN updated successfully"
-#        except Exception as e:
-#            error["Error"] = str(e)
-#            is_error = True
+            
+        except Exception as e:
+           error["Error"] = str(e)
+           is_error = True
 
         if is_error == True:
 #            Response.status = "400"
