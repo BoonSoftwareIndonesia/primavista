@@ -73,19 +73,19 @@ class ApiController(models.Model):
             "asn": [
                 {
                      
-                    "ownerReferences": "",
+                    "ownerReferences": "N/A",
                     "poNo": "" if record['name'] == False else record['name'],
                     "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
-                    "sender": "",
+                    "sender": "N/A",
                     "documentTransCode": "" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
                     "ownerCode": "" if record['x_studio_owner'] == False else record['x_studio_owner'],
                     "warehouseCode": "" if record['picking_type_id']['warehouse_id']['code'] == False else record['picking_type_id']['warehouse_id']['code'],
-                    "poDate": "" if record['date_approve'] == False else datetime.strftime(record['date_approve'], '%d/%m/%Y'),
+                    "poDate": "" if record['date_order'] == False else datetime.strftime(record['date_order'], '%d/%m/%Y'),
                     "expectedArrivalDate": "" if record['date_planned'] == False else datetime.strftime(record['date_planned'], '%d/%m/%Y'),
-                    "otherReferences": "",
-                    "remark1": "",
-                    "doNo": "",
-                    
+                    "otherReferences": "N/A",
+                    "remark1": "N/A",
+                    "doNo": "N/A",
+                    "asnLine": po_lines
 #                     "ownerReferences": "" if record['x_studio_owner_reference'] == False else record['x_studio_owner_reference'],
 #                     "poNo": "" if record['name'] == False else record['name'],
 #                     "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
@@ -111,7 +111,7 @@ class ApiController(models.Model):
 #                     "otherReferences":"STCK TRS APL",
 #                     "remark1":" Stock Transfer from APL 29 Jun'22\rSurat Jalan No: 9910278722, 9910278725, 9910278745, 9910278771, 9910278722",
 #                     "doNo":"",
-                    "asnLine": po_lines
+                    
                 }
             ]
         }
