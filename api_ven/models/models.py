@@ -79,7 +79,7 @@ class ApiController(models.Model):
                     "sender": "",
                     "documentTransCode": "" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
                     "ownerCode": "" if record['x_studio_owner'] == False else record['x_studio_owner'],
-                    "warehouseCode": "" if record['picking_type_id']['warehouse_id']['code'] == False else record['picking_type_id']['warehouse_id']['code'],
+                    "warehouseCode": "AVI",
                     "poDate": "13-07-2022",
                     "expectedArrivalDate": "13-07-2022",
                     "otherReferences": "N/A",
