@@ -86,32 +86,6 @@ class ApiController(models.Model):
                     "remark1": "",
                     "doNo": "",
                     "asnLine": po_lines
-#                     "ownerReferences": "" if record['x_studio_owner_reference'] == False else record['x_studio_owner_reference'],
-#                     "poNo": "" if record['name'] == False else record['name'],
-#                     "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
-#                     "sender": "" if record['x_studio_sender'] == False else record['x_studio_sender'],
-#                     "documentTransCode": "" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
-#                     "ownerCode": "" if record['x_studio_owner'] == False else record['x_studio_owner'],
-#                     "warehouseCode": "" if record['picking_type_id']['warehouse_id']['code'] == False else record['picking_type_id']['warehouse_id']['code'],
-#                     "poDate": "" if record['date_approve'] == False else datetime.strftime(record['date_approve'], '%d/%m/%Y'),
-#                     "expectedArrivalDate": "" if record['date_planned'] == False else datetime.strftime(record['date_planned'], '%d/%m/%Y'),
-#                     "otherReferences": "" if record['x_studio_other_reference'] == False else record['x_studio_other_reference'],
-#                     "remark1": "" if record['x_studio_remark_1'] == False else record['x_studio_remark_1'],
-#                     "doNo": "" if record['x_studio_do_number'] == False else record['x_studio_do_number'],
-                    
-#                     "ownerReferences":"",
-#                     "poNo":"15220014721",
-#                     "supplierReferences":"V-80",
-#                     "sender":"VITA HEALTH INDONESIA, PT",
-#                     "documentTransCode":"PODR",
-#                     "ownerCode":"VITAHEALTH",
-#                     "warehouseCode":"AVI",
-#                     "poDate":"13-07-2022",
-#                     "expectedArrivalDate":"13-07-2022",
-#                     "otherReferences":"STCK TRS APL",
-#                     "remark1":" Stock Transfer from APL 29 Jun'22\rSurat Jalan No: 9910278722, 9910278725, 9910278745, 9910278771, 9910278722",
-#                     "doNo":"",
-                    
                 }
             ]
         }
@@ -123,3 +97,30 @@ class ApiController(models.Model):
         }
         
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+        
+         #Create log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': record,
+                'message_type': 'RCPT'
+            })
+
+            api_log['status'] = 'process'
+        except:
+            error['Error'] = str(e)
+            is_error = True
+        
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(record), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
