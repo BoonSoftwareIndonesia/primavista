@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from odoo.http import request
+import json, datetime, requests
+from datetime import datetime
 
 
 # class api_ven(models.Model):
