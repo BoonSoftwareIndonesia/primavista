@@ -73,9 +73,9 @@ class ApiController(models.Model):
             "asn": [
                 {
                      
-                    "ownerReferences": "N/A",
+                    "ownerReferences": "",
                     "poNo": "" if record['name'] == False else record['name'],
-                    "supplierReferences": "V-80",
+                    "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
                     "sender": "N/A",
                     "documentTransCode": "PODR",
                     "ownerCode": "VITAHEALTH",
