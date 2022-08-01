@@ -48,32 +48,6 @@ class ApiController(models.Model):
     _inherit = "purchase.order"
     
     def api_dw_po(self, record):
-        #Create log
-        try:
-            api_log = request.env['api_ven.api_ven'].create({
-                'status': 'new',
-                'created_date': datetime.now(),
-                'incoming_msg': record,
-                'message_type': 'RCPT'
-            })
-
-            api_log['status'] = 'process'
-        except:
-            error['Error'] = str(e)
-            is_error = True
-            
-        try:
-            api_log['incoming_txt'] = request.env['ir.attachment'].create({
-                'name': str(api_log['name']) + '_in.txt',
-                'type': 'binary',
-                'datas': base64.b64encode(bytes(str(record), 'utf-8')),
-                'res_model': 'api_ven.api_ven',
-                'res_id': api_log['id'],
-                'mimetype': 'text/plain'
-            })
-        except Exception as e:
-            error['Error'] = str(e)
-            is_error = True
             
 #       PROSES KIRIM API
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
@@ -126,5 +100,19 @@ class ApiController(models.Model):
         }
         
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+        
+        #Create log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': json.dumps(payload),
+                'message_type': 'RCPT'
+            })
+
+            api_log['status'] = 'process'
+        except:
+            error['Error'] = str(e)
+            is_error = True
         
          
