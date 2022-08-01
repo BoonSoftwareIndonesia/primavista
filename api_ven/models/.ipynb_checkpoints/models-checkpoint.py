@@ -102,17 +102,17 @@ class ApiController(models.Model):
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
         
         #Create log
-#         try:
-#             api_log = request.env['api_ven.api_ven'].create({
-#                 'status': 'new',
-#                 'created_date': datetime.now(),
-#                 'incoming_msg': 'test',
-#                 'message_type': 'RCPT'
-#             })
+        try:
+            api_log = self.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': 'test',
+                'message_type': 'RCPT'
+            })
 
-#             api_log['status'] = 'process'
-#         except:
-#             error['Error'] = str(e)
-#             is_error = True
+            api_log['status'] = 'process'
+        except:
+            error['Error'] = str(e)
+            is_error = True
         
          
