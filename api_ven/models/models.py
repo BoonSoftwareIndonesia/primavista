@@ -82,9 +82,9 @@ class ApiController(models.Model):
                     "warehouseCode": "" if record['picking_type_id']['warehouse_id']['code'] == False else record['picking_type_id']['warehouse_id']['code'],
                     "poDate": "" if record['date_approve'] == False else datetime.strftime(record['date_approve'], '%d/%m/%Y'),
                     "expectedArrivalDate": "" if record['date_planned'] == False else datetime.strftime(record['date_planned'], '%d/%m/%Y'),
-                    "otherReferences": "" if record['x_studio_other_reference'] == False else record['x_studio_other_reference'],
-                    "remark1": "" if record['x_studio_remark_1'] == False else record['x_studio_remark_1'],
-                    "doNo": "" if record['x_studio_do_number'] == False else record['x_studio_do_number'],
+                    "otherReferences": "",
+                    "remark1": "",
+                    "doNo": "",
                     "asnLine": po_lines
                 }
             ]
