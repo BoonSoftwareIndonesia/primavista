@@ -80,7 +80,7 @@ class ApiController(models.Model):
                     "documentTransCode": "" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
                     "ownerCode": "" if record['x_studio_owner'] == False else record['x_studio_owner'],
                     "warehouseCode": "" if record['picking_type_id']['warehouse_id']['code'] == False else record['picking_type_id']['warehouse_id']['code'],
-                    "poDate": "" if record['date_order'] == False else datetime.strftime(record['date_order'], '%d/%m/%Y'),
+                    "poDate": "" if record['date_approve'] == False else datetime.strftime(record['date_approve'], '%d/%m/%Y'),
                     "expectedArrivalDate": "" if record['date_planned'] == False else datetime.strftime(record['date_planned'], '%d/%m/%Y'),
                     "otherReferences": "N/A",
                     "remark1": "N/A",
