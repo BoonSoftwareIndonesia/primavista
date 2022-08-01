@@ -111,16 +111,3 @@ class ApiController(models.Model):
         except:
             error['Error'] = str(e)
             is_error = True
-        
-        try:
-            api_log['incoming_txt'] = request.env['ir.attachment'].create({
-                'name': str(api_log['name']) + '_in.txt',
-                'type': 'binary',
-                'datas': base64.b64encode(bytes(str(record), 'utf-8')),
-                'res_model': 'api_ven.api_ven',
-                'res_id': api_log['id'],
-                'mimetype': 'text/plain'
-            })
-        except Exception as e:
-            error['Error'] = str(e)
-            is_error = True
