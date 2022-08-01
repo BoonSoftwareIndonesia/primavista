@@ -106,7 +106,7 @@ class ApiController(models.Model):
             api_log = request.env['api_ven.api_ven'].create({
                 'status': 'new',
                 'created_date': datetime.now(),
-                'incoming_msg': json.dumps(payload),
+                'incoming_msg': 'test',
                 'message_type': 'RCPT'
             })
 
