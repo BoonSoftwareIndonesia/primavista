@@ -47,6 +47,20 @@ class ApiController(models.Model):
     _inherit = "purchase.order"
     
     def api_dw_po(self, record):
+        #Create log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': record,
+                'message_type': 'RCPT'
+            })
+
+            api_log['status'] = 'process'
+        except:
+            error['Error'] = str(e)
+            is_error = True
+            
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
         
         line_no = 1
@@ -98,16 +112,4 @@ class ApiController(models.Model):
         
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
         
-         #Create log
-        try:
-            api_log = request.env['api_ven.api_ven'].create({
-                'status': 'new',
-                'created_date': datetime.now(),
-                'incoming_msg': record,
-                'message_type': 'RCPT'
-            })
-
-            api_log['status'] = 'process'
-        except:
-            error['Error'] = str(e)
-            is_error = True
+         
