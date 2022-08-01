@@ -43,7 +43,7 @@ class api_ven(models.Model):
 class ApiController(models.Model):
     _inherit = "purchase.order"
     
-    def api_dw_po(self, record):
+    def api_dw_po(self):
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
         
 #         line_no = 1
