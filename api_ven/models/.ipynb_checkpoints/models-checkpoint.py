@@ -115,4 +115,101 @@ class ApiController(models.Model):
 #             error['Error'] = str(e)
 #             is_error = True
         
-         
+class ApiControllerSO(models.Model):
+    _inherit = "sale.order"
+    
+    def api_dw_so(self, record):
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        
+#         line_no = 1
+#         so_lines = []
+        
+#         for line in record['order_line']:
+#             line['x_studio_line_no'] = str(line_no)
+            
+#             so_line = {
+#                 "soLineOptChar1": line['x_studio_line_no'],
+#                 "soLineOptChar2": "" if line['x_studio_opt_char_2'] == False else line['x_studio_opt_char_2'],
+#                 "product": line['product_id']['default_code'],
+#                 #"productDesc": record['product_id']['name'],
+#                 "quantityOrder": str(int(line['product_uom_qty'])),
+#                 "uomCode": line['product_uom']['name'],
+#                 "lotNo": "LOT",
+#                 "filterTransactionCode": "NM",
+#             }
+#             line_no += 1
+            
+#             so_lines.append(so_line)
+        
+        
+        payload = {
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "order":[
+                {
+#                     "customerPO":"" if record['x_studio_customer_po'] == False else record['x_studio_customer_po'],
+#                     "reference":"" if record['name'] == False else record['name'],
+#                     "customerCode":"" if record['partner_id']["x_studio_internal_id"] == False else record['partner_id']["x_studio_internal_id"],
+#                     "soHeaderOptChar3":"",
+#                     "documentTransCode":"" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
+#                     "orderDate":"" if record['date_order'] == False else datetime.strftime(record['date_order'], '%d/%m/%Y'),
+#                     "requestedDeliveryDate":"" if record['x_studio_request_delivery_date'] == False else datetime.strftime(record['x_studio_request_delivery_date'], '%d/%m/%Y'),
+#                     "ownerCode":"" if record['x_studio_owner_code'] == False else record['x_studio_owner_code'],
+#                     "warehouseCode": "" if record['warehouse_id']['code'] == False else record['warehouse_id']['code'],
+#                     "shipNo":"" if record['partner_shipping_id']["x_studio_internal_id"] == False else record['partner_shipping_id']["x_studio_internal_id"],
+#                     "shipAddress1":"" if record['partner_shipping_id']["street"] == False else record['partner_shipping_id']["street"],
+#                     "shipCity":"" if record['partner_shipping_id']["city"] == False else record['partner_id']["x_studio_internal_id"],
+#                     "shipZipCode":"" if record['partner_shipping_id']["zip"] == False else record['partner_shipping_id']["zip"],
+#                     "shipCountry":"" if record['partner_shipping_id']["country_id"]["name"] == False else record['partner_shipping_id']["country_id"]["name"],
+#                     "shipZone":"NA",
+#                     "shipRoute":"NA",
+#                     "shipArea":"SHIP",
+#                     "remark2":"" if record['x_studio_remark_1'] == False else record['x_studio_remark_1'],
+#                     "remark1":"" if record['x_studio_remark_2'] == False else record['x_studio_remark_2'],
+#                     "allocatequantityOrder":"TRUE",
+#                     "shipInFull":"FALSE",
+#                     "orderLine": so_lines
+                    
+                    "customerPO":"64513",
+                    "reference":"11220019401",
+                    "customerCode":"C01-0478",
+                    "soHeaderOptChar3":"AFRIZAL",
+                    "documentTransCode":"OR",
+                    "orderDate":"15-07-2022",
+                    "requestedDeliveryDate":"15-07-2022",
+                    "ownerCode":"OMRON",
+                    "warehouseCode":"AVI",
+                    "shipNo":"0478",
+                    "shipAddress1":"Jl. Residen Danu Broto. Desa Geuceu Kayee Jato. Dusun Taman Mulia. Gang Mawar No 33,",
+                    "shipCity":"Banda Aceh",
+                    "shipZipCode":"23229",
+                    "shipCountry":"INDONESIA",
+                    "shipZone":"NA",
+                    "shipRoute":"NA",
+                    "shipArea":"SHIP",
+                    "remark2":"220714DN8ERNE7",
+                    "remark1":"Afrizal/220714DN8ERNE7",
+                    "allocatequantityOrder":"TRUE",
+                    "shipInFull":"FALSE",
+                    "orderLine":[
+                                    {
+                                       "soLineOptChar1":"2",
+                                       "product":"HEM-7121",
+                                       "quantityOrder":"1",
+                                       "originalOrderUOM":"BOX",
+                                       "lotNo":"%",
+                                       "filterTransactionCode":"NM",
+                                       "soLineOptChar2":"OR"
+                                    }
+                                ]
+
+                }
+            ]
+        }
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive",
+            "Accept": "*/*"
+        }
+        
+        r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
