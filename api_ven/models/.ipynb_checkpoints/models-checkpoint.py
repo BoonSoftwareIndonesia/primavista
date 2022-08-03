@@ -121,25 +121,24 @@ class ApiControllerSO(models.Model):
     def api_dw_so(self, record):
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
         
-#         line_no = 1
-#         so_lines = []
+        line_no = 1
+        so_lines = []
         
-#         for line in record['order_line']:
-#             line['x_studio_line_no'] = str(line_no)
+        for line in record['order_line']:
+            line['x_studio_line_no'] = str(line_no)
             
-#             so_line = {
-#                 "soLineOptChar1": line['x_studio_line_no'],
-#                 "soLineOptChar2": "" if line['x_studio_opt_char_2'] == False else line['x_studio_opt_char_2'],
-#                 "product": line['product_id']['default_code'],
-#                 #"productDesc": record['product_id']['name'],
-#                 "quantityOrder": str(int(line['product_uom_qty'])),
-#                 "uomCode": line['product_uom']['name'],
-#                 "lotNo": "LOT",
-#                 "filterTransactionCode": "NM",
-#             }
-#             line_no += 1
+            so_line = {
+                "soLineOptChar1": line['x_studio_line_no'],
+                "product": line['product_id']['default_code'],
+                "quantityOrder": str(int(line['product_uom_qty'])),
+                "originalOrderUOM": line['product_uom']['name'],
+                "lotNo": "LOT",
+                "filterTransactionCode": "NM",
+                "soLineOptChar2": ""
+            }
+            line_no += 1
             
-#             so_lines.append(so_line)
+            so_lines.append(so_line)
         
         
         payload = {
@@ -190,17 +189,18 @@ class ApiControllerSO(models.Model):
                     "remark1":"Afrizal/220714DN8ERNE7",
                     "allocatequantityOrder":"TRUE",
                     "shipInFull":"FALSE",
-                    "orderLine":[
-                                    {
-                                       "soLineOptChar1":"2",
-                                       "product":"HEM-7121",
-                                       "quantityOrder":"1",
-                                       "originalOrderUOM":"BOX",
-                                       "lotNo":"%",
-                                       "filterTransactionCode":"NM",
-                                       "soLineOptChar2":"OR"
-                                    }
-                                ]
+                    "orderLine": so_lines
+#                                 [
+#                                     {
+#                                        "soLineOptChar1":"2",
+#                                        "product":"HEM-7121",
+#                                        "quantityOrder":"1",
+#                                        "originalOrderUOM":"BOX",
+#                                        "lotNo":"%",
+#                                        "filterTransactionCode":"NM",
+#                                        "soLineOptChar2":"OR"
+#                                     }
+#                                 ]
 
                 }
             ]
