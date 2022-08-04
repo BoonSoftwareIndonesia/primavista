@@ -172,7 +172,7 @@ class ApiControllerSO(models.Model):
                     "reference":"" if record['name'] == False else record['name'],
                     "customerCode":"" if record['x_studio_customer_code'] == False else record['x_studio_customer_code'],
                     "soHeaderOptChar3":"",
-                    "documentTransCode":"OR",
+                    "documentTransCode":"" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
                     "orderDate":"15-07-2022",
                     "requestedDeliveryDate":"",
                     "ownerCode":"OMRON",
