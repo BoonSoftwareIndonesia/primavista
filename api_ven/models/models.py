@@ -176,7 +176,7 @@ class ApiControllerSO(models.Model):
                     "orderDate":"" if record['date_order'] == False else datetime.strftime(record['date_order'], '%d/%m/%Y'),
                     "requestedDeliveryDate":"",
                     "ownerCode":"" if record['x_studio_owner_code'] == False else record['x_studio_owner_code'],
-                    "warehouseCode":"AVI",
+                    "warehouseCode": "" if record['warehouse_id']['code'] == False else record['warehouse_id']['code'],
                     "shipNo":"0478",
                     "shipAddress1":"Jl. Residen Danu Broto. Desa Geuceu Kayee Jato. Dusun Taman Mulia. Gang Mawar No 33,",
                     "shipCity":"Banda Aceh",
