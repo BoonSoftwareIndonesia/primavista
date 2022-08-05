@@ -235,7 +235,7 @@ class ApiControllerSO(models.Model):
                     "ownerCode":"" if record['x_studio_owner_code'] == False else record['x_studio_owner_code'],
                     "warehouseCode": "" if record['warehouse_id']['code'] == False else record['warehouse_id']['code'],
                     "shipNo": "" if record['x_studio_internal_id'] == False else record['x_studio_internal_id'],
-                    "shipAddress1":"" if record['partner_shipping_id']["street"] == False else record['partner_shipping_id']["street"],
+                    "shipAddress1":"Jl. Residen Danu Broto. Desa Geuceu Kayee Jato. Dusun Taman Mulia. Gang Mawar No 33,",
                     "shipCity":"Banda Aceh",
                     "shipZipCode":"23229",
                     "shipCountry":"INDONESIA",
