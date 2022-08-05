@@ -2,7 +2,7 @@
 
 from odoo import models, fields, api
 from odoo.http import request, Response
-import json, datetime, requests, base64
+import json, datetime, requests, base64, unicodedata
 from datetime import datetime
 from odoo import http
 
