@@ -202,29 +202,6 @@ class ApiControllerSO(models.Model):
             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "order":[
                 {
-#                     "customerPO":"",
-#                     "reference":"" if record['name'] == False else record['name'],
-#                     "customerCode":"" if record['x_studio_customer_code'] == False else record['x_studio_customer_code'],
-#                     "soHeaderOptChar3":"",
-#                     "documentTransCode":"" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
-#                     "orderDate":"" if record['date_order'] == False else datetime.strftime(record['date_order'], '%d/%m/%Y'),
-#                     "requestedDeliveryDate":"",
-#                     "ownerCode":"" if record['x_studio_owner_code'] == False else record['x_studio_owner_code'],
-#                     "warehouseCode": "" if record['warehouse_id']['code'] == False else record['warehouse_id']['code'],
-#                     "shipNo":"" if record['x_studio_internal_id'] == False else record['x_studio_internal_id'],
-#                     "shipAddress1":"" if record['partner_shipping_id']["street"] == False else record['partner_shipping_id']["street"],
-#                     "shipCity":"" if record['partner_shipping_id']["city"] == False else record['partner_id']["x_studio_internal_id"],
-#                     "shipZipCode":"" if record['partner_shipping_id']["zip"] == False else record['partner_shipping_id']["zip"],
-#                     "shipCountry":"" if record['partner_shipping_id']["country_id"]["name"] == False else record['partner_shipping_id']["country_id"]["name"],
-#                     "shipZone":"NA",
-#                     "shipRoute":"NA",
-#                     "shipArea":"SHIP",
-#                     "remark2":"",
-#                     "remark1":"",
-#                     "allocatequantityOrder":"TRUE",
-#                     "shipInFull":"FALSE",
-#                     "orderLine": so_lines
-                    
                     "customerPO":"",
                     "reference":"" if record['name'] == False else record['name'],
                     "customerCode":"" if record['x_studio_customer_code'] == False else record['x_studio_customer_code'],
@@ -247,40 +224,6 @@ class ApiControllerSO(models.Model):
                     "allocatequantityOrder":"TRUE",
                     "shipInFull":"FALSE",
                     "orderLine": so_lines
-                    
-#                     "customerPO":"",
-#                     "reference":"11220019401",
-#                     "customerCode":"C01-0478",
-#                     "soHeaderOptChar3":"",
-#                     "documentTransCode":"OR",
-#                     "orderDate":"15-07-2022",
-#                     "requestedDeliveryDate":"",
-#                     "ownerCode":"OMRON",
-#                     "warehouseCode":"AVI",
-#                     "shipNo":"0478",
-#                     "shipAddress1":"Jl. Residen Danu Broto. Desa Geuceu Kayee Jato. Dusun Taman Mulia. Gang Mawar No 33,",
-#                     "shipCity":"Banda Aceh",
-#                     "shipZipCode":"23229",
-#                     "shipCountry":"INDONESIA",
-#                     "shipZone":"NA",
-#                     "shipRoute":"NA",
-#                     "shipArea":"SHIP",
-#                     "remark2":"",
-#                     "remark1":"",
-#                     "allocatequantityOrder":"TRUE",
-#                     "shipInFull":"FALSE",
-#                     "orderLine": so_lines
-#                                 [
-#                                     {
-#                                        "soLineOptChar1":"2",
-#                                        "product":"HEM-7121",
-#                                        "quantityOrder":"1",
-#                                        "originalOrderUOM":"BOX",
-#                                        "lotNo":"%",
-#                                        "filterTransactionCode":"NM",
-#                                        "soLineOptChar2":"OR"
-#                                     }
-#                                 ]
 
                 }
             ]
@@ -292,4 +235,57 @@ class ApiControllerSO(models.Model):
             "Accept": "*/*"
         }
         
+        #Create log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': payload,
+                'message_type': 'SO'
+            })
+
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+        
+        api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
+        
+        """if is_error == False:
+            api_log['status'] = 'success'
+        elif '"returnStatus":"-1"' in api_log['response_msg']:
+            api_log['status'] = 'error'
+        else:
+            api_log['status'] = 'success'"""
+        
+        if r.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
+        
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+        
+#         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
