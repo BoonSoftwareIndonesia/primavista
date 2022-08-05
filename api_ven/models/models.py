@@ -111,7 +111,65 @@ class ApiController(models.Model):
             "Accept": "*/*"
         }
         
+        #Create log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': payload,
+                'message_type': 'PO'
+            })
+
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+#        try:
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+#        except Exception as e:
+#            is_error = True
+#            api_log['status'] = 'error'
+            
+#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        
+        api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
+        
+        """if is_error == False:
+            api_log['status'] = 'success'
+        elif '"returnStatus":"-1"' in api_log['response_msg']:
+            api_log['status'] = 'error'
+        else:
+            api_log['status'] = 'success'"""
+        
+        if r.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
+        
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+#         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
         
         #Create log
 #         try:
