@@ -31,7 +31,7 @@ class api_ven(models.Model):
     status = fields.Selection([('new','New'),('process','Processing'),('success','Success'),('error','Error')])
     created_date = fields.Datetime(string="Created Date")
     response_date = fields.Datetime(string="Response Date")
-    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO')])
+    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO'), ('PO','DW_PO'),('SO','DW_SO')])
     incoming_txt = fields.Many2one('ir.attachment', string="Incoming txt", readonly=True)
     response_txt = fields.Many2one('ir.attachment', string="Response txt", readonly=True)
     raw_data = fields.Binary(string="Raw Data", attachment=True)
@@ -171,19 +171,6 @@ class ApiController(models.Model):
         })
 #         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
         
-        #Create log
-#         try:
-#             api_log = self.env['api_ven.api_ven'].create({
-#                 'status': 'new',
-#                 'created_date': datetime.now(),
-#                 'incoming_msg': 'test',
-#                 'message_type': 'RCPT'
-#             })
-
-#             api_log['status'] = 'process'
-#         except:
-#             error['Error'] = str(e)
-#             is_error = True
         
 class ApiControllerSO(models.Model):
     _inherit = "sale.order"
