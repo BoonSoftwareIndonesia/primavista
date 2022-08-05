@@ -31,7 +31,7 @@ class api_ven(models.Model):
     status = fields.Selection([('new','New'),('process','Processing'),('success','Success'),('error','Error')])
     created_date = fields.Datetime(string="Created Date")
     response_date = fields.Datetime(string="Response Date")
-    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO'), ('PO','DW_PO'),('SO','DW_SO')])
+    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO'),('PO','DW_PO'),('SO','DW_SO')])
     incoming_txt = fields.Many2one('ir.attachment', string="Incoming txt", readonly=True)
     response_txt = fields.Many2one('ir.attachment', string="Response txt", readonly=True)
     raw_data = fields.Binary(string="Raw Data", attachment=True)
@@ -41,7 +41,7 @@ class api_ven(models.Model):
     def create(self, vals):
         if vals.get('name', ('New')) == ('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('api.seq') or ('New')
-        result = super(api_sbt_inv, self).create(vals)
+        result = super(api_ven, self).create(vals)
         return result
     
 class ApiController(models.Model):
