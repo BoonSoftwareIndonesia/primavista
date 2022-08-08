@@ -60,25 +60,25 @@ def post_rcpt(self, rcpt):
                 if rec['poNo'] == "":
                     error["Error"] = "Field ownerReference is blank"
                     is_error = True
-                break
+                    break
 
                 po = self.getRecord(model="purchase.order", field="name", wms=rec['poNo'])
                 if po == -1:
                     error["Error"] = "poNo does not exist"
                     is_error = True
-                break
+                    break
                 
                 receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['poNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
                 if receipt_header['origin'] != rec['poNo']:
                     error["Error"] = "Receipt does not exist"
                     is_error = True
-                break
+                    break
                 
                 #DocumentTransCode
                 if rec['documentTransCode'] == "":
                     error["Error"] = "Field documentTransCode is blank"
                     is_error = True
-                break
+                    break
 
                 #receiptDate
                 if rec["receiptDate"] == "":
@@ -89,7 +89,7 @@ def post_rcpt(self, rcpt):
                     except ValueError:
                         error["Error"] = "Wrong date format on receiptDate"
                         is_error = True
-                    break
+                        break
                     
                 #Receipt Line
                 for line in rec['details']:
@@ -99,19 +99,56 @@ def post_rcpt(self, rcpt):
                     if line['ownerReference'] == "":
                         error["Error"] = "Field ownerReference is blank"
                         is_error = True
-                    break
+                        break
                     
                     #inwardLineOptChar1
                     if line['inwardLineOptChar1'] == "":
                         error["Error"] = "Field inwardLineOptChar1 is blank"
                         is_error = True
-                    break
+                        break
 
                     #product
                     if line['product'] == "":
                         error["Error"] = "Field product is blank"
                         is_error = True
-                    break
+                        break
+                    
+                    temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                    if temp_product == -1:
+
+                        created_product = request.env['product.product'].create({
+                            "type": "product",
+                            "default_code": line['product'],
+                            "name": line['product'],
+                            "tracking": "lot",
+                            "use_expiration_date": 1,
+                            "company_id": 1
+                        })
+    
+                        temp_product = created_product['id']
+
+                        warn_str = "Message " + str(warn_cnt)
+                        error[warn_str] = "Product " + line['product'] + " has been created"
+                        warn_cnt += 1
+                    
+                    for det in line['lineDetails']:
+
+                        #Check quantityReceived
+                        if det['quantityReceived'] == "":
+                            error["Error"] = "Field quantityReceived is blank"
+                            is_error = True
+                            break
+
+                        #Check expiryDate
+                        if det['expiryDate'] == "":
+                            expiry_date = ""
+                        else:
+                            try:
+                                expiry_date = datetime.strptime(det['expiryDate'], '%d/%m/%Y').date()
+                            except ValueError:
+                                error["Error"] = "Wrong date format on expiryDate"
+                                is_error = True
+                                break
                     
         except Exception as e:
             error["Error"] = str(e)
