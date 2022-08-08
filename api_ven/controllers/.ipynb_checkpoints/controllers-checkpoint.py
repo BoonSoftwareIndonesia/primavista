@@ -91,6 +91,28 @@ def post_rcpt(self, rcpt):
                         is_error = True
                     break
                     
+                #Receipt Line
+                for line in rec['details']:
+                    temp_product = 0
+
+                    #ownerReference
+                    if line['ownerReference'] == "":
+                        error["Error"] = "Field ownerReference is blank"
+                        is_error = True
+                    break
+                    
+                    #inwardLineOptChar1
+                    if line['inwardLineOptChar1'] == "":
+                        error["Error"] = "Field inwardLineOptChar1 is blank"
+                        is_error = True
+                    break
+
+                    #product
+                    if line['product'] == "":
+                        error["Error"] = "Field product is blank"
+                        is_error = True
+                    break
+                    
         except Exception as e:
             error["Error"] = str(e)
             is_error = True
