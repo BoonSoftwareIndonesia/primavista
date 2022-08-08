@@ -149,9 +149,91 @@ def post_rcpt(self, rcpt):
                                 error["Error"] = "Wrong date format on expiryDate"
                                 is_error = True
                                 break
+                        
+                        #Check stockStatusCode
+                        if det['stockStatusCode'] == "":
+                            error["Error"] = "Field stockStatusCode is blank"
+                            is_error = True
+                            break
+
+                        #Check lotNo
+                        if det['lotNo'] == "":
+                            error["Error"] = "Field lotNo is blank"
+                            is_error = True
+                            break
+
+                        temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
+                            if temp_lot['name'] != det['lotNo']:
+                            temp_lot = request.env['stock.production.lot'].create({
+                                "product_id": temp_product,
+                                "name": det["lotNo"],
+                                "company_id": 1
+                            })
+
+                        #Create Line Detail
+                        line_detail = request.env['stock.move.line'].create({
+                            "product_id": temp_product,
+                            "product_uom_id": 1,
+                            "location_id": 4,
+                            "location_dest_id": 8,
+                            "lot_id": temp_lot['id'],
+                            "expiration_date": expiry_date,
+                            "qty_done": det["quantityReceived"],
+                            "company_id": 1,
+                            "state": "done"
+                        })
+
+                        line_details.append(line_detail['id'])
+                        
+                    #Get existing receipt line data based on poNo and lineOptChar1
+                    receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
+                    if receipt_line['origin'] != rec['poNo']:
+                        error["Error"] = "Stock Move not found"
+                        is_error = True
+                        break
                     
+                    #Get previous receipt line detail data
+                    existing_detail = []
+                    for i in receipt_line['move_line_nosuggest_ids']:
+                        existing_detail.append(i['id'])
+
+                    #Merge new line details from JSON and existing line details
+                    line_details += existing_detail
+
+                    #Update line details data
+                    receipt_line['move_line_nosuggest_ids'] = line_details
+
+                    #Check partial receipt
+                    if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
+                        receipt_line['state'] = 'done'
+                    else:
+                        is_partial = True
+
+
+                    if is_error == True:
+                        break
+                        
+                    receipt_header['date_done'] = receipt_date
+                    receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
+            
+                    if is_partial == False:
+                        receipt_header['state'] = 'done'
+                        
+                    response_msg = "GRN updated successfully"
+                    
+            if is_error == True:
+#            Response.status = "400"
+                pass
+            else:
+                Response.status = "200"
+        
+            message = {
+                'response': response_msg, 
+                'message': error
+            }    
+                        
         except Exception as e:
             error["Error"] = str(e)
             is_error = True
             
-        return is_error
+        return message
