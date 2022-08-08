@@ -216,24 +216,24 @@ def post_rcpt(self, rcpt):
                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
             
-#                     if is_partial == False:
-#                         receipt_header['state'] = 'done'
+                    if is_partial == False:
+                        receipt_header['state'] = 'done'
                         
-#                     response_msg = "GRN updated successfully"
+                    response_msg = "GRN updated successfully"
                     
-#             if is_error == True:
-# #            Response.status = "400"
-#                 pass
-#             else:
-#                 Response.status = "200"
+            if is_error == True:
+#            Response.status = "400"
+                pass
+            else:
+                Response.status = "200"
         
-#             message = {
-#                 'response': response_msg, 
-#                 'message': error
-#             }    
+            message = {
+                'response': response_msg, 
+                'message': error
+            }    
                         
         except Exception as e:
             error["Error"] = str(e)
             is_error = True
             
-        return is_error
+        return message
