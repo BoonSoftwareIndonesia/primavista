@@ -139,36 +139,36 @@ def post_rcpt(self, rcpt):
                             is_error = True
                             break
 
-#                         #Check expiryDate
-#                         if det['expiryDate'] == "":
-#                             expiry_date = ""
-#                         else:
-#                             try:
-#                                 expiry_date = datetime.strptime(det['expiryDate'], '%d/%m/%Y').date()
-#                             except ValueError:
-#                                 error["Error"] = "Wrong date format on expiryDate"
-#                                 is_error = True
-#                                 break
+                        #Check expiryDate
+                        if det['expiryDate'] == "":
+                            expiry_date = ""
+                        else:
+                            try:
+                                expiry_date = datetime.strptime(det['expiryDate'], '%d/%m/%Y').date()
+                            except ValueError:
+                                error["Error"] = "Wrong date format on expiryDate"
+                                is_error = True
+                                break
                         
-#                         #Check stockStatusCode
-#                         if det['stockStatusCode'] == "":
-#                             error["Error"] = "Field stockStatusCode is blank"
-#                             is_error = True
-#                             break
+                        #Check stockStatusCode
+                        if det['stockStatusCode'] == "":
+                            error["Error"] = "Field stockStatusCode is blank"
+                            is_error = True
+                            break
 
-#                         #Check lotNo
-#                         if det['lotNo'] == "":
-#                             error["Error"] = "Field lotNo is blank"
-#                             is_error = True
-#                             break
+                        #Check lotNo
+                        if det['lotNo'] == "":
+                            error["Error"] = "Field lotNo is blank"
+                            is_error = True
+                            break
 
-#                         temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
-#                             if temp_lot['name'] != det['lotNo']:
-#                             temp_lot = request.env['stock.production.lot'].create({
-#                                 "product_id": temp_product,
-#                                 "name": det["lotNo"],
-#                                 "company_id": 1
-#                             })
+                        temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
+                            if temp_lot['name'] != det['lotNo']:
+                            temp_lot = request.env['stock.production.lot'].create({
+                                "product_id": temp_product,
+                                "name": det["lotNo"],
+                                "company_id": 1
+                            })
 
 #                         #Create Line Detail
 #                         line_detail = request.env['stock.move.line'].create({
