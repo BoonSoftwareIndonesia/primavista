@@ -185,36 +185,36 @@ def post_rcpt(self, rcpt):
 
                         line_details.append(line_detail['id'])
                         
-#                     #Get existing receipt line data based on poNo and lineOptChar1
-#                     receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
-#                     if receipt_line['origin'] != rec['poNo']:
-#                         error["Error"] = "Stock Move not found"
-#                         is_error = True
-#                         break
+                    #Get existing receipt line data based on poNo and lineOptChar1
+                    receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
+                    if receipt_line['origin'] != rec['poNo']:
+                        error["Error"] = "Stock Move not found"
+                        is_error = True
+                        break
                     
-#                     #Get previous receipt line detail data
-#                     existing_detail = []
-#                     for i in receipt_line['move_line_nosuggest_ids']:
-#                         existing_detail.append(i['id'])
+                    #Get previous receipt line detail data
+                    existing_detail = []
+                    for i in receipt_line['move_line_nosuggest_ids']:
+                        existing_detail.append(i['id'])
 
-#                     #Merge new line details from JSON and existing line details
-#                     line_details += existing_detail
+                    #Merge new line details from JSON and existing line details
+                    line_details += existing_detail
 
-#                     #Update line details data
-#                     receipt_line['move_line_nosuggest_ids'] = line_details
+                    #Update line details data
+                    receipt_line['move_line_nosuggest_ids'] = line_details
 
-#                     #Check partial receipt
-#                     if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-#                         receipt_line['state'] = 'done'
-#                     else:
-#                         is_partial = True
+                    #Check partial receipt
+                    if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
+                        receipt_line['state'] = 'done'
+                    else:
+                        is_partial = True
 
 
-#                     if is_error == True:
-#                         break
+                    if is_error == True:
+                        break
                         
-#                     receipt_header['date_done'] = receipt_date
-#                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
+                    receipt_header['date_done'] = receipt_date
+                    receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
             
 #                     if is_partial == False:
 #                         receipt_header['state'] = 'done'
