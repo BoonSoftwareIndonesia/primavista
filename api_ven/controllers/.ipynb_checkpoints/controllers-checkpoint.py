@@ -131,13 +131,13 @@ def post_rcpt(self, rcpt):
                         error[warn_str] = "Product " + line['product'] + " has been created"
                         warn_cnt += 1
                     
-#                     for det in line['lineDetails']:
+                    for det in line['lineDetails']:
 
-#                         #Check quantityReceived
-#                         if det['quantityReceived'] == "":
-#                             error["Error"] = "Field quantityReceived is blank"
-#                             is_error = True
-#                             break
+                        #Check quantityReceived
+                        if det['quantityReceived'] == "":
+                            error["Error"] = "Field quantityReceived is blank"
+                            is_error = True
+                            break
 
 #                         #Check expiryDate
 #                         if det['expiryDate'] == "":
