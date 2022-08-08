@@ -162,13 +162,13 @@ def post_rcpt(self, rcpt):
                             is_error = True
                             break
 
-                        temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
-                            if temp_lot['name'] != det['lotNo']:
-                            temp_lot = request.env['stock.production.lot'].create({
-                                "product_id": temp_product,
-                                "name": det["lotNo"],
-                                "company_id": 1
-                            })
+#                         temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
+#                             if temp_lot['name'] != det['lotNo']:
+#                             temp_lot = request.env['stock.production.lot'].create({
+#                                 "product_id": temp_product,
+#                                 "name": det["lotNo"],
+#                                 "company_id": 1
+#                             })
 
 #                         #Create Line Detail
 #                         line_detail = request.env['stock.move.line'].create({
