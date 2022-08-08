@@ -170,20 +170,20 @@ def post_rcpt(self, rcpt):
                                 "company_id": 1
                             })
 
-#                         #Create Line Detail
-#                         line_detail = request.env['stock.move.line'].create({
-#                             "product_id": temp_product,
-#                             "product_uom_id": 1,
-#                             "location_id": 4,
-#                             "location_dest_id": 8,
-#                             "lot_id": temp_lot['id'],
-#                             "expiration_date": expiry_date,
-#                             "qty_done": det["quantityReceived"],
-#                             "company_id": 1,
-#                             "state": "done"
-#                         })
+                        #Create Line Detail
+                        line_detail = request.env['stock.move.line'].create({
+                            "product_id": temp_product,
+                            "product_uom_id": 1,
+                            "location_id": 4,
+                            "location_dest_id": 8,
+                            "lot_id": temp_lot['id'],
+                            "expiration_date": expiry_date,
+                            "qty_done": det["quantityReceived"],
+                            "company_id": 1,
+                            "state": "done"
+                        })
 
-#                         line_details.append(line_detail['id'])
+                        line_details.append(line_detail['id'])
                         
 #                     #Get existing receipt line data based on poNo and lineOptChar1
 #                     receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
