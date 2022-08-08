@@ -170,56 +170,56 @@ def post_rcpt(self, rcpt):
                                 "company_id": 1
                             })
 
-                        #Create Line Detail
-                        line_detail = request.env['stock.move.line'].create({
-                            "product_id": temp_product,
-                            "product_uom_id": 1,
-                            "location_id": 4,
-                            "location_dest_id": 8,
-                            "lot_id": temp_lot['id'],
-                            "expiration_date": expiry_date,
-                            "qty_done": det["quantityReceived"],
-                            "company_id": 1,
-                            "state": "done"
-                        })
+#                         #Create Line Detail
+#                         line_detail = request.env['stock.move.line'].create({
+#                             "product_id": temp_product,
+#                             "product_uom_id": 1,
+#                             "location_id": 4,
+#                             "location_dest_id": 8,
+#                             "lot_id": temp_lot['id'],
+#                             "expiration_date": expiry_date,
+#                             "qty_done": det["quantityReceived"],
+#                             "company_id": 1,
+#                             "state": "done"
+#                         })
 
-                        line_details.append(line_detail['id'])
+#                         line_details.append(line_detail['id'])
                         
-                    #Get existing receipt line data based on poNo and lineOptChar1
-                    receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
-                    if receipt_line['origin'] != rec['poNo']:
-                        error["Error"] = "Stock Move not found"
-                        is_error = True
-                        break
+#                     #Get existing receipt line data based on poNo and lineOptChar1
+#                     receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
+#                     if receipt_line['origin'] != rec['poNo']:
+#                         error["Error"] = "Stock Move not found"
+#                         is_error = True
+#                         break
                     
-                    #Get previous receipt line detail data
-                    existing_detail = []
-                    for i in receipt_line['move_line_nosuggest_ids']:
-                        existing_detail.append(i['id'])
+#                     #Get previous receipt line detail data
+#                     existing_detail = []
+#                     for i in receipt_line['move_line_nosuggest_ids']:
+#                         existing_detail.append(i['id'])
 
-                    #Merge new line details from JSON and existing line details
-                    line_details += existing_detail
+#                     #Merge new line details from JSON and existing line details
+#                     line_details += existing_detail
 
-                    #Update line details data
-                    receipt_line['move_line_nosuggest_ids'] = line_details
+#                     #Update line details data
+#                     receipt_line['move_line_nosuggest_ids'] = line_details
 
-                    #Check partial receipt
-                    if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-                        receipt_line['state'] = 'done'
-                    else:
-                        is_partial = True
+#                     #Check partial receipt
+#                     if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
+#                         receipt_line['state'] = 'done'
+#                     else:
+#                         is_partial = True
 
 
-                    if is_error == True:
-                        break
+#                     if is_error == True:
+#                         break
                         
-                    receipt_header['date_done'] = receipt_date
-                    receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
+#                     receipt_header['date_done'] = receipt_date
+#                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
             
-                    if is_partial == False:
-                        receipt_header['state'] = 'done'
+#                     if is_partial == False:
+#                         receipt_header['state'] = 'done'
                         
-                    response_msg = "GRN updated successfully"
+#                     response_msg = "GRN updated successfully"
                     
 #             if is_error == True:
 # #            Response.status = "400"
