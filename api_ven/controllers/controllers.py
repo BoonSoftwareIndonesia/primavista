@@ -221,19 +221,19 @@ def post_rcpt(self, rcpt):
                         
                     response_msg = "GRN updated successfully"
                     
-            if is_error == True:
-#            Response.status = "400"
-                pass
-            else:
-                Response.status = "200"
+#             if is_error == True:
+# #            Response.status = "400"
+#                 pass
+#             else:
+#                 Response.status = "200"
         
-            message = {
-                'response': response_msg, 
-                'message': error
-            }    
+#             message = {
+#                 'response': response_msg, 
+#                 'message': error
+#             }    
                         
         except Exception as e:
             error["Error"] = str(e)
             is_error = True
             
-        return message
+        return is_error
