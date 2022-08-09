@@ -43,7 +43,7 @@ def authenticate(self, db, login, password):
             return {"Error": "Failed to authenticate user"}
 
 
-@http.route('/api/createasn', type='json', auth='user', methods=['POST'])
+@http.route('/api/creatercpt', type='json', auth='user', methods=['POST'])
 def post_rcpt(self, rcpt):
         created = 0
         error = {}
