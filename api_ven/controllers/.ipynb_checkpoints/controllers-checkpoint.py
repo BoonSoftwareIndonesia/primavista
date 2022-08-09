@@ -81,6 +81,19 @@ class ApiVen(http.Controller):
                 is_error = True
 
             try:
+                api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                    'name': str(api_log['name']) + '_in.txt',
+                    'type': 'binary',
+                    'datas': base64.b64encode(bytes(str(rcpt), 'utf-8')),
+                    'res_model': 'api_ven.api_ven',
+                    'res_id': api_log['id'],
+                    'mimetype': 'text/plain'
+                })
+            except Exception as e:
+                error['Error'] = str(e)
+                is_error = True
+
+            try:
                 for rec in rcpt:
                     if rec['poNo'] == "":
                         error["Error"] = "Field ownerReference is blank"
@@ -251,21 +264,7 @@ class ApiVen(http.Controller):
                     pass
                 else:
                     Response.status = "200"
-                
-            try:
-                api_log['incoming_txt'] = request.env['ir.attachment'].create({
-                    'name': str(api_log['name']) + '_in.txt',
-                    'type': 'binary',
-                    'datas': base64.b64encode(bytes(str(ap), 'utf-8')),
-                    'res_model': 'api_ven.api_ven',
-                    'res_id': api_log['id'],
-                    'mimetype': 'text/plain'
-                })
-                
-            except Exception as e:
-                error['Error'] = str(e)
-                is_error = True
-                
+
                 message = {
                     'response': response_msg, 
                     'message': error
