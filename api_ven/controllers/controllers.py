@@ -257,7 +257,7 @@ class ApiVen(http.Controller):
                         if is_partial == False:
                             receipt_header['state'] = 'done'
 
-                        response_msg = "GRN updated successfully"
+                response_msg = "GRN updated successfully"
 
                 if is_error == True:
     #            Response.status = "400"
