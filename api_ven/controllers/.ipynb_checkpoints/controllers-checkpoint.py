@@ -257,7 +257,7 @@ class ApiVen(http.Controller):
                         if is_partial == False:
                             receipt_header['state'] = 'done'
 
-                        
+                        response_msg = "GRN updated successfully"
 
                 if is_error == True:
     #            Response.status = "400"
@@ -266,13 +266,13 @@ class ApiVen(http.Controller):
                 else:
                     Response.status = "200"
                     api_log['status'] = 'success'
-                    response_msg = "GRN updated successfully"
-
-#                 message = {
-#                     'response': response_msg, 
-#                     'message': error
-#                 } 
-
+                
+#                 ini di uncommmnd
+                message = {
+                    'response': response_msg, 
+                    'message': error
+                } 
+            
                 api_log['response_msg'] = base64.b64encode(bytes(str(response_msg), 'utf-8'))
                 api_log['response_date'] = datetime.now()
 
@@ -284,9 +284,11 @@ class ApiVen(http.Controller):
                     'res_id': api_log['id'],
                     'mimetype': 'text/plain'
                 })
+# sampe sini
+
 
             except Exception as e:
                 error["Error"] = str(e)
                 is_error = True
 
-            return response_msg
+            return error["Error"]
