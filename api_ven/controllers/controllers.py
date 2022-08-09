@@ -20,10 +20,16 @@
 #             'object': obj
 #         })
 
-import json, datetime, base64
-from odoo import http
+from odoo import models, fields, api
 from odoo.http import request, Response
+import json, datetime, requests, base64, unicodedata
 from datetime import datetime
+from odoo import http
+
+# import json, datetime, base64
+# from odoo import http
+# from odoo.http import request, Response
+# from datetime import datetime
 
 class ApiVen(http.Controller):
     # @http.route('/api_sbt_inv/api_sbt_inv/', auth='user')
