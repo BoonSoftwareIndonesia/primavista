@@ -267,12 +267,12 @@ class ApiVen(http.Controller):
                     Response.status = "200"
                     api_log['status'] = 'success'
 
-                message = {
-                    'response': response_msg, 
-                    'message': error
-                } 
+#                 message = {
+#                     'response': response_msg, 
+#                     'message': error
+#                 } 
 
-                api_log['response_msg'] = base64.b64encode(bytes(str(message), 'utf-8'))
+                api_log['response_msg'] = base64.b64encode(bytes(str(response_msg), 'utf-8'))
                 api_log['response_date'] = datetime.now()
 
                 api_log['response_txt'] = request.env['ir.attachment'].create({
@@ -288,4 +288,4 @@ class ApiVen(http.Controller):
                 error["Error"] = str(e)
                 is_error = True
 
-            return message
+            return response_msg
