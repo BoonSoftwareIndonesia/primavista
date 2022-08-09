@@ -25,7 +25,7 @@ from odoo import http
 from odoo.http import request, Response
 from datetime import datetime
 
-@http.route('/api_sbt_inv/api_sbt_inv/', auth='user')
+# @http.route('/api_sbt_inv/api_sbt_inv/', auth='user')
 def getRecord(self, model, field, wms):
         record = request.env[model].search([(field,'=',wms)])
         if record[field] == wms:
