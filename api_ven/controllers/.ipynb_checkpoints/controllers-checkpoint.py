@@ -33,7 +33,7 @@ def getRecord(self, model, field, wms):
         else:
             return -1
         
-@http.route('/hello/hello/', auth='public')
+@http.route('/hello/hello/', auth='public', type='json')
 def index(self, **kw):
         return "Hello, world"
         
