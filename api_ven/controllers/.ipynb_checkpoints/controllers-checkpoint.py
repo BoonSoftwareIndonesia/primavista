@@ -66,6 +66,20 @@ class ApiVen(http.Controller):
             line_details = []
             is_partial = False
 
+            #Create log
+            try:
+                api_log = request.env['api_ven.api_ven'].create({
+                    'status': 'new',
+                    'created_date': datetime.now(),
+                    'incoming_msg': rcpt,
+                    'message_type': 'RCPT'
+                })
+
+                api_log['status'] = 'process'
+            except:
+                error['Error'] = str(e)
+                is_error = True
+
             try:
                 for rec in rcpt:
                     if rec['poNo'] == "":
@@ -231,21 +245,13 @@ class ApiVen(http.Controller):
                             receipt_header['state'] = 'done'
 
                         response_msg = "GRN updated successfully"
-                        
-                            #Create log
-            try:
-                api_log = request.env['api_ven.api_ven'].create({
-                    'status': 'new',
-                    'created_date': datetime.now(),
-                    'incoming_msg': rcpt,
-                    'message_type': 'RCPT'
-                })
 
-                api_log['status'] = 'process'
-            except:
-                error['Error'] = str(e)
-                is_error = True
-
+                if is_error == True:
+    #            Response.status = "400"
+                    pass
+                else:
+                    Response.status = "200"
+                
             try:
                 api_log['incoming_txt'] = request.env['ir.attachment'].create({
                     'name': str(api_log['name']) + '_in.txt',
@@ -255,17 +261,11 @@ class ApiVen(http.Controller):
                     'res_id': api_log['id'],
                     'mimetype': 'text/plain'
                 })
+                
             except Exception as e:
                 error['Error'] = str(e)
                 is_error = True
-
-
-                if is_error == True:
-    #            Response.status = "400"
-                    pass
-                else:
-                    Response.status = "200"
-
+                
                 message = {
                     'response': response_msg, 
                     'message': error
