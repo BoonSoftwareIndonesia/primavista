@@ -258,7 +258,7 @@ class ApiVen(http.Controller):
                             receipt_header['state'] = 'done'
 
                         response_msg = "GRN updated successfully"
-
+# ini dipindahin kebawah
                 if is_error == True:
     #            Response.status = "400"
                     api_log['status'] = 'error'
@@ -273,7 +273,7 @@ class ApiVen(http.Controller):
                     'message': error
                 } 
             
-                api_log['response_msg'] = base64.b64encode(bytes(str(response_msg), 'utf-8'))
+                api_log['response_msg'] = message
                 api_log['response_date'] = datetime.now()
 
                 api_log['response_txt'] = request.env['ir.attachment'].create({
