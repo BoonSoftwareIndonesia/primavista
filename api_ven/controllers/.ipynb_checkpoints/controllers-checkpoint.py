@@ -33,9 +33,9 @@ def getRecord(self, model, field, wms):
         else:
             return -1
         
-@http.route('/api_sbt_inv/api_sbt_inv/', auth='user')
-def index(self, **kw):
-        return "Hello, world"
+    @http.route('/api_sbt_inv/api_sbt_inv/', auth='user')
+    def index(self, **kw):
+            return "Hello, world"
         
 @http.route('/api/authenticate', type='json', auth='none', methods=['POST'])
 def authenticate(self, db, login, password):
