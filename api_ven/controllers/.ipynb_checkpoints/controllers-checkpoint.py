@@ -37,7 +37,7 @@ def getRecord(self, model, field, wms):
 def index(self, **kw):
         return "Hello, world"
         
-@http.route('/api/authenticate', type='json', auth='none', methods=['POST'])
+@http.route('/web/api/authenticate', type='json', auth='none', methods=['POST'])
 def authenticate(self, db, login, password):
         try:
             request.session.authenticate(db, login, password)
