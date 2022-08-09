@@ -291,4 +291,4 @@ class ApiVen(http.Controller):
                 error["Error"] = str(e)
                 is_error = True
 
-            return error["Error"]
+            return message
