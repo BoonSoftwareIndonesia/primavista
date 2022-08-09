@@ -257,21 +257,22 @@ class ApiVen(http.Controller):
                         if is_partial == False:
                             receipt_header['state'] = 'done'
 
-                        
+                        response_msg = "GRN updated successfully"
 
                 if is_error == True:
     #            Response.status = "400"
-                    pass
+                    api_log['status'] = 'error'
+#                     pass
                 else:
                     Response.status = "200"
-                    response_msg = "GRN updated successfully"
+                    api_log['status'] = 'success'
 
                 message = {
                     'response': response_msg, 
                     'message': error
                 } 
 
-                api_log['response_msg'] = message
+                api_log['response_msg'] = base64.b64encode(bytes(str(message), 'utf-8'))
                 api_log['response_date'] = datetime.now()
 
                 api_log['response_txt'] = request.env['ir.attachment'].create({
