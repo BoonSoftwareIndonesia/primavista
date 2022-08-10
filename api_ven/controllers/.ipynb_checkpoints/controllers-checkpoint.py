@@ -93,7 +93,7 @@ class ApiVen(http.Controller):
                 error['Error'] = str(e)
                 is_error = True
 
-            try:
+#             try:
                 for rec in rcpt:
                     if rec['poNo'] == "":
                         error["Error"] = "Field ownerReference is blank"
@@ -259,9 +259,9 @@ class ApiVen(http.Controller):
 
                         response_msg = "GRN updated successfully"
                         
-                except Exception as e:
-                    error["Error"] = str(e)
-                    is_error = True
+#                 except Exception as e:
+#                     error["Error"] = str(e)
+#                     is_error = True
                     
 # ini dipindahin kebawah
                 if is_error == True:
