@@ -258,6 +258,11 @@ class ApiVen(http.Controller):
                             receipt_header['state'] = 'done'
 
                         response_msg = "GRN updated successfully"
+                        
+                except Exception as e:
+                    error["Error"] = str(e)
+                    is_error = True
+                    
 # ini dipindahin kebawah
                 if is_error == True:
     #            Response.status = "400"
@@ -287,8 +292,8 @@ class ApiVen(http.Controller):
 # sampe sini
 
 
-            except Exception as e:
-                error["Error"] = str(e)
-                is_error = True
+#             except Exception as e:
+#                 error["Error"] = str(e)
+#                 is_error = True
 
-            return message
+                return message
