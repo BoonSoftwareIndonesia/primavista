@@ -156,10 +156,10 @@ class ApiController(models.Model):
         else:
             api_log['status'] = 'success'"""
         
-#         if r.status_code == 200:
-#             api_log['status'] = 'success'
-#         else:
-#             api_log['status'] = 'error'
+        if r.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
         
         api_log['response_txt'] = request.env['ir.attachment'].create({
             'name': str(api_log['name']) + '_out.txt',
