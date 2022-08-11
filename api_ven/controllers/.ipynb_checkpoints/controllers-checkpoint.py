@@ -109,10 +109,10 @@ class ApiVen(http.Controller):
 
                     receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['poNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
 # ini kudu di fixx di uncommand 
-                    if receipt_header['origin'] != rec['poNo']:
-                        error["Error"] = "Receipt does not exist"
-                        is_error = True
-                        break
+#                     if receipt_header['origin'] != rec['poNo']:
+#                         error["Error"] = "Receipt does not exist"
+#                         is_error = True
+#                         break
 
                     #DocumentTransCode
                     if rec['documentTransCode'] == "":
@@ -229,7 +229,7 @@ class ApiVen(http.Controller):
                             "location_dest_id": 1,
 #                             "lot_id": temp_lot['id'],
 #                                 "expiration_date": expiry_date,
-                            "qty_done": det["quantityReceived"],
+                            "qty_done": line["quantityReceived"],
                             "company_id": 1,
                             "state": "done"
                         })
@@ -238,11 +238,11 @@ class ApiVen(http.Controller):
 
                         #Get existing receipt line data based on poNo and lineOptChar1
                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
-#                 di uncommand ama fix
-#                         if receipt_line['origin'] != rec['poNo']:
-#                             error["Error"] = "Stock Move not found"
-#                             is_error = True
-#                             break
+                di uncommand ama fix
+                        if receipt_line['origin'] != rec['poNo']:
+                            error["Error"] = "Stock Move not found"
+                            is_error = True
+                            break
 
                         #Get previous receipt line detail data
                         existing_detail = []
