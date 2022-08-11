@@ -160,7 +160,7 @@ class ApiVen(http.Controller):
                                 "default_code": line['product'],
                                 "name": line['product'],
                                 "tracking": "lot",
-                                "use_expiration_date": 1,
+#                                 "use_expiration_date": 1,
                                 "company_id": 1
                             })
 
