@@ -239,10 +239,10 @@ class ApiVen(http.Controller):
                         #Get existing receipt line data based on poNo and lineOptChar1
                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                 di uncommand ama fix
-                        if receipt_line['origin'] != rec['poNo']:
-                            error["Error"] = "Stock Move not found"
-                            is_error = True
-                            break
+#                         if receipt_line['origin'] != rec['poNo']:
+#                             error["Error"] = "Stock Move not found"
+#                             is_error = True
+#                             break
 
                         #Get previous receipt line detail data
                         existing_detail = []
