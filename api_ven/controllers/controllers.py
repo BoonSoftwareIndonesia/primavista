@@ -93,8 +93,9 @@ class ApiVen(http.Controller):
                 error['Error'] = str(e)
                 is_error = True
 
+            new_rcpt = json.loads(rcpt)
             try:
-                for rec in rcpt:
+                for rec in new_rcpt:
                     if rec['poNo'] == "":
                         error["Error"] = "Field ownerReference is blank"
                         is_error = True
