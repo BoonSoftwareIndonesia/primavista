@@ -227,7 +227,7 @@ class ApiVen(http.Controller):
                             "product_uom_id": 1,
                             "location_id": 1,
                             "location_dest_id": 1,
-                            "lot_id": "",
+#                             "lot_id": "",
 #                             "expiration_date": ,
                             "qty_done": line["quantityReceived"],
                             "company_id": 1,
