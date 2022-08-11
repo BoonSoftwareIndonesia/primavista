@@ -209,11 +209,22 @@ class ApiVen(http.Controller):
                                 })
 
                             #Create Line Detail
+#                             line_detail = request.env['stock.move.line'].create({
+#                                 "product_id": temp_product,
+#                                 "product_uom_id": 1,
+#                                 "location_id": 4,
+#                                 "location_dest_id": 8,
+#                                 "lot_id": temp_lot['id'],
+#                                 "expiration_date": expiry_date,
+#                                 "qty_done": det["quantityReceived"],
+#                                 "company_id": 1,
+#                                 "state": "done"
+#                             })
                             line_detail = request.env['stock.move.line'].create({
                                 "product_id": temp_product,
                                 "product_uom_id": 1,
-                                "location_id": 4,
-                                "location_dest_id": 8,
+                                "location_id": 1,
+                                "location_dest_id": 1,
                                 "lot_id": temp_lot['id'],
                                 "expiration_date": expiry_date,
                                 "qty_done": det["quantityReceived"],
@@ -430,11 +441,22 @@ class ApiVen(http.Controller):
                         break
 
                     #Create Line Detail
+#                     line_detail = request.env['stock.move.line'].create({
+#                         "product_id": temp_product,
+#                         "product_uom_id": 1,
+#                         "location_id": 8,
+#                         "location_dest_id": 5,
+#                         "lot_id": temp_lot['id'],
+#                         "expiration_date": expiry_date,
+#                         "qty_done": det["quantityShipped"],
+#                         "company_id": 1,
+#                         "state": "done"
+#                     })
                     line_detail = request.env['stock.move.line'].create({
                         "product_id": temp_product,
                         "product_uom_id": 1,
-                        "location_id": 8,
-                        "location_dest_id": 5,
+                        "location_id": 1,
+                        "location_dest_id": 1,
                         "lot_id": temp_lot['id'],
                         "expiration_date": expiry_date,
                         "qty_done": det["quantityShipped"],
