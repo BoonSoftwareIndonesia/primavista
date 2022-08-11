@@ -432,13 +432,13 @@ class ApiVen(http.Controller):
                     error[warn_str] = "Product " + line['product'] + " has been created"
                     warn_cnt += 1
 # uncommand
-#                 for det in line['lineDetails']:
+                for det in line['lineDetails']:
 
-#                     #Check quantityShipped
-#                     if det['quantityShipped'] == "":
-#                         error["Error"] = "Field quantityShipped is blank"
-#                         is_error = True
-#                         break
+                    #Check quantityShipped
+                    if det['quantityShipped'] == "":
+                        error["Error"] = "Field quantityShipped is blank"
+                        is_error = True
+                        break
 
 #                     #Check expiryDate
 #                     if det['expiryDate'] == "":
@@ -457,11 +457,11 @@ class ApiVen(http.Controller):
 #                         is_error = True
 #                         break
 
-#                     #Check stockStatusCode
-#                     if det['stockStatusCode'] == "":
-#                         error["Error"] = "Field stockStatusCode is blank"
-#                         is_error = True
-#                         break
+                    #Check stockStatusCode
+                    if det['stockStatusCode'] == "":
+                        error["Error"] = "Field stockStatusCode is blank"
+                        is_error = True
+                        break
 
 #                     temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
 #                     if temp_lot['name'] != det['lotNo']:
