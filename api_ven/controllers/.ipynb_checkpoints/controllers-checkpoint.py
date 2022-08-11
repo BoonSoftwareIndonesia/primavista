@@ -93,7 +93,7 @@ class ApiVen(http.Controller):
                 error['Error'] = str(e)
                 is_error = True
 
-#             try:
+            try:
                 for rec in rcpt:
                     if rec['poNo'] == "":
                         error["Error"] = "Field ownerReference is blank"
@@ -270,36 +270,36 @@ class ApiVen(http.Controller):
 
                         response_msg = "GRN updated successfully"
                         
-#                 except Exception as e:
-#                     error["Error"] = str(e)
-#                     is_error = True
+            except Exception as e:
+                error["Error"] = str(e)
+                is_error = True
                     
 # ini dipindahin kebawah
-                if is_error == True:
+            if is_error == True:
     #            Response.status = "400"
-                    api_log['status'] = 'error'
+                api_log['status'] = 'error'
 #                     pass
-                else:
-                    Response.status = "200"
-                    api_log['status'] = 'success'
+            else:
+                Response.status = "200"
+                api_log['status'] = 'success'
                 
 #                 ini di uncommmnd
-                message = {
-                    'response': response_msg, 
-                    'message': error
-                } 
+            message = {
+                'response': response_msg, 
+                'message': error
+            } 
             
-                api_log['response_msg'] = message
-                api_log['response_date'] = datetime.now()
+            api_log['response_msg'] = message
+            api_log['response_date'] = datetime.now()
 
-                api_log['response_txt'] = request.env['ir.attachment'].create({
-                    'name': str(api_log['name']) + '_out.txt',
-                    'type': 'binary',
-                    'datas': base64.b64encode(bytes(str(message), 'utf-8')),
-                    'res_model': 'api_ven.api_ven',
-                    'res_id': api_log['id'],
-                    'mimetype': 'text/plain'
-                })
+            api_log['response_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_out.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(message), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
 # sampe sini
 
 
@@ -307,7 +307,7 @@ class ApiVen(http.Controller):
 #                 error["Error"] = str(e)
 #                 is_error = True
 
-                return message
+            return message
 
 
 
