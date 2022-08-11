@@ -343,10 +343,10 @@ class ApiVen(http.Controller):
 
             #check do header
             do_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['soReference']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
-            if do_header['origin'] != rec['soReference']:
-                error["Error"] = "DO not found"
-                is_error = True
-                break
+#             if do_header['origin'] != rec['soReference']:
+#                 error["Error"] = "DO not found"
+#                 is_error = True
+#                 break
 
                 #DispatchDate
             if rec["dispatchDate"] == "":
@@ -471,10 +471,10 @@ class ApiVen(http.Controller):
 
                 #Get existing dispatch line data based on doNo and lineOptChar1
                 dispatch_line = request.env['stock.move'].search(['&',('origin','=',rec['soReference']),('x_studio_opt_char_1', '=', line["soLineOptChar1"])])
-                if dispatch_line['origin'] != rec['soReference']:
-                    error["Error"] = "Stock Move not found"
-                    is_error = True
-                    break
+#                 if dispatch_line['origin'] != rec['soReference']:
+#                     error["Error"] = "Stock Move not found"
+#                     is_error = True
+#                     break
                     
                 #Get previous dispatch line detail data
                 existing_detail = []
