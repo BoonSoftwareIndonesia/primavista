@@ -146,7 +146,7 @@
             sequence="10"/>
 
       <menuitem id="api_log_root"
-            name="Log"
+            name="Logs"
             parent="api_menu_root"
             action="action_api"
             sequence="10"/>
