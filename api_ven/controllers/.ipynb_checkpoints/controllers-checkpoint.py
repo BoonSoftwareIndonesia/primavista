@@ -338,6 +338,7 @@ class ApiVen(http.Controller):
         except:
             error['Error'] = str(e)
             is_error = True
+            
         try:
             api_log['incoming_txt'] = request.env['ir.attachment'].create({
                 'name': str(api_log['name']) + '_in.txt',
