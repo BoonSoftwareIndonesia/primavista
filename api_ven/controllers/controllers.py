@@ -430,38 +430,38 @@ class ApiVen(http.Controller):
                     warn_str = "Message " + str(warn_cnt)
                     error[warn_str] = "Product " + line['product'] + " has been created"
                     warn_cnt += 1
+# uncommand
+#                 for det in line['lineDetails']:
 
-                for det in line['lineDetails']:
+#                     #Check quantityShipped
+#                     if det['quantityShipped'] == "":
+#                         error["Error"] = "Field quantityShipped is blank"
+#                         is_error = True
+#                         break
 
-                    #Check quantityShipped
-                    if det['quantityShipped'] == "":
-                        error["Error"] = "Field quantityShipped is blank"
-                        is_error = True
-                        break
-
-                    #Check expiryDate
-                    if det['expiryDate'] == "":
-                        expiry_date = ""
-                    else:
-                        try:
-                            expiry_date = datetime.strptime(det['expiryDate'], '%d/%m/%Y').date()
-                        except ValueError:
-                            error["Error"] = "Wrong date format on expiryDate"
-                            is_error = True
-                            break
+#                     #Check expiryDate
+#                     if det['expiryDate'] == "":
+#                         expiry_date = ""
+#                     else:
+#                         try:
+#                             expiry_date = datetime.strptime(det['expiryDate'], '%d/%m/%Y').date()
+#                         except ValueError:
+#                             error["Error"] = "Wrong date format on expiryDate"
+#                             is_error = True
+#                             break
                             
-                    #Check lotNo
-                    if det['lotNo'] == "":
-                        error["Error"] = "Field lotNo is blank"
-                        is_error = True
-                        break
+#                     #Check lotNo
+#                     if det['lotNo'] == "":
+#                         error["Error"] = "Field lotNo is blank"
+#                         is_error = True
+#                         break
 
-                    #Check stockStatusCode
-                    if det['stockStatusCode'] == "":
-                        error["Error"] = "Field stockStatusCode is blank"
-                        is_error = True
-                        break
-
+#                     #Check stockStatusCode
+#                     if det['stockStatusCode'] == "":
+#                         error["Error"] = "Field stockStatusCode is blank"
+#                         is_error = True
+#                         break
+# sampe sini
                     temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
                     if temp_lot['name'] != det['lotNo']:
                         error["Error"] = "lot number does not exist!"
