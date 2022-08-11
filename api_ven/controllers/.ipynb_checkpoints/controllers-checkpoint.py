@@ -93,9 +93,9 @@ class ApiVen(http.Controller):
                 error['Error'] = str(e)
                 is_error = True
 
-            new_rcpt = json.dumps(rcpt)
+#             new_rcpt = json.dumps(rcpt)
             try:
-                for rec in new_rcpt:
+                for rec in rcpt:
                     if rec['poNo'] == "":
                         error["Error"] = "Field ownerReference is blank"
                         is_error = True
@@ -107,11 +107,11 @@ class ApiVen(http.Controller):
                         is_error = True
                         break
 
-                    receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['poNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
-                    if receipt_header['origin'] != rec['poNo']:
-                        error["Error"] = "Receipt does not exist"
-                        is_error = True
-                        break
+#                     receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['poNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
+#                     if receipt_header['origin'] != rec['poNo']:
+#                         error["Error"] = "Receipt does not exist"
+#                         is_error = True
+#                         break
 
                     #DocumentTransCode
                     if rec['documentTransCode'] == "":
