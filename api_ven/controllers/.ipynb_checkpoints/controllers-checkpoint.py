@@ -315,7 +315,7 @@ class ApiVen(http.Controller):
 
 
 #DW-DO
-    @http.route('/api/downloaddo', type='json', auth='user', methods=['POST'])
+    @http.route('/web/api/downloaddo', type='json', auth='user', methods=['POST'])
     def post_do(self, do):
         created = 0
         error = {}
