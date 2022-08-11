@@ -368,6 +368,7 @@ class ApiVen(http.Controller):
 
             #check do header
             do_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['soReference']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
+#                 uncommand
 #             if do_header['origin'] != rec['soReference']:
 #                 error["Error"] = "DO not found"
 #                 is_error = True
@@ -461,13 +462,13 @@ class ApiVen(http.Controller):
 #                         error["Error"] = "Field stockStatusCode is blank"
 #                         is_error = True
 #                         break
-# sampe sini
-                    temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
-                    if temp_lot['name'] != det['lotNo']:
-                        error["Error"] = "lot number does not exist!"
-                        is_error = True
-                        break
 
+#                     temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
+#                     if temp_lot['name'] != det['lotNo']:
+#                         error["Error"] = "lot number does not exist!"
+#                         is_error = True
+#                         break
+# sampe sini
                     #Create Line Detail
 #                     line_detail = request.env['stock.move.line'].create({
 #                         "product_id": temp_product,
@@ -487,7 +488,7 @@ class ApiVen(http.Controller):
                         "location_dest_id": 1,
                         "lot_id": temp_lot['id'],
                         "expiration_date": expiry_date,
-                        "qty_done": det["quantityShipped"],
+#                         "qty_done": det["quantityShipped"],
                         "company_id": 1,
                         "state": "done"
                     })
@@ -496,6 +497,7 @@ class ApiVen(http.Controller):
 
                 #Get existing dispatch line data based on doNo and lineOptChar1
                 dispatch_line = request.env['stock.move'].search(['&',('origin','=',rec['soReference']),('x_studio_opt_char_1', '=', line["soLineOptChar1"])])
+#                 uncommand
 #                 if dispatch_line['origin'] != rec['soReference']:
 #                     error["Error"] = "Stock Move not found"
 #                     is_error = True
