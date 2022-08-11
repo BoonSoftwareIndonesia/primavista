@@ -93,7 +93,7 @@ class ApiVen(http.Controller):
                 error['Error'] = str(e)
                 is_error = True
 
-            new_rcpt = base64.b64encode(bytes(str(rcpt), 'utf-8'))
+            new_rcpt = json.loads(json.loads(json.dumps(rcpt)))
             try:
                 for rec in new_rcpt:
                     if rec['poNo'] == "":
