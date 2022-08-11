@@ -171,44 +171,44 @@ class ApiVen(http.Controller):
                             error[warn_str] = "Product " + line['product'] + " has been created"
                             warn_cnt += 1
 
-                        for det in line['lineDetails']:
+#                         for det in line['lineDetails']:
 
-                            #Check quantityReceived
-                            if det['quantityReceived'] == "":
-                                error["Error"] = "Field quantityReceived is blank"
-                                is_error = True
-                                break
+                        #Check quantityReceived
+                        if line['quantityReceived'] == "":
+                            error["Error"] = "Field quantityReceived is blank"
+                            is_error = True
+                            break
 
-                            #Check expiryDate
-                            if det['expiryDate'] == "":
-                                expiry_date = ""
-                            else:
-                                try:
-                                    expiry_date = datetime.strptime(det['expiryDate'], '%d/%m/%Y').date()
-                                except ValueError:
-                                    error["Error"] = "Wrong date format on expiryDate"
-                                    is_error = True
-                                    break
+                        #Check expiryDate
+#                         if det['expiryDate'] == "":
+#                             expiry_date = ""
+#                         else:
+#                             try:
+#                                 expiry_date = datetime.strptime(det['expiryDate'], '%d/%m/%Y').date()
+#                             except ValueError:
+#                                 error["Error"] = "Wrong date format on expiryDate"
+#                                 is_error = True
+#                                 break
 
-                            #Check stockStatusCode
-                            if det['stockStatusCode'] == "":
-                                error["Error"] = "Field stockStatusCode is blank"
-                                is_error = True
-                                break
+                        #Check stockStatusCode
+                        if line['stockStatusCode'] == "":
+                            error["Error"] = "Field stockStatusCode is blank"
+                            is_error = True
+                            break
 
-                            #Check lotNo
-                            if det['lotNo'] == "":
-                                error["Error"] = "Field lotNo is blank"
-                                is_error = True
-                                break
+                        #Check lotNo
+#                         if det['lotNo'] == "":
+#                             error["Error"] = "Field lotNo is blank"
+#                             is_error = True
+#                             break
 
-                            temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
-                            if temp_lot['name'] != det['lotNo']:
-                                temp_lot = request.env['stock.production.lot'].create({
-                                    "product_id": temp_product,
-                                    "name": det["lotNo"],
-                                    "company_id": 1
-                                })
+#                         temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
+#                         if temp_lot['name'] != det['lotNo']:
+#                             temp_lot = request.env['stock.production.lot'].create({
+#                                 "product_id": temp_product,
+#                                 "name": det["lotNo"],
+#                                 "company_id": 1
+#                             })
 
                             #Create Line Detail
 #                             line_detail = request.env['stock.move.line'].create({
@@ -222,27 +222,27 @@ class ApiVen(http.Controller):
 #                                 "company_id": 1,
 #                                 "state": "done"
 #                             })
-                            line_detail = request.env['stock.move.line'].create({
-                                "product_id": temp_product,
-                                "product_uom_id": 1,
-                                "location_id": 1,
-                                "location_dest_id": 1,
-                                "lot_id": temp_lot['id'],
+                        line_detail = request.env['stock.move.line'].create({
+                            "product_id": temp_product,
+                            "product_uom_id": 1,
+                            "location_id": 1,
+                            "location_dest_id": 1,
+#                             "lot_id": temp_lot['id'],
 #                                 "expiration_date": expiry_date,
-                                "qty_done": det["quantityReceived"],
-                                "company_id": 1,
-                                "state": "done"
-                            })
+                            "qty_done": det["quantityReceived"],
+                            "company_id": 1,
+                            "state": "done"
+                        })
 
-                            line_details.append(line_detail['id'])
+                        line_details.append(line_detail['id'])
 
                         #Get existing receipt line data based on poNo and lineOptChar1
                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                 di uncommand ama fix
-                        if receipt_line['origin'] != rec['poNo']:
-                            error["Error"] = "Stock Move not found"
-                            is_error = True
-                            break
+#                         if receipt_line['origin'] != rec['poNo']:
+#                             error["Error"] = "Stock Move not found"
+#                             is_error = True
+#                             break
 
                         #Get previous receipt line detail data
                         existing_detail = []
