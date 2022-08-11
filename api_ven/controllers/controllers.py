@@ -487,7 +487,7 @@ class ApiVen(http.Controller):
                         "location_id": 1,
                         "location_dest_id": 1,
 #                         "lot_id": temp_lot['id'], nanti unccommand
-                        "lot_id": 1,
+#                         "lot_id": 1,
 #                         "expiration_date": expiry_date,
 #                         "qty_done": det["quantityShipped"], nanti unccommand
                         "company_id": 1,
