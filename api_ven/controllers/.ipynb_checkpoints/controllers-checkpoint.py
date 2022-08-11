@@ -297,3 +297,204 @@ class ApiVen(http.Controller):
 #                 is_error = True
 
                 return message
+
+
+
+#DW-DO
+    @http.route('/api/downloaddo', type='json', auth='user', methods=['POST'])
+    def post_do(self, do):
+        created = 0
+        error = {}
+        warn_cnt = 1
+        rcpt_lines = []
+        is_error = False
+        response_msg = "Failed to create DO!"
+        message = {}
+        line_details = []
+        is_partial = False
+        
+#        try:
+        for rec in do:
+            #check soNo
+            if rec['soReference'] == "":
+                error["Error"] = "Field soReference is blank"
+                is_error = True
+                break
+
+            sos = self.getRecord(model="sale.order", field="name", wms=rec['soReference'])
+            if sos == -1:
+                error["Error"] = "soReference does not exist"
+                is_error = True
+                break
+
+            #check do header
+            do_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['soReference']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
+            if do_header['origin'] != rec['soReference']:
+                error["Error"] = "DO not found"
+                is_error = True
+                break
+
+                #DispatchDate
+            if rec["dispatchDate"] == "":
+                dispatch_date = ""
+            else:
+                try:
+                    dispatch_date = datetime.strptime(rec["dispatchDate"], '%d/%m/%Y').date()
+                except ValueError:
+                    error["Error"] = "Wrong date format on dispatchDate"
+                    is_error = True
+                    break
+                
+            #DocumentTransCode
+            if rec['documentTransCode'] == "":
+                error["Error"] = "Field documentTransCode is blank"
+                is_error = True
+                break
+
+            #do Line
+            for line in rec['details']:
+                temp_product = 0
+
+                #customerPO
+                if line['customerPO'] == "":
+                    error["Error"] = "Field customerPO is blank"
+                    is_error = True
+                    break
+
+                #product
+                if line['product'] == "":
+                    error["Error"] = "Field product is blank"
+                    is_error = True
+                    break
+                    
+                 #soLineOptChar1
+                if line['soLineOptChar1'] == "":
+                    error["Error"] = "Field soLineOptChar1 is blank"
+                    is_error = True
+                    break   
+                    
+                #create product on the fly if product does not exist
+                temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                if temp_product == -1:
+
+                    created_product = request.env['product.product'].create({
+                        "type": "product",
+                        "default_code": line['product'],
+                        "name": line['product'],
+                        "tracking": "lot",
+                        "use_expiration_date": 1,
+                        "company_id": 1
+                    })
+
+                    temp_product = created_product['id']
+
+                    warn_str = "Message " + str(warn_cnt)
+                    error[warn_str] = "Product " + line['product'] + " has been created"
+                    warn_cnt += 1
+
+                for det in line['lineDetails']:
+
+                    #Check quantityShipped
+                    if det['quantityShipped'] == "":
+                        error["Error"] = "Field quantityShipped is blank"
+                        is_error = True
+                        break
+
+                    #Check expiryDate
+                    if det['expiryDate'] == "":
+                        expiry_date = ""
+                    else:
+                        try:
+                            expiry_date = datetime.strptime(det['expiryDate'], '%d/%m/%Y').date()
+                        except ValueError:
+                            error["Error"] = "Wrong date format on expiryDate"
+                            is_error = True
+                            break
+                            
+                    #Check lotNo
+                    if det['lotNo'] == "":
+                        error["Error"] = "Field lotNo is blank"
+                        is_error = True
+                        break
+
+                    #Check stockStatusCode
+                    if det['stockStatusCode'] == "":
+                        error["Error"] = "Field stockStatusCode is blank"
+                        is_error = True
+                        break
+
+                    temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
+                    if temp_lot['name'] != det['lotNo']:
+                        error["Error"] = "lot number does not exist!"
+                        is_error = True
+                        break
+
+                    #Create Line Detail
+                    line_detail = request.env['stock.move.line'].create({
+                        "product_id": temp_product,
+                        "product_uom_id": 1,
+                        "location_id": 8,
+                        "location_dest_id": 5,
+                        "lot_id": temp_lot['id'],
+                        "expiration_date": expiry_date,
+                        "qty_done": det["quantityShipped"],
+                        "company_id": 1,
+                        "state": "done"
+                    })
+
+                    line_details.append(line_detail['id'])
+
+                #Get existing dispatch line data based on doNo and lineOptChar1
+                dispatch_line = request.env['stock.move'].search(['&',('origin','=',rec['soReference']),('x_studio_opt_char_1', '=', line["soLineOptChar1"])])
+                if dispatch_line['origin'] != rec['soReference']:
+                    error["Error"] = "Stock Move not found"
+                    is_error = True
+                    break
+                    
+                #Get previous dispatch line detail data
+                existing_detail = []
+                for i in dispatch_line['move_line_ids']:
+                    existing_detail.append(i['id'])
+                    
+                #Merge new line details from JSON and existing line details
+                line_details += existing_detail
+                
+                #Update line details data
+                dispatch_line['move_line_ids'] = line_details
+                
+                #Check partial receipt
+                if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
+                    dispatch_line['state'] = 'done'
+                else:
+                    is_partial = True
+
+
+                if is_error == True:
+                    break
+
+            if is_error == True:
+                break
+            
+            do_header['x_studio_dispatch_date'] = dispatch_date
+            do_header['x_studio_document_trans_code'] = rec["documentTransCode"]
+            
+            if is_partial == False:
+                do_header['state'] = 'done'
+
+            response_msg = "DO updated successfully"
+#        except Exception as e:
+#            error["Error"] = str(e)
+#            is_error = True
+
+        if is_error == True:
+#            Response.status = "400"
+            pass
+        else:
+            Response.status = "200"
+        
+        message = {
+            'response': response_msg, 
+            'message': error
+        }
+        
+        return message

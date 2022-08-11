@@ -142,7 +142,7 @@
         </record>
 
       <menuitem id="api_menu_root"
-            name="API SBT"
+            name="API LOG"
             sequence="10"/>
 
       <menuitem id="api_log_root"
