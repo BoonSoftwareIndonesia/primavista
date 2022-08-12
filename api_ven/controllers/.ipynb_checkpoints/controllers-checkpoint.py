@@ -101,15 +101,15 @@ class ApiVen(http.Controller):
                         is_error = True
                         break
 
-                    po = self.getRecord(model="purchase.order", field="name", wms=rec['poNo'])
+                    po = self.getRecord(model="purchase.order", field="name", wms=rec['receiptNo'])
                     if po == -1:
-                        error["Error"] = "poNo does not exist"
+                        error["Error"] = "receiptNo does not exist"
                         is_error = True
                         break
 
-                    receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['poNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
+                    receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
 # ini kudu di fixx di uncommand 
-                    if receipt_header['origin'] != rec['poNo']:
+                    if receipt_header['origin'] != rec['receiptNo']:
                         error["Error"] = "Receipt does not exist"
                         is_error = True
                         break
@@ -237,10 +237,10 @@ class ApiVen(http.Controller):
                         line_details.append(line_detail['id'])
 
                         #Get existing receipt line data based on poNo and lineOptChar1
-                        receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
+                        receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo'])])
 #                 di uncommand ama fix
-                        if receipt_line['origin'] != rec['poNo']:
+                        if receipt_line['origin'] != rec['receiptNo']:
                             error["Error"] = "Stock Move not found"
                             is_error = True
                             break
@@ -356,21 +356,21 @@ class ApiVen(http.Controller):
 #        try:
         for rec in do:
             #check soNo
-            if rec['soReference'] == "":
-                error["Error"] = "Field soReference is blank"
+            if rec['doNo'] == "":
+                error["Error"] = "Field doNo is blank"
                 is_error = True
                 break
 
-            sos = self.getRecord(model="sale.order", field="name", wms=rec['soReference'])
+            sos = self.getRecord(model="sale.order", field="name", wms=rec['doNo'])
             if sos == -1:
-                error["Error"] = "soReference does not exist"
+                error["Error"] = "doNo does not exist"
                 is_error = True
                 break
 
             #check do header
-            do_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['soReference']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
+            do_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['doNo']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
 #                 uncommand
-            if do_header['origin'] != rec['soReference']:
+            if do_header['origin'] != rec['doNo']:
                 error["Error"] = "DO not found"
                 is_error = True
                 break
@@ -498,12 +498,12 @@ class ApiVen(http.Controller):
                 line_details.append(line_detail['id'])
 
                 #Get existing dispatch line data based on doNo and lineOptChar1
-                dispatch_line = request.env['stock.move'].search(['&',('origin','=',rec['soReference']),('x_studio_opt_char_1', '=', line["soLineOptChar1"])])
+                dispatch_line = request.env['stock.move'].search(['&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"])])
 #                 uncommand
-#                 if dispatch_line['origin'] != rec['soReference']:
-#                     error["Error"] = "Stock Move not found"
-#                     is_error = True
-#                     break
+                if dispatch_line['origin'] != rec['soReference']:
+                    error["Error"] = "Stock Move not found"
+                    is_error = True
+                    break
                     
                 #Get previous dispatch line detail data
                 existing_detail = []
