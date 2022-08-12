@@ -96,7 +96,7 @@ class ApiVen(http.Controller):
 #             new_rcpt = json.dumps(rcpt)
             try:
                 for rec in rcpt:
-                    if rec['poNo'] == "":
+                    if rec['receiptNo'] == "":
                         error["Error"] = "Field ownerReference is blank"
                         is_error = True
                         break
@@ -370,10 +370,10 @@ class ApiVen(http.Controller):
             #check do header
             do_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['soReference']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
 #                 uncommand
-#             if do_header['origin'] != rec['soReference']:
-#                 error["Error"] = "DO not found"
-#                 is_error = True
-#                 break
+            if do_header['origin'] != rec['soReference']:
+                error["Error"] = "DO not found"
+                is_error = True
+                break
 
                 #DispatchDate
             if rec["dispatchDate"] == "":
@@ -433,13 +433,13 @@ class ApiVen(http.Controller):
                     error[warn_str] = "Product " + line['product'] + " has been created"
                     warn_cnt += 1
 # uncommand
-                for det in line['lineDetails']:
+#                 for det in line['lineDetails']:
 
                     #Check quantityShipped
-                    if det['quantityShipped'] == "":
-                        error["Error"] = "Field quantityShipped is blank"
-                        is_error = True
-                        break
+                if line['quantityShipped'] == "":
+                    error["Error"] = "Field quantityShipped is blank"
+                    is_error = True
+                    break
 
 #                     #Check expiryDate
 #                     if det['expiryDate'] == "":
@@ -459,10 +459,10 @@ class ApiVen(http.Controller):
 #                         break
 
                     #Check stockStatusCode
-                    if det['stockStatusCode'] == "":
-                        error["Error"] = "Field stockStatusCode is blank"
-                        is_error = True
-                        break
+                if line['stockStatusCode'] == "":
+                    error["Error"] = "Field stockStatusCode is blank"
+                    is_error = True
+                    break
 
 #                     temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
 #                     if temp_lot['name'] != det['lotNo']:
@@ -482,20 +482,20 @@ class ApiVen(http.Controller):
 #                         "company_id": 1,
 #                         "state": "done"
 #                     })
-                    line_detail = request.env['stock.move.line'].create({
-                        "product_id": temp_product,
-                        "product_uom_id": 1,
-                        "location_id": 1,
-                        "location_dest_id": 1,
+                line_detail = request.env['stock.move.line'].create({
+                    "product_id": temp_product,
+                    "product_uom_id": 1,
+                    "location_id": 1,
+                    "location_dest_id": 1,
 #                         "lot_id": temp_lot['id'], nanti unccommand
 #                         "lot_id": 1,
 #                         "expiration_date": expiry_date,
-#                         "qty_done": det["quantityShipped"], nanti unccommand
-                        "company_id": 1,
-                        "state": "done"
-                    })
+                    "qty_done": line["quantityShipped"],
+                    "company_id": 1,
+                    "state": "done"
+                })
 
-                    line_details.append(line_detail['id'])
+                line_details.append(line_detail['id'])
 
                 #Get existing dispatch line data based on doNo and lineOptChar1
                 dispatch_line = request.env['stock.move'].search(['&',('origin','=',rec['soReference']),('x_studio_opt_char_1', '=', line["soLineOptChar1"])])
