@@ -61,7 +61,7 @@ class ApiController(models.Model):
             po_line = {
                 "inwardLineOptChar1": line['x_studio_opt_char_1'],
                 "inwardLineOptChar2": "",
-                "product": record['product_id']['name'],
+                "product": record['product_id']['default_code'],
                 "quantityOrdered": str(line['product_qty']),
                 "uomCode": line['product_uom']['name'],
                 "stockStatusCode": "" if line['x_studio_stock_status_code'] == False else line['x_studio_stock_status_code']
@@ -147,7 +147,7 @@ class ApiController(models.Model):
 #        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
         
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
-        api_log['response_date'] = datetim e.now()
+        api_log['response_date'] = datetime.now()
         
         """if is_error == False:
             api_log['status'] = 'success'
