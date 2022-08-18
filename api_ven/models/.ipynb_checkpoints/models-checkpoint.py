@@ -186,10 +186,10 @@ class ApiControllerSO(models.Model):
             
             so_line = {
                 "soLineOptChar1": line['x_studio_line_no'],
-                "product": line['product_id']['default_code'],
+                "product": line['product_id']["product_tmpl_id"]["default_code"],
                 "quantityOrder": str(int(line['product_uom_qty'])),
                 "originalOrderUOM": line['product_uom']['name'],
-                "lotNo": "LOT",
+                "lotNo": "LOT", 
                 "filterTransactionCode": "NM",
                 "soLineOptChar2": ""
             }
