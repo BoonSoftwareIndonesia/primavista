@@ -61,7 +61,7 @@ class ApiController(models.Model):
             po_line = {
                 "inwardLineOptChar1": line['x_studio_opt_char_1'],
                 "inwardLineOptChar2": "",
-                "product": record['product_id']['default_code'],
+                "product": record['product_id']["product_tmpl_id"]["default_code"],
                 "quantityOrdered": str(line['product_qty']),
                 "uomCode": line['product_uom']['name'],
                 "stockStatusCode": "" if line['x_studio_stock_status_code'] == False else line['x_studio_stock_status_code']
