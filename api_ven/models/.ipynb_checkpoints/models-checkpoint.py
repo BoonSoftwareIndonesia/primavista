@@ -80,7 +80,7 @@ class ApiController(models.Model):
                     "poNo": "" if record['name'] == False else record['name'],
                     "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
                     "sender": "",
-                    "documentTransCode": "GR",
+                    "documentTransCode": "PODR",
                     "ownerCode": "PRIMAVISTA",
                     "warehouseCode": "" if record['picking_type_id']['warehouse_id']['code'] == False else record['picking_type_id']['warehouse_id']['code'],
                     "poDate": "" if record['date_approve'] == False else datetime.strftime(record['date_approve'], '%d/%m/%Y'),
