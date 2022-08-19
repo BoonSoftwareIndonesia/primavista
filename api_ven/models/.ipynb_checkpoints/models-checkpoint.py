@@ -64,7 +64,7 @@ class ApiController(models.Model):
                 "product": line['product_id']["product_tmpl_id"]["default_code"],
                 "quantityOrdered": str(line['product_qty']),
                 "uomCode": line['product_uom']['name'],
-                "stockStatusCode": "" if line['x_studio_stock_status_code'] == False else line['x_studio_stock_status_code']
+                "stockStatusCode": "NM"
             }
             line_no += 1
             
@@ -80,8 +80,8 @@ class ApiController(models.Model):
                     "poNo": "" if record['name'] == False else record['name'],
                     "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
                     "sender": "",
-                    "documentTransCode": "" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
-                    "ownerCode": "" if record['x_studio_owner'] == False else record['x_studio_owner'],
+                    "documentTransCode": "GR",
+                    "ownerCode": "PRIMAVISTA",
                     "warehouseCode": "" if record['picking_type_id']['warehouse_id']['code'] == False else record['picking_type_id']['warehouse_id']['code'],
                     "poDate": "" if record['date_approve'] == False else datetime.strftime(record['date_approve'], '%d/%m/%Y'),
                     "expectedArrivalDate": "" if record['date_planned'] == False else datetime.strftime(record['date_planned'], '%d/%m/%Y'),
