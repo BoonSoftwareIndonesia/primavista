@@ -101,7 +101,7 @@ class ApiVen(http.Controller):
                         is_error = True
                         break
                     
-                    return rec['receiptNo']
+#                     return rec['receiptNo']
                     
                     po = self.getRecord(model="purchase.order", field="name", wms=rec['receiptNo'])
                     if po == -1:
@@ -246,7 +246,7 @@ class ApiVen(http.Controller):
 #                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo'])])
 #                 di uncommand ama fix
 
-
+                        return receipt_line['origin']
 
                         if receipt_line['origin'] != rec['receiptNo']:
                             error["Error"] = "Stock Move not found"
