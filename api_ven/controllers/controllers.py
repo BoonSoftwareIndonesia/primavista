@@ -112,7 +112,7 @@ class ApiVen(http.Controller):
                     receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
                     
 #                     return receipt_header['origin']
-                    print(receipt_header['origin'])
+#                     print(receipt_header['origin'])
                     
 # ini kudu di fixx di uncommand 
                     if receipt_header['origin'] != rec['receiptNo']:
@@ -139,6 +139,9 @@ class ApiVen(http.Controller):
 
                     #Receipt Line
                     for line in rec['details']:
+                        
+                        return line['quantityReceived']
+                        
                         temp_product = 0
 
                         #ownerReference
