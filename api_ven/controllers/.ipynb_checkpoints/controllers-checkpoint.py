@@ -110,6 +110,9 @@ class ApiVen(http.Controller):
                         break
 
                     receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
+                    
+                    return receipt_header
+                    
 # ini kudu di fixx di uncommand 
                     if receipt_header['origin'] != rec['receiptNo']:
                         error["Error"] = "Receipt does not exist"
@@ -246,7 +249,6 @@ class ApiVen(http.Controller):
 #                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo'])])
 #                 di uncommand ama fix
 
-                        return receipt_line['origin']
 
                         if receipt_line['origin'] != rec['receiptNo']:
                             error["Error"] = "Stock Move not found"
