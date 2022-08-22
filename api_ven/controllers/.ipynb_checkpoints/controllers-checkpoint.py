@@ -111,7 +111,7 @@ class ApiVen(http.Controller):
 
                     receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
                     
-                    return receipt_header
+                    return receipt_header['origin']
                     
 # ini kudu di fixx di uncommand 
                     if receipt_header['origin'] != rec['receiptNo']:
