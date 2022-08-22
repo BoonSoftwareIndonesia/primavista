@@ -100,7 +100,9 @@ class ApiVen(http.Controller):
                         error["Error"] = "Field ownerReference is blank"
                         is_error = True
                         break
-
+                    
+                    return rec['receiptNo']
+                    
                     po = self.getRecord(model="purchase.order", field="name", wms=rec['receiptNo'])
                     if po == -1:
                         error["Error"] = "receiptNo does not exist"
