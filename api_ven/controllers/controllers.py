@@ -238,7 +238,7 @@ class ApiVen(http.Controller):
 
                         #Get existing receipt line data based on poNo and lineOptChar1
                         receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
-                        print(receipt_line)
+#                         print(receipt_line)
                     
 #                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo'])])
