@@ -158,7 +158,7 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
 
-                        return line['quantityReceived']
+#                         return line['quantityReceived']
                             
                         temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
                         if temp_product == -1:
@@ -247,11 +247,11 @@ class ApiVen(http.Controller):
                         line_details.append(line_detail['id'])
 
                         #Get existing receipt line data based on poNo and lineOptChar1
-                        receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
+#                         receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                         print(receipt_line)
 #                         return receipt_line, receipt_line['origin']
-                    
-#                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
+#                     
+                        receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo'])])
 #                 di uncommand ama fix
 
