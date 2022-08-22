@@ -184,6 +184,7 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
 
+                        return line['quantityReceived']
                         #Check expiryDate
 #                         if det['expiryDate'] == "":
 #                             expiry_date = ""
@@ -244,7 +245,7 @@ class ApiVen(http.Controller):
                         #Get existing receipt line data based on poNo and lineOptChar1
                         receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                         print(receipt_line)
-                        return receipt_line, receipt_line['origin']
+#                         return receipt_line, receipt_line['origin']
                     
 #                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo'])])
