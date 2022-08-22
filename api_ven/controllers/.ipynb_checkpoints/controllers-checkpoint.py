@@ -178,13 +178,15 @@ class ApiVen(http.Controller):
 
 #                         for det in line['lineDetails']:
 
+                        return line['quantityReceived']
+
                         #Check quantityReceived
                         if line['quantityReceived'] == "":
                             error["Error"] = "Field quantityReceived is blank"
                             is_error = True
                             break
 
-                        return line['quantityReceived']
+#                         return line['quantityReceived']
                         #Check expiryDate
 #                         if det['expiryDate'] == "":
 #                             expiry_date = ""
