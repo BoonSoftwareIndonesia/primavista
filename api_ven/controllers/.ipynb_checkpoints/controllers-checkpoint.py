@@ -158,6 +158,8 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
 
+                        return line['quantityReceived']
+                            
                         temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
                         if temp_product == -1:
 
@@ -178,7 +180,7 @@ class ApiVen(http.Controller):
 
 #                         for det in line['lineDetails']:
 
-                        return line['quantityReceived']
+#                         return line['quantityReceived']
 
                         #Check quantityReceived
                         if line['quantityReceived'] == "":
