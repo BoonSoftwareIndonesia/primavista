@@ -204,7 +204,7 @@ class ApiControllerSO(models.Model):
                 {
                     "customerPO":"",
                     "reference":"" if record['name'] == False else record['name'],
-                    "customerCode":"" if record['x_studio_customer_id'] == False else record['partner_shipping_id']['x_studio_customer_id'],
+                    "customerCode":"" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
                     "soHeaderOptChar3":"",
 #                     "documentTransCode":"" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
                     "documentTransCode":"OR", 
