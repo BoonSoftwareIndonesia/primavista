@@ -207,7 +207,7 @@ class ApiControllerSO(models.Model):
                     "customerCode":"" if record['x_studio_customer_code'] == False else record['x_studio_customer_code'],
                     "soHeaderOptChar3":"",
 #                     "documentTransCode":"" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
-                    "documentTransCode":"OR" 
+                    "documentTransCode":"OR", 
                     "orderDate":"" if record['date_order'] == False else datetime.strftime(record['date_order'], '%d/%m/%Y'),
                     "requestedDeliveryDate":"",
 #                     "ownerCode":"" if record['x_studio_owner_code'] == False else record['x_studio_owner_code'],
