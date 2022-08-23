@@ -254,7 +254,7 @@ class ApiVen(http.Controller):
 #                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo'])])
                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']), ('product_id', '=', line['product'])])
 #                         test = request.env['stock.move'].search([('id','=', 27)])
-                        return line['product'], test['origin'], test['product_uom_qty'], test['quantity_done'], test['x_studio_opt_char_1']
+                        return line['product'], test['origin'], receipt_line['product_uom_qty'], receipt_line['quantity_done'], receipt_line['x_studio_opt_char_1']
 #                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']))
 #                         request.env['stock.move'].search([])
 
