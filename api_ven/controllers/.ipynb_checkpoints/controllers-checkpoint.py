@@ -261,7 +261,7 @@ class ApiVen(http.Controller):
 #                         return receipt_line['origin'], rec['receiptNo']
 #                         receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
 #                         receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
-                        return receipt_line['id']
+#                         return receipt_line['id']
 #                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo'])])
 #                 di uncommand ama fix
 
