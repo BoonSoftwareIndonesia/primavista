@@ -204,7 +204,7 @@ class ApiControllerSO(models.Model):
                 {
                     "customerPO":"",
                     "reference":"" if record['name'] == False else record['name'],
-                    "customerCode":"" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
+                    "customerCode":"" if record['partner_shipping_id']['x_studio_customer_id'] == False else record['partner_shipping_id']['x_studio_customer_id'],
                     "soHeaderOptChar3":"",
 #                     "documentTransCode":"" if record['x_studio_document_trans_code'] == False else record['x_studio_document_trans_code'],
                     "documentTransCode":"OR", 
@@ -215,7 +215,7 @@ class ApiControllerSO(models.Model):
 #                     "warehouseCode": "" if record['warehouse_id']['code'] == False else record['warehouse_id']['code'],
                     "warehouseCode": "AVI",
 #                     "shipNo": "" if record['x_studio_internal_id'] == False else record['x_studio_internal_id'],
-                    "shipNo": "" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
+                    "shipNo": "" if record['partner_shipping_id']['x_studio_customer_id'] == False else record['partner_shipping_id']['x_studio_customer_id'],
                     "shipAddress1":"" if record['partner_shipping_id']["street"] == False else record['partner_shipping_id']["street"],
                     "shipCity":"" if record['partner_shipping_id']["city"] == False else record['partner_id']["city"],
                     "shipZipCode":"" if record['partner_shipping_id']["zip"] == False else record['partner_shipping_id']["zip"],
