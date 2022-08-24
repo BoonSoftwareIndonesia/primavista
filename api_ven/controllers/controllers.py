@@ -145,10 +145,10 @@ class ApiVen(http.Controller):
                         temp_product = 0
 
                         #ownerReference
-                        if line['ownerReference'] == "":
-                            error["Error"] = "Field ownerReference is blank"
-                            is_error = True
-                            break
+#                         if line['ownerReference'] == "":
+#                             error["Error"] = "Field ownerReference is blank"
+#                             is_error = True
+#                             break
 
                         #inwardLineOptChar1
                         if line['inwardLineOptChar1'] == "":
@@ -252,7 +252,7 @@ class ApiVen(http.Controller):
 
                         #Get existing receipt line data based on poNo and lineOptChar1
 #                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo'])])
-#                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']), ('product_id', '=', line['product'])])
+                        receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']), ('product_id', '=', line['product'])])
 #                         test = request.env['stock.move'].search([('id','=', 27)])
 #                         return line['product'], receipt_line['origin'], receipt_line['product_uom_qty'], receipt_line['quantity_done'], receipt_line['x_studio_opt_char_1']
 #                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']))
@@ -260,7 +260,7 @@ class ApiVen(http.Controller):
 
 #                         return receipt_line['origin'], rec['receiptNo']
 #                         receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
-                        receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
+#                         receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                         return receipt_line['id']
 #                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo'])])
 #                 di uncommand ama fix
@@ -270,18 +270,26 @@ class ApiVen(http.Controller):
                             error["Error"] = "Stock Move not found"
                             is_error = True
                             break
-
+                        
+#                         return receipt_line['x_studio_opt_char_1']
+#                         return line_detail['qty_done']
+                    
                         #Get previous receipt line detail data
                         existing_detail = []
                         for i in receipt_line['move_line_nosuggest_ids']:
                             existing_detail.append(i['id'])
-
+                        
+#                         return existing_detail
+                    
                         #Merge new line details from JSON and existing line details
                         line_details += existing_detail
 
                         #Update line details data
                         receipt_line['move_line_nosuggest_ids'] = line_details
-
+#                         return receipt_line['move_line_nosuggest_ids']
+                        
+#                         return receipt_line['quantity_done']
+        
                         #Check partial receipt
                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
                             receipt_line['state'] = 'done'
@@ -394,7 +402,7 @@ class ApiVen(http.Controller):
                 break
 
             #check do header
-            do_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['doNo']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
+            do_header = request.env["stock.picking"].search(['&','&', ('origin', '=', rec['doNo']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
 #                 uncommand
             if do_header['origin'] != rec['doNo']:
                 error["Error"] = "DO not found"
