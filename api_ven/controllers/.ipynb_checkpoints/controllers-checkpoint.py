@@ -31,6 +31,31 @@ from odoo import http
 # from odoo.http import request, Response
 # from datetime import datetime
 
+# ngetest override stock move create
+class PurchaseOrderLineExt(models.Model):
+    _inherit = 'purchase.order.line'
+    x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
+    
+#     @api.multi
+    def _prepare_stock_moves(self, picking):
+        res = super(PurchaseOrderLineExt, self)._prepare_stock_moves(picking)
+        for rec in res:
+            rec['x_studio_opt_char_1'] = self.x_studio_opt_char_1
+        return res
+
+class StockRuleExt(models.Model):
+    _inherit = 'stock.rule'
+    
+    @api.model
+    def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, values, po, supplier):
+        res = super(StockRuleExt, self)._prepare_purchase_order_line(product_id, product_qty, product_uom, values, po, supplier)
+        res['x_studio_opt_char_1'] = values.get('x_studio_opt_char_1', False)
+        return res
+    
+    _inherit = 'stock.move'
+    x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
+# end test
+
 class ApiVen(http.Controller):
     # @http.route('/api_sbt_inv/api_sbt_inv/', auth='user')
     def getRecord(self, model, field, wms):
@@ -186,7 +211,7 @@ class ApiVen(http.Controller):
 
 #                         return line['quantityReceived']
 
-                        #Check quantityReceived
+                        #Check quantityReceived ================
                         if line['quantityReceived'] == "":
                             error["Error"] = "Field quantityReceived is blank"
                             is_error = True
@@ -204,7 +229,7 @@ class ApiVen(http.Controller):
 #                                 is_error = True
 #                                 break
 
-                        #Check stockStatusCode
+                        #Check stockStatusCode ===================
                         if line['stockStatusCode'] == "":
                             error["Error"] = "Field stockStatusCode is blank"
                             is_error = True
@@ -236,6 +261,7 @@ class ApiVen(http.Controller):
 #                                 "company_id": 1,
 #                                 "state": "done"
 #                             })
+
                         line_detail = request.env['stock.move.line'].create({
                             "product_id": temp_product,
                             "product_uom_id": 1,
@@ -249,20 +275,41 @@ class ApiVen(http.Controller):
                         })
 
                         line_details.append(line_detail['id'])
+        
+        
+#                         TESTT ==========================================================================
+#                         for det in line['linedetails']:
+#                             #Check quantityReceived
+#                             if det['quantityReceived'] == "":
+#                                 error["Error"] = "Field quantityReceived is blank"
+#                                 is_error = True
+#                                 break
+                                
+#                             #Check stockStatusCode
+#                             if det['stockStatusCode'] == "":
+#                                 error["Error"] = "Field stockStatusCode is blank"
+#                                 is_error = True
+#                                 break
+                                
+#                             #Create Line Detail
+#                             line_detail = request.env['stock.move.line'].create({
+#                                 "product_id": temp_product,
+#                                 "product_uom_id": 1,
+#                                 "location_id": 1,
+#                                 "location_dest_id": 1,
+# #                                 "lot_id": "",
+# #                                 "expiration_date": ,
+#                                 "qty_done": det["quantityReceived"],
+#                                 "company_id": 1,
+#                                 "state": "done"
+#                             })
+#                             line_details.append(line_detail['id'])
+#                         TEST===========================================================================
 
                         #Get existing receipt line data based on poNo and lineOptChar1
-#                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo'])])
-                        receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']), ('product_id', '=', line['product'])])
-#                         test = request.env['stock.move'].search([('id','=', 27)])
-#                         return line['product'], receipt_line['origin'], receipt_line['product_uom_qty'], receipt_line['quantity_done'], receipt_line['x_studio_opt_char_1']
-#                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']))
-#                         request.env['stock.move'].search([])
-
-#                         return receipt_line['origin'], rec['receiptNo']
-#                         receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
-#                         receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
-#                         return receipt_line['id']
-#                         receipt_line = request.env['stock.move'].search(['&',('origin','=',rec['poNo'])])
+#                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']), ('product_id', '=', line['product'])])
+                
+                        receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                 di uncommand ama fix
 
                         
