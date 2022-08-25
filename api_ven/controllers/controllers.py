@@ -275,36 +275,6 @@ class ApiVen(http.Controller):
                         })
 
                         line_details.append(line_detail['id'])
-        
-        
-#                         TESTT ==========================================================================
-#                         for det in line['linedetails']:
-#                             #Check quantityReceived
-#                             if det['quantityReceived'] == "":
-#                                 error["Error"] = "Field quantityReceived is blank"
-#                                 is_error = True
-#                                 break
-                                
-#                             #Check stockStatusCode
-#                             if det['stockStatusCode'] == "":
-#                                 error["Error"] = "Field stockStatusCode is blank"
-#                                 is_error = True
-#                                 break
-                                
-#                             #Create Line Detail
-#                             line_detail = request.env['stock.move.line'].create({
-#                                 "product_id": temp_product,
-#                                 "product_uom_id": 1,
-#                                 "location_id": 1,
-#                                 "location_dest_id": 1,
-# #                                 "lot_id": "",
-# #                                 "expiration_date": ,
-#                                 "qty_done": det["quantityReceived"],
-#                                 "company_id": 1,
-#                                 "state": "done"
-#                             })
-#                             line_details.append(line_detail['id'])
-#                         TEST===========================================================================
 
                         #Get existing receipt line data based on poNo and lineOptChar1
 #                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']), ('product_id', '=', line['product'])])
@@ -332,7 +302,9 @@ class ApiVen(http.Controller):
                         line_details += existing_detail
 
                         #Update line details data
-                        receipt_line['move_line_nosuggest_ids'] = line_details
+#                         receipt_line['move_line_nosuggest_ids'] = line_details
+                        receipt_line['move_line_nosuggest_ids'] = line_detail['id']
+                    
 #                         return receipt_line['move_line_nosuggest_ids']
                         
 #                         return receipt_line['quantity_done']
@@ -344,16 +316,18 @@ class ApiVen(http.Controller):
                             is_partial = True
 
 
-                        if is_error == True:
-                            break
+#                             TEST =====================
+                    if is_error == True:
+                        break
 
-                        receipt_header['date_done'] = receipt_date
-                        receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
+                    receipt_header['date_done'] = receipt_date
+                    receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 
-                        if is_partial == False:
-                            receipt_header['state'] = 'done'
+                    if is_partial == False:
+                        receipt_header['state'] = 'done'
 
-                        response_msg = "GRN updated successfully"
+                    response_msg = "GRN updated successfully"
+#                         TEST ================
                         
             except Exception as e:
                 error["Error"] = str(e)
