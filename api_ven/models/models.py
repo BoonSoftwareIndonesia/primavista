@@ -6,6 +6,30 @@ import json, datetime, requests, base64, unicodedata
 from datetime import datetime
 from odoo import http
 
+# ngetest override stock move create
+class PurchaseOrderLineExt(models.Model):
+    _inherit = 'purchase.order.line'
+    x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
+    
+#     @api.multi
+    def _prepare_stock_moves(self, picking):
+        res = super(PurchaseOrderLineExt, self)._prepare_stock_moves(picking)
+        for rec in res:
+            rec['x_studio_opt_char_1'] = self.x_studio_opt_char_1
+        return res
+
+class StockRuleExt(models.Model):
+    _inherit = 'stock.rule'
+    
+    @api.model
+    def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, values, po, supplier):
+        res = super(StockRuleExt, self)._prepare_purchase_order_line(product_id, product_qty, product_uom, values, po, supplier)
+        res['x_studio_opt_char_1'] = values.get('x_studio_opt_char_1', False)
+        return res
+    
+    _inherit = 'stock.move'
+    x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
+# end test
 
 # class api_ven(models.Model):
 #     _name = 'api_ven.api_ven'
