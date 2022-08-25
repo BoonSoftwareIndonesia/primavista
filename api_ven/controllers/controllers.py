@@ -81,7 +81,7 @@ class ApiVen(http.Controller):
 
     @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['POST'])
     def post_rcpt(self, rcpt):
-            flag = 0
+#             flag = 0
             created = 0
             error = {}
             warn_cnt = 1
@@ -305,7 +305,7 @@ class ApiVen(http.Controller):
 
                         #Update line details data
                         receipt_line['move_line_nosuggest_ids'] = line_details
-                        flag += 1
+#                         flag += 1
 #                         receipt_line['move_line_nosuggest_ids'] = line_detail['id']
 #                         return receipt_line['product_uom_qty']
 #                         return receipt_line['quantity_done']
@@ -321,7 +321,7 @@ class ApiVen(http.Controller):
 
 
 #                             TEST =====================
-                    return flag
+#                     return flag
                     if is_error == True:
                         break
 
