@@ -267,8 +267,8 @@ class ApiVen(http.Controller):
                         line_detail = request.env['stock.move.line'].create({
                             "product_id": temp_product,
                             "product_uom_id": 1,
-                            "location_id": 1,
-                            "location_dest_id": 1,
+                            "location_id": 4,
+                            "location_dest_id": 8,
 #                             "lot_id": "",
 #                             "expiration_date": ,
                             "qty_done": line["quantityReceived"],
@@ -290,28 +290,22 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
                         
-#                         return receipt_line['x_studio_opt_char_1']
-#                         return line_detail['qty_done']
+#                         
                     
                         #Get previous receipt line detail data
                         existing_detail = []
                         for i in receipt_line['move_line_nosuggest_ids']:
                             existing_detail.append(i['id'])
                         
-#                         return existing_detail
+                        if existing_detail:
+                            line_details += existing_detail
+                        
                     
                         #Merge new line details from JSON and existing line details
-                        line_details += existing_detail
+#                         line_details += existing_detail
 
                         #Update line details data
                         receipt_line['move_line_nosuggest_ids'] = line_details
-#                         flag += 1
-#                         receipt_line['move_line_nosuggest_ids'] = line_detail['id']
-#                         return receipt_line['product_uom_qty']
-#                         return receipt_line['quantity_done']
-#                         return receipt_line['move_line_nosuggest_ids']
-                        
-#                         return receipt_line['quantity_done']
                         
                         #Check partial receipt
                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
