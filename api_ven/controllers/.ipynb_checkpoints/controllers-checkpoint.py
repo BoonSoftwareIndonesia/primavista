@@ -242,14 +242,30 @@ class ApiVen(http.Controller):
 #                             error["Error"] = "Field lotNo is blank"
 #                             is_error = True
 #                             break
+                        
+#                         test
+#                         quant = request.env['stock.quant'].search([("product_id", '=', temp_product)])
+#                         hehe = request.env['stock.production.lot'].search([("id", '=', quant['lot_id'])])
+#                         return quant['lot_id']
+#                         test = request.env['stock.production.lot'].search([("id", '=', quant['lot_id']['id'])])
+#                         return test['display_name']
+                        
+#                         arr = 0
+#                         for t in request.env['stock.quant']:
+#                             arr += 1
+#                         return arr
 
-#                         temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
-#                         if temp_lot['name'] != det['lotNo']:
+
+#                         temp_lot = request.env['stock.production.lot'].search([("name", '=', "21JR557")])
+#                         return temp_lot['product_id']
+#                         temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', line['lotNo'])])
+#                         if temp_lot['name'] != line['lotNo']:
 #                             temp_lot = request.env['stock.production.lot'].create({
 #                                 "product_id": temp_product,
-#                                 "name": det["lotNo"],
+#                                 "name": line["lotNo"],
 #                                 "company_id": 1
 #                             })
+#                         return temp_lot['id']
 
                             #Create Line Detail
 #                             line_detail = request.env['stock.move.line'].create({
@@ -271,9 +287,10 @@ class ApiVen(http.Controller):
                             "location_dest_id": 8,
 #                             "lot_id": "",
 #                             "expiration_date": ,
+#                             "lot_id": temp_lot['id'],
                             "qty_done": line["quantityReceived"],
                             "company_id": 1,
-                            "state": "done"
+#                             "state": "done"
                         })
 
                         line_details.append(line_detail['id'])
@@ -284,6 +301,8 @@ class ApiVen(http.Controller):
                         receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 #                 di uncommand ama fix
 
+#                         receipt_header.action_confirm()
+#                         receipt_line._action_assign()
                         
                         if receipt_line['origin'] != rec['receiptNo']:
                             error["Error"] = "Stock Move not found"
@@ -323,7 +342,11 @@ class ApiVen(http.Controller):
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 
                     if is_partial == False:
-                        receipt_header['state'] = 'done'
+#                         todo_moves = receipt_header.mapped('move_lines').filtered(lambda self: self.state in ['draft', 'waiting', 'partially_available', 'assigned', 'confirmed'])
+#                         todo_moves._action_done()
+#                         receipt_header.action_confirm()
+#                         receipt_header.button_validate()
+#                         receipt_header['state'] = 'done'
 
                     response_msg = "GRN updated successfully"
 #                         TEST ================
