@@ -284,7 +284,7 @@ class ApiVen(http.Controller):
 #                             "lot_id": temp_lot['id'],
                             "qty_done": line["quantityReceived"],
                             "company_id": 1,
-#                             "state": "done"
+                            "state": "done"
                         })
 
                         line_details.append(line_detail['id'])
@@ -321,10 +321,10 @@ class ApiVen(http.Controller):
                         receipt_line['move_line_nosuggest_ids'] = line_details
                         
                         #Check partial receipt
-#                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-#                             receipt_line['state'] = 'done'
-#                         else:
-#                             is_partial = True
+                        if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
+                            receipt_line['state'] = 'done'
+                        else:
+                            is_partial = True
 
 
 #                             TEST =====================
@@ -335,11 +335,11 @@ class ApiVen(http.Controller):
                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 
-#                     if is_partial == False:
+                    if is_partial == False:
 #                         todo_moves = receipt_header.mapped('move_lines').filtered(lambda self: self.state in ['draft', 'waiting', 'partially_available', 'assigned', 'confirmed'])
 #                         todo_moves._action_done()
 #                         receipt_header.action_confirm()
-#                         receipt_header.button_validate()
+                        receipt_header.button_validate()
 #                         receipt_header['state'] = 'done'
 
                     response_msg = "GRN updated successfully"
