@@ -341,7 +341,7 @@ class ApiVen(http.Controller):
                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 
-                    if is_partial == False:
+#                     if is_partial == False:
 #                         todo_moves = receipt_header.mapped('move_lines').filtered(lambda self: self.state in ['draft', 'waiting', 'partially_available', 'assigned', 'confirmed'])
 #                         todo_moves._action_done()
 #                         receipt_header.action_confirm()
