@@ -137,8 +137,6 @@ class ApiVen(http.Controller):
 
                     receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
                     
-#                     return receipt_header['origin']
-#                     print(receipt_header['origin'])
                     
 # ini kudu di fixx di uncommand 
                     if receipt_header['origin'] != rec['receiptNo']:
@@ -209,9 +207,6 @@ class ApiVen(http.Controller):
                             error[warn_str] = "Product " + line['product'] + " has been created"
                             warn_cnt += 1
 
-#                         for det in line['lineDetails']:
-
-#                         return line['quantityReceived']
 
                         #Check quantityReceived ================
                         if line['quantityReceived'] == "":
@@ -219,7 +214,6 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
 
-#                         return line['quantityReceived']
                         #Check expiryDate
 #                         if det['expiryDate'] == "":
 #                             expiry_date = ""
@@ -316,21 +310,21 @@ class ApiVen(http.Controller):
                         for i in receipt_line['move_line_nosuggest_ids']:
                             existing_detail.append(i['id'])
                         
-                        if existing_detail:
-                            line_details += existing_detail
+#                         if existing_detail:
+#                             line_details += existing_detail
                         
                     
                         #Merge new line details from JSON and existing line details
-#                         line_details += existing_detail
+                        line_details += existing_detail
 
                         #Update line details data
                         receipt_line['move_line_nosuggest_ids'] = line_details
                         
                         #Check partial receipt
-                        if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-                            receipt_line['state'] = 'done'
-                        else:
-                            is_partial = True
+#                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
+#                             receipt_line['state'] = 'done'
+#                         else:
+#                             is_partial = True
 
 
 #                             TEST =====================
