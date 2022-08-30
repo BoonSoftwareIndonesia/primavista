@@ -323,8 +323,8 @@ class ApiVen(http.Controller):
 #                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
 #                             receipt_line['state'] = 'done'
 #                             return receipt_line['state']
-                        else:
-                            is_partial = True
+#                         else:
+#                             is_partial = True
 
 
 #                         TEST =====================
