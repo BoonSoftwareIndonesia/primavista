@@ -293,7 +293,6 @@ class ApiVen(http.Controller):
 #                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']), ('product_id', '=', line['product'])])
                 
                         receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
-#                 di uncommand ama fix
 
 #                         receipt_header.action_confirm()
 #                         receipt_line._action_assign()
@@ -320,26 +319,24 @@ class ApiVen(http.Controller):
                         #Update line details data
                         receipt_line['move_line_nosuggest_ids'] = line_details
                         
-                        #Check partial receipt
-                        if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-                            receipt_line['state'] = 'done'
+                        #Check partial receipt (YANG BUAT RCPTNYA LGSG JD DONE) ==========================================
+#                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
+#                             receipt_line['state'] = 'done'
+#                             return receipt_line['state']
                         else:
                             is_partial = True
 
 
-#                             TEST =====================
-#                     return flag
+#                         TEST =====================
                     if is_error == True:
                         break
 
                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 
-                    if is_partial == False:
-#                         todo_moves = receipt_header.mapped('move_lines').filtered(lambda self: self.state in ['draft', 'waiting', 'partially_available', 'assigned', 'confirmed'])
-#                         todo_moves._action_done()
+#                     if is_partial == False:
 #                         receipt_header.action_confirm()
-                        receipt_header.button_validate()
+#                         receipt_header.button_validate()
 #                         receipt_header['state'] = 'done'
 
                     response_msg = "GRN updated successfully"
