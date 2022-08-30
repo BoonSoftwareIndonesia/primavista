@@ -32,28 +32,28 @@ from odoo import http
 # from datetime import datetime
 
 # ngetest override stock move create
-class PurchaseOrderLineExt(models.Model):
-    _inherit = 'purchase.order.line'
-    x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
+# class PurchaseOrderLineExt(models.Model):
+#     _inherit = 'purchase.order.line'
+#     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
     
-#     @api.multi
-    def _prepare_stock_moves(self, picking):
-        res = super(PurchaseOrderLineExt, self)._prepare_stock_moves(picking)
-        for rec in res:
-            rec['x_studio_opt_char_1'] = self.x_studio_opt_char_1
-        return res
+# #     @api.multi
+#     def _prepare_stock_moves(self, picking):
+#         res = super(PurchaseOrderLineExt, self)._prepare_stock_moves(picking)
+#         for rec in res:
+#             rec['x_studio_opt_char_1'] = self.x_studio_opt_char_1
+#         return res
 
-class StockRuleExt(models.Model):
-    _inherit = 'stock.rule'
+# class StockRuleExt(models.Model):
+#     _inherit = 'stock.rule'
     
-    @api.model
-    def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, values, po, supplier):
-        res = super(StockRuleExt, self)._prepare_purchase_order_line(product_id, product_qty, product_uom, values, po, supplier)
-        res['x_studio_opt_char_1'] = values.get('x_studio_opt_char_1', False)
-        return res
+#     @api.model
+#     def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, values, po, supplier):
+#         res = super(StockRuleExt, self)._prepare_purchase_order_line(product_id, product_qty, product_uom, values, po, supplier)
+#         res['x_studio_opt_char_1'] = values.get('x_studio_opt_char_1', False)
+#         return res
     
-    _inherit = 'stock.move'
-    x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
+#     _inherit = 'stock.move'
+#     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
 # end test
 
 class ApiVen(http.Controller):
@@ -320,11 +320,10 @@ class ApiVen(http.Controller):
                         receipt_line['move_line_nosuggest_ids'] = line_details
                         
                         #Check partial receipt (YANG BUAT RCPTNYA LGSG JD DONE) ==========================================
-#                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-#                             receipt_line['state'] = 'done'
-#                             return receipt_line['state']
-#                         else:
-#                             is_partial = True
+                        if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
+                            receipt_line['state'] = 'done'
+                        else:
+                            is_partial = True
 
 
 #                         TEST =====================
@@ -339,7 +338,7 @@ class ApiVen(http.Controller):
 #                         receipt_header.button_validate()
 #                         receipt_header['state'] = 'done'
 
-                    response_msg = "GRN updated successfully"
+#                     response_msg = "GRN updated successfully"
 #                         TEST ================
                         
             except Exception as e:
