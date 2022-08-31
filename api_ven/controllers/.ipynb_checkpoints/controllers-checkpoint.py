@@ -320,7 +320,7 @@ class ApiVen(http.Controller):
 #                             is_partial = True
 
 
-#                         TEST =====================
+#                         INDENT  =====================
                     if is_error == True:
                         break
 
@@ -333,7 +333,7 @@ class ApiVen(http.Controller):
 #                         receipt_header['state'] = 'assigned'
 
                     response_msg = "GRN updated successfully"
-#                         TEST ================
+#                         INDENT ================
                         
             except Exception as e:
                 error["Error"] = str(e)
@@ -429,7 +429,10 @@ class ApiVen(http.Controller):
                 break
 
             #check do header
-            do_header = request.env["stock.picking"].search(['&','&', ('origin', '=', rec['doNo']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
+            do_header = request.env["stock.picking"].search(['&','&', ('origin', '=', rec['doNo']), ('picking_type_id', '=', 2), ('state', '=', 'assigned')])
+#             (STOCK PICKING NYA UDH DLM STATE READY (ASSIGNED) BUKAN WAITING (CONFIRMED))
+#             do_header = request.env["stock.picking"].search(['&','&', ('origin', '=', rec['doNo']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
+            
 #                 uncommand
             if do_header['origin'] != rec['doNo']:
                 error["Error"] = "DO not found"
@@ -455,6 +458,7 @@ class ApiVen(http.Controller):
 
             #do Line
             for line in rec['details']:
+                line_details = []
                 temp_product = 0
 
                 #customerPO (DIISI APA DI POSTMAN?)
@@ -543,11 +547,13 @@ class ApiVen(http.Controller):
 #                         "company_id": 1,
 #                         "state": "done"
 #                     })
+    
+#                 LOCATION ID AMA DEST ID SBLMNNYA SAMA2 1
                 line_detail = request.env['stock.move.line'].create({
                     "product_id": temp_product,
                     "product_uom_id": 1,
-                    "location_id": 1,
-                    "location_dest_id": 1,
+                    "location_id": 8,
+                    "location_dest_id": 5,
 #                         "lot_id": temp_lot['id'], nanti unccommand
 #                         "lot_id": 1,
 #                         "expiration_date": expiry_date,
@@ -582,9 +588,11 @@ class ApiVen(http.Controller):
                 
                 #Update line details data
                 dispatch_line['move_line_ids'] = line_details
+#                 dispatch_line['move_line_nosuggest_ids'] = line_details
                 
                 #Check partial receipt
                 if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
+#                     return dispatch_line['quantity_done']
                     dispatch_line['state'] = 'done'
                 else:
                     is_partial = True
@@ -600,7 +608,9 @@ class ApiVen(http.Controller):
             do_header['x_studio_document_trans_code'] = rec["documentTransCode"]
             
             if is_partial == False:
-                do_header['state'] = 'done'
+#                 request.env["stock.picking"].action_confirm(do_header['id'])
+                do_header.action_confirm()
+#                 do_header['state'] = 'done'
 
             response_msg = "DO updated successfully"
 #        except Exception as e:
