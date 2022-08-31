@@ -138,7 +138,7 @@ class ApiVen(http.Controller):
                     receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
                     
                     
-# ini kudu di fixx di uncommand 
+#               ini kudu di fixx di uncommand 
                     if receipt_header['origin'] != rec['receiptNo']:
                         error["Error"] = "Receipt does not exist"
                         is_error = True
@@ -187,8 +187,6 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
 
-#                         return line['quantityReceived']
-                            
                         temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
                         if temp_product == -1:
 
@@ -243,11 +241,7 @@ class ApiVen(http.Controller):
 #                         return quant['lot_id']
 #                         test = request.env['stock.production.lot'].search([("id", '=', quant['lot_id']['id'])])
 #                         return test['display_name']
-                        
-#                         arr = 0
-#                         for t in request.env['stock.quant']:
-#                             arr += 1
-#                         return arr
+#                         test
 
 
 #                         temp_lot = request.env['stock.production.lot'].search([("name", '=', "21JR557")])
@@ -320,10 +314,10 @@ class ApiVen(http.Controller):
                         receipt_line['move_line_nosuggest_ids'] = line_details
                         
                         #Check partial receipt (YANG BUAT RCPTNYA LGSG JD DONE) ==========================================
-                        if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-                            receipt_line['state'] = 'done'
-                        else:
-                            is_partial = True
+#                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
+#                             receipt_line['state'] = 'assigned'
+#                         else:
+#                             is_partial = True
 
 
 #                         TEST =====================
@@ -334,11 +328,11 @@ class ApiVen(http.Controller):
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 
 #                     if is_partial == False:
-#                         receipt_header.action_confirm()
-#                         receipt_header.button_validate()
-#                         receipt_header['state'] = 'done'
+# #                         receipt_header.action_confirm()
+# #                         receipt_header.button_validate()
+#                         receipt_header['state'] = 'assigned'
 
-#                     response_msg = "GRN updated successfully"
+                    response_msg = "GRN updated successfully"
 #                         TEST ================
                         
             except Exception as e:
