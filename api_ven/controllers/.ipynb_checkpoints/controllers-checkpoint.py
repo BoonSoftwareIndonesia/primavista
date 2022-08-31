@@ -586,16 +586,23 @@ class ApiVen(http.Controller):
                 #Merge new line details from JSON and existing line details
                 line_details += existing_detail
                 
+#                 dispatch_line['product_uom_qty'] =  0
+                
                 #Update line details data
                 dispatch_line['move_line_ids'] = line_details
 #                 dispatch_line['move_line_nosuggest_ids'] = line_details
                 
+#                 sum = 0
+
+#                 for n in dispatch_line['move_line_ids']:
+#                     sum += n['qty_done']
+#                 return sum
+                
                 #Check partial receipt
-                if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
-#                     return dispatch_line['quantity_done']
-                    dispatch_line['state'] = 'done'
-                else:
-                    is_partial = True
+#                 if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
+#                     dispatch_line['state'] = 'done'
+#                 else:
+#                     is_partial = True
 
 
                 if is_error == True:
@@ -607,9 +614,8 @@ class ApiVen(http.Controller):
             do_header['x_studio_dispatch_date'] = dispatch_date
             do_header['x_studio_document_trans_code'] = rec["documentTransCode"]
             
-            if is_partial == False:
-#                 request.env["stock.picking"].action_confirm(do_header['id'])
-                do_header.action_confirm()
+#             if is_partial == False:
+#                 do_header.action_confirm()
 #                 do_header['state'] = 'done'
 
             response_msg = "DO updated successfully"
