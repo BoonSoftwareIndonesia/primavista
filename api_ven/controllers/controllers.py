@@ -457,11 +457,11 @@ class ApiVen(http.Controller):
             for line in rec['details']:
                 temp_product = 0
 
-                #customerPO
-                if line['customerPO'] == "":
-                    error["Error"] = "Field customerPO is blank"
-                    is_error = True
-                    break
+                #customerPO (DIISI APA DI POSTMAN?)
+#                 if line['customerPO'] == "":
+#                     error["Error"] = "Field customerPO is blank"
+#                     is_error = True
+#                     break
 
                 #product
                 if line['product'] == "":
@@ -560,12 +560,18 @@ class ApiVen(http.Controller):
 
                 #Get existing dispatch line data based on doNo and lineOptChar1
                 dispatch_line = request.env['stock.move'].search(['&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"])])
-#                 uncommand
-                if dispatch_line['origin'] != rec['soReference']:
+                
+#                 uncommand (KYKNY BUKAN SOREFERENCE TP DONO)
+#                 if dispatch_line['origin'] != rec['soReference']:
+#                     error["Error"] = "Stock Move not found"
+#                     is_error = True
+#                     break
+    
+                if dispatch_line['origin'] != rec['doNo']:
                     error["Error"] = "Stock Move not found"
                     is_error = True
                     break
-                    
+    
                 #Get previous dispatch line detail data
                 existing_detail = []
                 for i in dispatch_line['move_line_ids']:
