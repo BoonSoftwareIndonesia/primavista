@@ -289,8 +289,8 @@ class ApiVen(http.Controller):
                         receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
 
 #                         TEST ================================================================
-                        receipt_line._action_confirm()
-                        receipt_line._action_assign()
+#                         receipt_line._action_confirm()
+#                         receipt_line._action_assign()
 #                         TEST ================================================================
                         
                         if receipt_line['origin'] != rec['receiptNo']:
@@ -328,7 +328,7 @@ class ApiVen(http.Controller):
 
                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
-                    receipt_line._action_done()
+#                     receipt_line._action_done()
 
 #                     HRSNYA DI UNCOMMAND
 #                     if is_partial == False:
