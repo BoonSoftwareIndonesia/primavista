@@ -267,10 +267,13 @@ class ApiVen(http.Controller):
 #                                 "company_id": 1,
 #                                 "state": "done"
 #                             })
+                        
+#                         test = request.env['uom.uom'].search([('id','=',27)])
+#                         return test['name']
 
                         line_detail = request.env['stock.move.line'].create({
                             "product_id": temp_product,
-                            "product_uom_id": 1,
+                            "product_uom_id": 27,
                             "location_id": 4,
                             "location_dest_id": 8,
 #                             "lot_id": "",
@@ -316,25 +319,32 @@ class ApiVen(http.Controller):
                         receipt_line['move_line_nosuggest_ids'] = line_details
                         
                         #Check partial receipt (YANG BUAT RCPTNYA LGSG JD DONE) ==========================================
-#                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-#                             receipt_line['state'] = 'assigned'
-#                         else:
-#                             is_partial = True
+                        if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
+                            receipt_line._action_confirm()
+                            receipt_line._action_assign()
+                            receipt_line._action_done()
+#                             receipt_line['state'] = 'done'
+                        else:
+                            is_partial = True
 
 
 #                         INDENT  =====================
                     if is_error == True:
                         break
 
+#                   TEST ===========================================
+#                     receipt_header._action_confirm()
+#                     receipt_header._action_assign()
+            
                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 #                     receipt_line._action_done()
 
 #                     HRSNYA DI UNCOMMAND
-#                     if is_partial == False:
+                    if is_partial == False:
 # #                         receipt_header.action_confirm()
 # #                         receipt_header.button_validate()
-#                         receipt_header['state'] = 'assigned'
+                        receipt_header['state'] = 'done'
 
                     response_msg = "GRN updated successfully"
 #                         INDENT ================
