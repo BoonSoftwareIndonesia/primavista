@@ -87,7 +87,8 @@ class ApiController(models.Model):
                 "inwardLineOptChar2": "",
                 "product": line['product_id']["product_tmpl_id"]["default_code"],
                 "quantityOrdered": str(line['product_qty']),
-                "uomCode": line['product_uom']['name'],
+#                 "uomCode": line['product_uom']['name'],
+                "uomCode": "PCS",
                 "stockStatusCode": "NM"
             }
             line_no += 1
@@ -213,7 +214,8 @@ class ApiControllerSO(models.Model):
                 "soLineOptChar1": line['x_studio_line_no'],
                 "product": line['product_id']["product_tmpl_id"]["default_code"],
                 "quantityOrder": str(int(line['product_uom_qty'])),
-                "originalOrderUOM": line['product_uom']['name'],
+#                 "originalOrderUOM": line['product_uom']['name'],
+                "originalOrderUOM": "PCS",
                 "lotNo": "LOT", 
                 "filterTransactionCode": "NM",
                 "soLineOptChar2": ""
