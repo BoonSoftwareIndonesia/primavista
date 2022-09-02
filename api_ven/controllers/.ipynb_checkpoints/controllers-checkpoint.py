@@ -268,7 +268,7 @@ class ApiVen(http.Controller):
 #                                 "state": "done"
 #                             })
                         
-#                         test = request.env['uom.uom'].search([('id','=',27)])
+#                         test = request.env['uom.uom'].search([('id','=',26)])
 #                         return test['name']
 
                         line_detail = request.env['stock.move.line'].create({
@@ -562,10 +562,11 @@ class ApiVen(http.Controller):
 #                         "state": "done"
 #                     })
     
-#                 LOCATION ID AMA DEST ID SBLMNNYA SAMA2 1
+#                 LOCATION ID AMA DEST ID SBLMNNYA SAMA2 1, product uom id nya tadinya 1
                 line_detail = request.env['stock.move.line'].create({
                     "product_id": temp_product,
-                    "product_uom_id": 1,
+#                     "product_uom_id":  1,
+                    "product_uom_id":  27,
                     "location_id": 8,
                     "location_dest_id": 5,
 #                         "lot_id": temp_lot['id'], nanti unccommand
