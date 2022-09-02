@@ -320,9 +320,9 @@ class ApiVen(http.Controller):
                         
                         #Check partial receipt (YANG BUAT RCPTNYA LGSG JD DONE) ==========================================
                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-                            receipt_line._action_confirm()
-                            receipt_line._action_assign()
-                            receipt_line._action_done()
+#                             receipt_line._action_confirm()
+#                             receipt_line._action_assign()
+                            receipt_line._action_done() #yg bikin rcpt nya jalan tp ke create 2
 #                             receipt_line['state'] = 'done'
                         else:
                             is_partial = True
@@ -331,20 +331,19 @@ class ApiVen(http.Controller):
 #                         INDENT  =====================
                     if is_error == True:
                         break
-
-#                   TEST ===========================================
-#                     receipt_header._action_confirm()
-#                     receipt_header._action_assign()
             
                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 #                     receipt_line._action_done()
+#                     receipt_header['move_ids_without_package']._action_done()
+#                     receipt_header.mapped('move_lines')._action_done()
 
 #                     HRSNYA DI UNCOMMAND
                     if is_partial == False:
 # #                         receipt_header.action_confirm()
 # #                         receipt_header.button_validate()
-                        receipt_header['state'] = 'done'
+                        receipt_header['state'] = 'done' #yg bikin rcpt nya jalan tp ke create 2
+#                         receipt_header.action_done()
 
                     response_msg = "GRN updated successfully"
 #                         INDENT ================
