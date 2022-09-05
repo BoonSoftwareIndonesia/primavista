@@ -186,7 +186,8 @@ class ApiVen(http.Controller):
                             error["Error"] = "Field product is blank"
                             is_error = True
                             break
-
+                            
+#                       Create a new product does not exist yet, else use existing product
                         temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
                         if temp_product == -1:
 
@@ -271,6 +272,7 @@ class ApiVen(http.Controller):
 #                         test = request.env['uom.uom'].search([('id','=',26)])
 #                         return test['name']
 
+#                       Create a new move stock line when item is received
                         line_detail = request.env['stock.move.line'].create({
                             "product_id": temp_product,
                             "product_uom_id": 27,
@@ -300,8 +302,6 @@ class ApiVen(http.Controller):
                             error["Error"] = "Stock Move not found"
                             is_error = True
                             break
-                        
-#                         
                     
                         #Get previous receipt line detail data
                         existing_detail = []
@@ -322,13 +322,36 @@ class ApiVen(http.Controller):
                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
 #                             receipt_line._action_confirm()
 #                             receipt_line._action_assign()
-                            receipt_line._action_done() #yg bikin rcpt nya jalan tp ke create 2
+#                             receipt_line._action_done() #yg bikin rcpt nya jalan tp ke create 2
 #                             receipt_line['state'] = 'done'
+                            is_partial = False
                         else:
                             is_partial = True
 
 
 #                         INDENT  =====================
+
+#                   Validate Picking Without Partial
+#                   Kalau dimasukin ke is_partial false, barang yang receivingnya sudah done tetap tidak ke update. Cuma keganti di valuation
+                    po_name = 'P00' + str(int(po))
+                    po_obj = request.env['purchase.order'].search([('name', '=', po_name )])
+
+                    immediate_transfer_line_ids = []
+
+                    for picking in po_obj.picking_ids:
+                        immediate_transfer_line_ids.append([0, False, {
+                            'picking_id': picking.id,
+                            'to_immediate': True
+                        }])
+
+                    res = request.env['stock.immediate.transfer'].create({
+                        'pick_ids': [(4, p.id) for p in po_obj.picking_ids],
+                        'show_transfers': False,
+                        'immediate_transfer_line_ids': immediate_transfer_line_ids
+                    })
+
+                    res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
+                    
                     if is_error == True:
                         break
             

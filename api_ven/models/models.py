@@ -76,6 +76,7 @@ class ApiController(models.Model):
 #       PROSES KIRIM API
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
         
+#       PO_LINES: Contains every product in the PO
         line_no = 1
         po_lines = []
         
@@ -207,6 +208,7 @@ class ApiControllerSO(models.Model):
         line_no = 1
         so_lines = []
         
+#       so_lines = every items in the SO
         for line in record['order_line']:
             line['x_studio_line_no'] = str(line_no)
             
