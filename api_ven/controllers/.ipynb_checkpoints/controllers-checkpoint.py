@@ -288,9 +288,6 @@ class ApiVen(http.Controller):
             
                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
-#                     receipt_line._action_done()
-#                     receipt_header['move_ids_without_package']._action_done()
-#                     receipt_header.mapped('move_lines')._action_done()
 
 #                   Receipt Validate
                     self.validate_receipt(receipt_header, po, is_partial)
@@ -302,7 +299,7 @@ class ApiVen(http.Controller):
                 error["Error"] = str(e)
                 is_error = True
                     
-# ini dipindahin kebawah
+#           ini dipindahin kebawah
             if is_error == True:
     #            Response.status = "400"
                 api_log['status'] = 'error'
@@ -357,7 +354,7 @@ class ApiVen(http.Controller):
     
     def validate_receipt(self, receipt_header, po, is_partial):
         if is_partial == False:
-        # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
+        # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock      immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
             po_name = 'P00' + str(int(po))
             res = self.create_immediate_transfer(po_name)
             receipt_header.with_context(cancel_backorder=True)._action_done()
@@ -421,6 +418,8 @@ class ApiVen(http.Controller):
                 is_error = True
                 break
 
+#             return sos
+                
             #check do header
             do_header = request.env["stock.picking"].search(['&','&', ('origin', '=', rec['doNo']), ('picking_type_id', '=', 2), ('state', '=', 'assigned')])
 #             (STOCK PICKING NYA UDH DLM STATE READY (ASSIGNED) BUKAN WAITING (CONFIRMED))
@@ -559,13 +558,7 @@ class ApiVen(http.Controller):
                 line_details.append(line_detail['id'])
 
                 #Get existing dispatch line data based on doNo and lineOptChar1
-                dispatch_line = request.env['stock.move'].search(['&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"])])
-                
-#                 uncommand (KYKNY BUKAN SOREFERENCE TP DONO)
-#                 if dispatch_line['origin'] != rec['soReference']:
-#                     error["Error"] = "Stock Move not found"
-#                     is_error = True
-#                     break
+                dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state' = 'assigned')])
     
                 if dispatch_line['origin'] != rec['doNo']:
                     error["Error"] = "Stock Move not found"
@@ -580,23 +573,15 @@ class ApiVen(http.Controller):
                 #Merge new line details from JSON and existing line details
                 line_details += existing_detail
                 
-#                 dispatch_line['product_uom_qty'] =  0
-                
                 #Update line details data
                 dispatch_line['move_line_ids'] = line_details
-#                 dispatch_line['move_line_nosuggest_ids'] = line_details
-                
-#                 sum = 0
-
-#                 for n in dispatch_line['move_line_ids']:
-#                     sum += n['qty_done']
-#                 return sum
                 
                 #Check partial receipt
-#                 if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
+                if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
 #                     dispatch_line['state'] = 'done'
-#                 else:
-#                     is_partial = True
+                    is_partial = False
+                else:
+                    is_partial = True
 
 
                 if is_error == True:
@@ -607,11 +592,10 @@ class ApiVen(http.Controller):
             
             do_header['x_studio_dispatch_date'] = dispatch_date
             do_header['x_studio_document_trans_code'] = rec["documentTransCode"]
-            
-#             if is_partial == False:
-#                 do_header.action_confirm()
-#                 do_header['state'] = 'done'
 
+#             Delivery Order Validate
+            self.validate_delivery(do_header, sos, is_partial)
+            
             response_msg = "DO updated successfully"
 #        except Exception as e:
 #            error["Error"] = str(e)
@@ -641,3 +625,33 @@ class ApiVen(http.Controller):
         })
         
         return message
+    
+    def create_immediate_transfer_so(self, so_name):
+        so_obj = request.env['sale.order'].search([('name', '=', so_name )])
+        
+        immediate_transfer_line_ids = []
+        
+        for picking in so_obj.picking_ids:
+            if picking['state'] == 'assigned':
+                immediate_transfer_line_ids.append([0, False, {
+                    'picking_id': picking.id,
+                    'to_immediate': True
+                }])
+
+        res = request.env['stock.immediate.transfer'].create({
+            'pick_ids': [(4, p.id) for p in so_obj.picking_ids],
+            'show_transfers': False,
+            'immediate_transfer_line_ids': immediate_transfer_line_ids
+        })
+
+        return res
+
+    def validate_delivery(self, do_header, sos, is_partial):
+        if is_partial == False:
+            so_name = 'S000' + str(int(sos))
+            res = self.create_immediate_transfer_so(so_name)
+#             do_header.with_context(cancel_backorder=True)._action_done()
+#             do_header.with_context(cancel_backorder=True).button_validate()
+            res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
+        else:
+            do_header.with_context(cancel_backorder=False)._action_done()
