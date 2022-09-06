@@ -558,7 +558,7 @@ class ApiVen(http.Controller):
                 line_details.append(line_detail['id'])
 
                 #Get existing dispatch line data based on doNo and lineOptChar1
-                dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state' = 'assigned')])
+                dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
     
                 if dispatch_line['origin'] != rec['doNo']:
                     error["Error"] = "Stock Move not found"
@@ -650,8 +650,8 @@ class ApiVen(http.Controller):
         if is_partial == False:
             so_name = 'S000' + str(int(sos))
             res = self.create_immediate_transfer_so(so_name)
-#             do_header.with_context(cancel_backorder=True)._action_done()
 #             do_header.with_context(cancel_backorder=True).button_validate()
-            res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
+            do_header.with_context(cancel_backorder=True)._action_done()
+#             res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
         else:
             do_header.with_context(cancel_backorder=False)._action_done()
