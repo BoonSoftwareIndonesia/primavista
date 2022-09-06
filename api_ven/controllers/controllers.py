@@ -53,7 +53,31 @@ class ApiVen(http.Controller):
     #            Response.status = "401"
                 return {"Error": "Failed to authenticate user"}
 
+    def validate_receipt_header(self, rec, error):
+        receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
+#         Origin
+        if receipt_header['origin'] != rec['receiptNo']:
+            error["Error"] = "Receipt does not exist"
+            return -1
 
+        #DocumentTransCode
+        if rec['documentTransCode'] == "":
+            error["Error"] = "Field documentTransCode is blank"
+            return -1
+        
+        return receipt_header
+    
+    def validate_receipt_date(self, rec, error):
+        if rec["receiptDate"] == "":
+            return ""
+        else:
+            try:
+                receipt_date = datetime.strptime(rec["receiptDate"], '%d/%m/%Y').date()
+                return receipt_date
+            except ValueError:
+                error["Error"] = "Wrong date format on receiptDate"
+                return -1
+        
     @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['POST'])
     def post_rcpt(self, rcpt):
             created = 0
@@ -106,31 +130,18 @@ class ApiVen(http.Controller):
                         error["Error"] = "receiptNo does not exist"
                         is_error = True
                         break
-                    
-                    receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
-                    
-                    
-                    if receipt_header['origin'] != rec['receiptNo']:
-                        error["Error"] = "Receipt does not exist"
+                
+#                   ReceiptHeader
+                    receipt_header = self.validate_receipt_header(rec, error)
+                    if receipt_header == -1:
                         is_error = True
                         break
-
-                    #DocumentTransCode
-                    if rec['documentTransCode'] == "":
-                        error["Error"] = "Field documentTransCode is blank"
+                    
+#                   ReceiptDate
+                    receipt_date = self.validate_receipt_date(rec, error)
+                    if receipt_date == -1:
                         is_error = True
                         break
-
-                    #receiptDate
-                    if rec["receiptDate"] == "":
-                        receipt_date = ""
-                    else:
-                        try:
-                            receipt_date = datetime.strptime(rec["receiptDate"], '%d/%m/%Y').date()
-                        except ValueError:
-                            error["Error"] = "Wrong date format on receiptDate"
-                            is_error = True
-                            break
                     
                     #Receipt Line
                     for line in rec['details']:
@@ -281,16 +292,9 @@ class ApiVen(http.Controller):
 #                     receipt_header['move_ids_without_package']._action_done()
 #                     receipt_header.mapped('move_lines')._action_done()
 
-                    if is_partial == False:
-                    # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
-                        po_name = 'P00' + str(int(po))
-                        res = self.create_immediate_transfer(po_name)
-                        receipt_header.with_context(cancel_backorder=True)._action_done()
-#                         res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
-                    else:
-                    # If there is a partial order, we do not change it to stock.immediate as we want to create backorder. So, we get the stock.picking, and process while also create a backorder.
-                        receipt_header.with_context(cancel_backorder=False)._action_done()
-
+#                   Receipt Validate
+                    self.validate_receipt(receipt_header, po, is_partial)
+    
                     response_msg = "GRN updated successfully"
 #                         INDENT ================
                         
@@ -350,6 +354,17 @@ class ApiVen(http.Controller):
             })
 
             return res
+    
+    def validate_receipt(self, receipt_header, po, is_partial):
+        if is_partial == False:
+        # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
+            po_name = 'P00' + str(int(po))
+            res = self.create_immediate_transfer(po_name)
+            receipt_header.with_context(cancel_backorder=True)._action_done()
+    #       res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
+        else:
+        # If there is a partial order, we do not change it to stock.immediate as we want to create backorder. So, we get the stock.picking, and process while also create a backorder.
+            receipt_header.with_context(cancel_backorder=False)._action_done()
         
 
 
