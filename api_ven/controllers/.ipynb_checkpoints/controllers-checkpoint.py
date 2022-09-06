@@ -31,31 +31,6 @@ from odoo import http
 # from odoo.http import request, Response
 # from datetime import datetime
 
-# ngetest override stock move create
-# class PurchaseOrderLineExt(models.Model):
-#     _inherit = 'purchase.order.line'
-#     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
-    
-# #     @api.multi
-#     def _prepare_stock_moves(self, picking):
-#         res = super(PurchaseOrderLineExt, self)._prepare_stock_moves(picking)
-#         for rec in res:
-#             rec['x_studio_opt_char_1'] = self.x_studio_opt_char_1
-#         return res
-
-# class StockRuleExt(models.Model):
-#     _inherit = 'stock.rule'
-    
-#     @api.model
-#     def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, values, po, supplier):
-#         res = super(StockRuleExt, self)._prepare_purchase_order_line(product_id, product_qty, product_uom, values, po, supplier)
-#         res['x_studio_opt_char_1'] = values.get('x_studio_opt_char_1', False)
-#         return res
-    
-#     _inherit = 'stock.move'
-#     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
-# end test
-
 class ApiVen(http.Controller):
     # @http.route('/api_sbt_inv/api_sbt_inv/', auth='user')
     def getRecord(self, model, field, wms):
@@ -81,7 +56,6 @@ class ApiVen(http.Controller):
 
     @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['POST'])
     def post_rcpt(self, rcpt):
-#             flag = 0
             created = 0
             error = {}
             warn_cnt = 1
@@ -127,8 +101,6 @@ class ApiVen(http.Controller):
                         is_error = True
                         break
                     
-#                     return rec['receiptNo']
-                    
                     po = self.getRecord(model="purchase.order", field="name", wms=rec['receiptNo'])
                     if po == -1:
                         error["Error"] = "receiptNo does not exist"
@@ -138,7 +110,6 @@ class ApiVen(http.Controller):
                     receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
                     
                     
-#               ini kudu di fixx di uncommand 
                     if receipt_header['origin'] != rec['receiptNo']:
                         error["Error"] = "Receipt does not exist"
                         is_error = True
@@ -161,11 +132,9 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
                     
-#                     flag = 0
                     #Receipt Line
                     for line in rec['details']:
                         line_details = []
-#                         return line['quantityReceived']
                         
                         temp_product = 0
 
@@ -235,18 +204,8 @@ class ApiVen(http.Controller):
 #                             error["Error"] = "Field lotNo is blank"
 #                             is_error = True
 #                             break
-                        
-#                         test
-#                         quant = request.env['stock.quant'].search([("product_id", '=', temp_product)])
-#                         hehe = request.env['stock.production.lot'].search([("id", '=', quant['lot_id'])])
-#                         return quant['lot_id']
-#                         test = request.env['stock.production.lot'].search([("id", '=', quant['lot_id']['id'])])
-#                         return test['display_name']
-#                         test
 
 
-#                         temp_lot = request.env['stock.production.lot'].search([("name", '=', "21JR557")])
-#                         return temp_lot['product_id']
 #                         temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', line['lotNo'])])
 #                         if temp_lot['name'] != line['lotNo']:
 #                             temp_lot = request.env['stock.production.lot'].create({
@@ -254,7 +213,6 @@ class ApiVen(http.Controller):
 #                                 "name": line["lotNo"],
 #                                 "company_id": 1
 #                             })
-#                         return temp_lot['id']
 
                             #Create Line Detail
 #                             line_detail = request.env['stock.move.line'].create({
@@ -269,8 +227,6 @@ class ApiVen(http.Controller):
 #                                 "state": "done"
 #                             })
                         
-#                         test = request.env['uom.uom'].search([('id','=',26)])
-#                         return test['name']
 
 #                       Create a new move stock line when item is received
                         line_detail = request.env['stock.move.line'].create({
@@ -288,16 +244,8 @@ class ApiVen(http.Controller):
                         
                         line_details.append(line_detail['id'])
 
-                        #Get existing receipt line data based on poNo and lineOptChar1
-#                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']), ('product_id', '=', line['product'])])
-                
+                        #Get existing receipt line data based on poNo, lineOptChar1, and status
                         receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
-        
-
-#                         TEST ================================================================
-#                         receipt_line._action_confirm()
-#                         receipt_line._action_assign()
-#                         TEST ================================================================
                         
                         if receipt_line['origin'] != rec['receiptNo']:
                             error["Error"] = "Stock Move not found"
@@ -309,21 +257,14 @@ class ApiVen(http.Controller):
                         for i in receipt_line['move_line_nosuggest_ids']:
                             existing_detail.append(i['id'])
                         
-#                         if existing_detail:
-#                             line_details += existing_detail
-                        
-                    
                         #Merge new line details from JSON and existing line details
                         line_details += existing_detail
 
                         #Update line details data
                         receipt_line['move_line_nosuggest_ids'] = line_details
                         
-                        #Check partial receipt (YANG BUAT RCPTNYA LGSG JD DONE) ==========================================
+                        #Check if qty received is partial or not
                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-#                             receipt_line._action_confirm()
-#                             receipt_line._action_assign()
-#                             receipt_line._action_done() #yg bikin rcpt nya jalan tp ke create 2
                             is_partial = False
                         else:
                             is_partial = True
@@ -334,20 +275,18 @@ class ApiVen(http.Controller):
                     if is_error == True:
                         break
             
-#                     receipt_header['date_done'] = receipt_date
+                    receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 #                     receipt_line._action_done()
 #                     receipt_header['move_ids_without_package']._action_done()
 #                     receipt_header.mapped('move_lines')._action_done()
 
-                    
-
-#                     HRSNYA DI UNCOMMAND
                     if is_partial == False:
                     # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
                         po_name = 'P00' + str(int(po))
                         res = self.create_immediate_transfer(po_name)
-                        res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
+                        receipt_header.with_context(cancel_backorder=True)._action_done()
+#                         res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
                     else:
                     # If there is a partial order, we do not change it to stock.immediate as we want to create backorder. So, we get the stock.picking, and process while also create a backorder.
                         receipt_header.with_context(cancel_backorder=False)._action_done()
@@ -368,7 +307,6 @@ class ApiVen(http.Controller):
                 Response.status = "200"
                 api_log['status'] = 'success'
                 
-#                 ini di uncommmnd
             message = {
                 'response': response_msg, 
                 'message': error
@@ -385,7 +323,6 @@ class ApiVen(http.Controller):
                 'res_id': api_log['id'],
                 'mimetype': 'text/plain'
             })
-# sampe sini
 
 
 #             except Exception as e:
@@ -400,10 +337,11 @@ class ApiVen(http.Controller):
             immediate_transfer_line_ids = []
 
             for picking in po_obj.picking_ids:
-                immediate_transfer_line_ids.append([0, False, {
-                    'picking_id': picking.id,
-                    'to_immediate': True
-                }])
+                if picking['state'] == 'assigned':
+                    immediate_transfer_line_ids.append([0, False, {
+                            'picking_id': picking.id,
+                            'to_immediate': True
+                    }])
 
             res = request.env['stock.immediate.transfer'].create({
                 'pick_ids': [(4, p.id) for p in po_obj.picking_ids],
