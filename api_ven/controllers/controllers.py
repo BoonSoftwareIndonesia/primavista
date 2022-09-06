@@ -134,7 +134,7 @@ class ApiVen(http.Controller):
                         error["Error"] = "receiptNo does not exist"
                         is_error = True
                         break
-
+                    
                     receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
                     
                     
@@ -285,13 +285,14 @@ class ApiVen(http.Controller):
                             "company_id": 1,
                             "state": "done"
                         })
-
+                        
                         line_details.append(line_detail['id'])
 
                         #Get existing receipt line data based on poNo and lineOptChar1
 #                         receipt_line = request.env['stock.move'].search([('origin','=', rec['receiptNo']), ('product_id', '=', line['product'])])
                 
-                        receipt_line = request.env['stock.move'].search([('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"])])
+                        receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
+        
 
 #                         TEST ================================================================
 #                         receipt_line._action_confirm()
@@ -323,50 +324,34 @@ class ApiVen(http.Controller):
 #                             receipt_line._action_confirm()
 #                             receipt_line._action_assign()
 #                             receipt_line._action_done() #yg bikin rcpt nya jalan tp ke create 2
-#                             receipt_line['state'] = 'done'
                             is_partial = False
                         else:
                             is_partial = True
 
 
 #                         INDENT  =====================
-
-#                   Validate Picking Without Partial
-#                   Kalau dimasukin ke is_partial false, barang yang receivingnya sudah done tetap tidak ke update. Cuma keganti di valuation
-                    po_name = 'P00' + str(int(po))
-                    po_obj = request.env['purchase.order'].search([('name', '=', po_name )])
-
-                    immediate_transfer_line_ids = []
-
-                    for picking in po_obj.picking_ids:
-                        immediate_transfer_line_ids.append([0, False, {
-                            'picking_id': picking.id,
-                            'to_immediate': True
-                        }])
-
-                    res = request.env['stock.immediate.transfer'].create({
-                        'pick_ids': [(4, p.id) for p in po_obj.picking_ids],
-                        'show_transfers': False,
-                        'immediate_transfer_line_ids': immediate_transfer_line_ids
-                    })
-
-                    res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
                     
                     if is_error == True:
                         break
             
-                    receipt_header['date_done'] = receipt_date
+#                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 #                     receipt_line._action_done()
 #                     receipt_header['move_ids_without_package']._action_done()
 #                     receipt_header.mapped('move_lines')._action_done()
 
+                    
+
 #                     HRSNYA DI UNCOMMAND
                     if is_partial == False:
-# #                         receipt_header.action_confirm()
-# #                         receipt_header.button_validate()
-                        receipt_header['state'] = 'done' #yg bikin rcpt nya jalan tp ke create 2
-#                         receipt_header.action_done()
+                    '''If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
+                    '''                       
+                        po_name = 'P00' + str(int(po))
+                        res = self.create_immediate_transfer(po_name)
+                        res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
+                    else:
+                      '''If there is a partial order, we do not change it to stock.immediate as we want to create backorder. So, we get the stock.picking, and process while also create a backorder.'''
+                        receipt_header.with_context(cancel_backorder=False)._action_done()
 
                     response_msg = "GRN updated successfully"
 #                         INDENT ================
@@ -409,6 +394,26 @@ class ApiVen(http.Controller):
 #                 is_error = True
 
             return message
+
+    def create_immediate_transfer(self, po_name):
+            po_obj = request.env['purchase.order'].search([('name', '=', po_name )])
+
+            immediate_transfer_line_ids = []
+
+            for picking in po_obj.picking_ids:
+                immediate_transfer_line_ids.append([0, False, {
+                    'picking_id': picking.id,
+                    'to_immediate': True
+                }])
+
+            res = request.env['stock.immediate.transfer'].create({
+                'pick_ids': [(4, p.id) for p in po_obj.picking_ids],
+                'show_transfers': False,
+                'immediate_transfer_line_ids': immediate_transfer_line_ids
+            })
+
+            return res
+        
 
 
 
