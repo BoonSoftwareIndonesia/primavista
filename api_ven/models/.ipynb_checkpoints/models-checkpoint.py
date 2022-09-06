@@ -6,11 +6,11 @@ import json, datetime, requests, base64, unicodedata
 from datetime import datetime
 from odoo import http
 
-# ngetest override stock move create
+# override stock move create when PO is confirmed
 class PurchaseOrderLineExt(models.Model):
     _inherit = 'purchase.order.line'
     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
-    
+
 #     @api.multi
     def _prepare_stock_moves(self, picking):
         res = super(PurchaseOrderLineExt, self)._prepare_stock_moves(picking)
@@ -20,16 +20,38 @@ class PurchaseOrderLineExt(models.Model):
 
 class StockRuleExt(models.Model):
     _inherit = 'stock.rule'
-    
+
     @api.model
     def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, values, po, supplier):
         res = super(StockRuleExt, self)._prepare_purchase_order_line(product_id, product_qty, product_uom, values, po, supplier)
         res['x_studio_opt_char_1'] = values.get('x_studio_opt_char_1', False)
         return res
     
+    @api.model
+    def _get_stock_move_values(self, product_id, product_qty, product_uom, location_id, name, origin, company_id, values):
+        group_id = False
+        res = super(StockRuleExt, self)._get_stock_move_values(product_id, product_qty, product_uom, location_id, name, origin, company_id, values)
+        
+        res['x_studio_opt_char_1'] = values.get('x_studio_opt_char_1', False)
+        return res
+
+class StockMoveExt(models.Model):
     _inherit = 'stock.move'
     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
-# end test
+# end 
+
+# override create stock move when SO is confirmed
+class SaleOrderLineExt(models.Model):
+    _inherit = 'sale.order.line'
+    x_studio_line_no = fields.Char('x_studio_line_no')
+    
+    def _prepare_procurement_values(self, group_id=False):
+        res = super(SaleOrderLineExt, self)._prepare_procurement_values(group_id)
+        # I am assuming field name in both sale.order.line and in stock.move are same and called 'YourField'
+        res.update({'x_studio_opt_char_1': self.x_studio_line_no})
+#         for rec in res:
+#             rec['x_studio_opt_char_1'] = self.x_studio_line_no
+        return res
 
 # class api_ven(models.Model):
 #     _name = 'api_ven.api_ven'
