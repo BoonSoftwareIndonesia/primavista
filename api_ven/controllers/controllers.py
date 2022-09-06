@@ -344,13 +344,12 @@ class ApiVen(http.Controller):
 
 #                     HRSNYA DI UNCOMMAND
                     if is_partial == False:
-                    '''If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
-                    '''                       
+                    # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
                         po_name = 'P00' + str(int(po))
                         res = self.create_immediate_transfer(po_name)
                         res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
                     else:
-                      '''If there is a partial order, we do not change it to stock.immediate as we want to create backorder. So, we get the stock.picking, and process while also create a backorder.'''
+                    # If there is a partial order, we do not change it to stock.immediate as we want to create backorder. So, we get the stock.picking, and process while also create a backorder.
                         receipt_header.with_context(cancel_backorder=False)._action_done()
 
                     response_msg = "GRN updated successfully"
