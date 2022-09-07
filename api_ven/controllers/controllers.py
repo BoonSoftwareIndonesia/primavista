@@ -580,7 +580,7 @@ class ApiVen(http.Controller):
                 
                 #Check partial receipt
                 if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
-#                     dispatch_line['state'] = 'done'
+                    dispatch_line._quantity_done_compute()
                     is_partial = False
                 else:
                     is_partial = True
@@ -658,4 +658,5 @@ class ApiVen(http.Controller):
 #             do_header.with_context(cancel_backorder=True)._action_done()
             res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
         else:
-            do_header.with_context(cancel_backorder=False)._action_done()
+            do_header.with_context(cancel_backorder=True)._action_done()
+#             do_header._action_done()
