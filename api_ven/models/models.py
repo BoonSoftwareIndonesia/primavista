@@ -264,7 +264,7 @@ class ApiControllerSO(models.Model):
                     "warehouseCode": "AVI",
 #                     "shipNo": "" if record['x_studio_internal_id'] == False else record['x_studio_internal_id'],
 #                     "shipNo": "" if record['partner_id']['x_studio_customer_id'] == False else record['partner_id']['x_studio_customer_id'],
-                    "shipNo": "" if record['partner_shipping_id'] == False else record['partner_shipping_id'],
+                    "shipNo": "" if record['partner_shipping_id']['name'] == False else record['partner_shipping_id']['name'],
                     "shipAddress1":"" if record['partner_shipping_id']["street"] == False else record['partner_shipping_id']["street"],
                     "shipCity":"" if record['partner_shipping_id']["city"] == False else record['partner_shipping_id']["city"],
 #                     "shipZipCode":"" if record['partner_shipping_id']["zip"] == False else record['partner_shipping_id']["zip"],
