@@ -47,8 +47,6 @@ class SaleOrderLineExt(models.Model):
     def _prepare_procurement_values(self, group_id=False):
         res = super(SaleOrderLineExt, self)._prepare_procurement_values(group_id)
         res.update({'x_studio_opt_char_1': self.x_studio_line_no})
-#         for rec in res:
-#             rec['x_studio_opt_char_1'] = self.x_studio_line_no
         return res
 
 # class api_ven(models.Model):
@@ -265,7 +263,8 @@ class ApiControllerSO(models.Model):
 #                     "warehouseCode": "" if record['warehouse_id']['code'] == False else record['warehouse_id']['code'],
                     "warehouseCode": "AVI",
 #                     "shipNo": "" if record['x_studio_internal_id'] == False else record['x_studio_internal_id'],
-                    "shipNo": "" if record['partner_id']['x_studio_customer_id'] == False else record['partner_id']['x_studio_customer_id'],
+#                     "shipNo": "" if record['partner_id']['x_studio_customer_id'] == False else record['partner_id']['x_studio_customer_id'],
+                    "shipNo": "" if record['partner_shipping_id'] == False else record['partner_shipping_id'],
                     "shipAddress1":"" if record['partner_shipping_id']["street"] == False else record['partner_shipping_id']["street"],
                     "shipCity":"" if record['partner_shipping_id']["city"] == False else record['partner_shipping_id']["city"],
 #                     "shipZipCode":"" if record['partner_shipping_id']["zip"] == False else record['partner_shipping_id']["zip"],
