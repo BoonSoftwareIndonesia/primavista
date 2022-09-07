@@ -38,7 +38,6 @@ class StockRuleExt(models.Model):
 class StockMoveExt(models.Model):
     _inherit = 'stock.move'
     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
-# end 
 
 # override create stock move when SO is confirmed
 class SaleOrderLineExt(models.Model):
@@ -47,7 +46,6 @@ class SaleOrderLineExt(models.Model):
     
     def _prepare_procurement_values(self, group_id=False):
         res = super(SaleOrderLineExt, self)._prepare_procurement_values(group_id)
-        # I am assuming field name in both sale.order.line and in stock.move are same and called 'YourField'
         res.update({'x_studio_opt_char_1': self.x_studio_line_no})
 #         for rec in res:
 #             rec['x_studio_opt_char_1'] = self.x_studio_line_no

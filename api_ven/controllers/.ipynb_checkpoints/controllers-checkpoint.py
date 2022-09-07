@@ -645,13 +645,15 @@ class ApiVen(http.Controller):
         })
 
         return res
+#         return res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
 
     def validate_delivery(self, do_header, sos, is_partial):
         if is_partial == False:
             so_name = 'S000' + str(int(sos))
             res = self.create_immediate_transfer_so(so_name)
 #             do_header.with_context(cancel_backorder=True).button_validate()
-            do_header.with_context(cancel_backorder=True)._action_done()
+            res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
+#             do_header.with_context(cancel_backorder=True)._action_done()
 #             res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
         else:
             do_header.with_context(cancel_backorder=False)._action_done()
