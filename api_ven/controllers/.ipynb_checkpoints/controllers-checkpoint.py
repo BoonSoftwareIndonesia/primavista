@@ -592,7 +592,10 @@ class ApiVen(http.Controller):
                         for move_line in move.move_line_ids:
                             if move.has_tracking != 'none' and not (move_line.lot_id or move_line.lot_name):
                                 continue
-                            move_line.qty_done = line["quantityShipped"]
+                            if move_line.qty_done != 0:
+                                move_line.qty_done = 0
+                            else:
+                                move_line.qty_done = line["quantityShipped"]
                     
                    
 #                     for move_line in dispatch_line.move_line_ids:
