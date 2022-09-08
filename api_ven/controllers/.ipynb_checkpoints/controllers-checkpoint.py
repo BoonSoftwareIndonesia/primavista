@@ -380,6 +380,7 @@ class ApiVen(http.Controller):
         message = {}
         line_details = []
         is_partial = False
+        test = []
         
         try:
             api_log = request.env['api_ven.api_ven'].create({
@@ -580,11 +581,32 @@ class ApiVen(http.Controller):
                 
                 #Check partial receipt
                 if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
+                    dispatch_line._set_quantities_to_reservation()
+#                     test.append(dispatch_line['move_line_ids'][0]._check_reserved_done_quantity())
 #                     dispatch_line._quantity_done_compute()
                     is_partial = False
                 else:
-                    is_partial = True
+                    for move in dispatch_line:
+                        if move.state not in ('partially_available', 'assigned'):
+                            continue
+                        for move_line in move.move_line_ids:
+                            if move.has_tracking != 'none' and not (move_line.lot_id or move_line.lot_name):
+                                continue
+                            move_line.qty_done = line["quantityShipped"]
+                    
+                   
+#                     for move_line in dispatch_line.move_line_ids:
+#                         if dispatch_line.has_tracking != 'none' and not (move_line.lot_id or move_line.lot_name):
+#                             continue
+#                         move_line.qty_done = line["quantityShipped"]
+                    
+                    
+#                     move_line = dispatch_line['move_line_ids'][1]
+#                     if dispatch_line.has_tracking != 'none' and not (move_line.lot_id or move_line.lot_name):
+#                         continue
+#                     move_line.qty_done = line["quantityShipped"]
 
+                    is_partial = True
 
                 if is_error == True:
                     break
