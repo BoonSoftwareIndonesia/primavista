@@ -56,7 +56,7 @@ class ApiVen(http.Controller):
     def validate_receipt_header(self, rec, error):
         receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
 #         Origin
-        return rec['receiptNo']
+#         return rec['receiptNo']
         if receipt_header['origin'] != rec['receiptNo']:
             error["Error"] = "Receipt does not exist"
             return -1
@@ -358,6 +358,7 @@ class ApiVen(http.Controller):
         # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock      immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
 #             po_name = 'P00' + str(int(po))
             po_name = receipt_header['origin']
+#             po_name = 'P00216'
             res = self.create_immediate_transfer(po_name)
             receipt_header.with_context(cancel_backorder=True)._action_done()
     #       res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
@@ -654,7 +655,6 @@ class ApiVen(http.Controller):
 #             so_name = 'S000' + str(int(sos))
             so_name = do_header['origin']
             res = self.create_immediate_transfer_so(so_name)
-#             do_header.with_context(cancel_backorder=True).button_validate()
             do_header.with_context(cancel_backorder=True)._action_done()
 #             res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
         else:
