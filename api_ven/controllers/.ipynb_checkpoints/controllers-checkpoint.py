@@ -56,7 +56,6 @@ class ApiVen(http.Controller):
     def validate_receipt_header(self, rec, error):
         receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
 #         Origin
-#         return rec['receiptNo']
         if receipt_header['origin'] != rec['receiptNo']:
             error["Error"] = "Receipt does not exist"
             return -1
@@ -581,7 +580,7 @@ class ApiVen(http.Controller):
                 
                 #Check partial receipt
                 if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
-                    dispatch_line._quantity_done_compute()
+#                     dispatch_line._quantity_done_compute()
                     is_partial = False
                 else:
                     is_partial = True
@@ -652,6 +651,7 @@ class ApiVen(http.Controller):
 
     def validate_delivery(self, do_header, sos, is_partial):
         if is_partial == False:
+            do_header.action_set_quantities_to_reservation()
 #             so_name = 'S000' + str(int(sos))
             so_name = do_header['origin']
             res = self.create_immediate_transfer_so(so_name)
