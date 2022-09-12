@@ -53,29 +53,41 @@ class ApiVen(http.Controller):
     #            Response.status = "401"
                 return {"Error": "Failed to authenticate user"}
 
-    def validate_receipt_header(self, rec, error):
-        receipt_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec['receiptNo']), ('picking_type_id', '=', 1), ('state', '=', 'assigned')])
-#         Origin
-        if receipt_header['origin'] != rec['receiptNo']:
-            error["Error"] = "Receipt does not exist"
+    def validate_obj_header(self, rec, error, rec_no_type, pick_type_id):
+#         REC VALIDATION
+        if rec[rec_no_type] == "":
+            error["Error"] = "Field " + rec_no_type + " is blank"  
             return -1
-
-        #DocumentTransCode
+            
         if rec['documentTransCode'] == "":
             error["Error"] = "Field documentTransCode is blank"
             return -1
         
-        return receipt_header
+        if rec['x_wms_rec_no'] == "":
+            error["Error"] = "Field WMS Receipt Number is blank"
+            return -1
+        
+#         OBJ_HEADER VALIDATION
+        obj_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec[rec_no_type]), ('picking_type_id', '=', pick_type_id), ('state', '=', 'assigned')])
+
+        if obj_header['origin'] != rec[rec_no_type]:
+            if rec_no_type == 'receiptNo':
+                error["Error"] = "Receipt does not exist"
+            else:
+                error["Error"] = "Delivery order does not exist"
+            return -1
+
+        return obj_header
     
-    def validate_receipt_date(self, rec, error):
-        if rec["receiptDate"] == "":
+    def validate_obj_date(self, rec, error, date_type):
+        if rec[date_type] == "":
             return ""
         else:
             try:
-                receipt_date = datetime.strptime(rec["receiptDate"], '%d/%m/%Y').date()
-                return receipt_date
+                obj_date = datetime.strptime(rec[date_type], '%d/%m/%Y').date()
+                return obj_date
             except ValueError:
-                error["Error"] = "Wrong date format on receiptDate"
+                error["Error"] = "Wrong date format on " + date_type 
                 return -1
         
     @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['POST'])
@@ -120,11 +132,7 @@ class ApiVen(http.Controller):
 #             new_rcpt = json.dumps(rcpt)
             try:
                 for rec in rcpt:
-                    if rec['receiptNo'] == "":
-                        error["Error"] = "Field ownerReference is blank"
-                        is_error = True
-                        break
-                    
+
                     po = self.getRecord(model="purchase.order", field="name", wms=rec['receiptNo'])
                     if po == -1:
                         error["Error"] = "receiptNo does not exist"
@@ -132,13 +140,13 @@ class ApiVen(http.Controller):
                         break
                 
 #                   ReceiptHeader
-                    receipt_header = self.validate_receipt_header(rec, error)
+                    receipt_header = self.validate_obj_header(rec, error, "receiptNo", 1)
                     if receipt_header == -1:
                         is_error = True
                         break
                     
 #                   ReceiptDate
-                    receipt_date = self.validate_receipt_date(rec, error)
+                    receipt_date = self.validate_obj_date(rec, error, "receiptDate")
                     if receipt_date == -1:
                         is_error = True
                         break
@@ -154,7 +162,7 @@ class ApiVen(http.Controller):
 #                             error["Error"] = "Field ownerReference is blank"
 #                             is_error = True
 #                             break
-
+#                       LINE VALIDATION========================
                         #inwardLineOptChar1
                         if line['inwardLineOptChar1'] == "":
                             error["Error"] = "Field inwardLineOptChar1 is blank"
@@ -166,6 +174,26 @@ class ApiVen(http.Controller):
                             error["Error"] = "Field product is blank"
                             is_error = True
                             break
+                            
+#                       check status code
+                        if line['stockStatusCode'] == "":
+                            error["Error"] = "Field stockStatusCode is blank"
+                            is_error = True
+                            break
+                    
+#                       check quantityReceived
+                        if line['quantityReceived'] == "":
+                            error["Error"] = "Field quantityReceived is blank"
+                            is_error = True
+                            break
+                        
+                        receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
+                        
+                        if receipt_line['origin'] != rec['receiptNo']:
+                            error["Error"] = "Stock Move not found"
+                            is_error = True
+                            break
+#                       LINE VALIDATION END===============
                             
 #                       Create a new product does not exist yet, else use existing product
                         temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
@@ -186,13 +214,6 @@ class ApiVen(http.Controller):
                             error[warn_str] = "Product " + line['product'] + " has been created"
                             warn_cnt += 1
 
-
-                        #Check quantityReceived ================
-                        if line['quantityReceived'] == "":
-                            error["Error"] = "Field quantityReceived is blank"
-                            is_error = True
-                            break
-
                         #Check expiryDate
 #                         if det['expiryDate'] == "":
 #                             expiry_date = ""
@@ -203,12 +224,6 @@ class ApiVen(http.Controller):
 #                                 error["Error"] = "Wrong date format on expiryDate"
 #                                 is_error = True
 #                                 break
-
-                        #Check stockStatusCode ===================
-                        if line['stockStatusCode'] == "":
-                            error["Error"] = "Field stockStatusCode is blank"
-                            is_error = True
-                            break
 
                         #Check lotNo
 #                         if det['lotNo'] == "":
@@ -238,6 +253,8 @@ class ApiVen(http.Controller):
 #                                 "state": "done"
 #                             })
                         
+                        #Get existing receipt line data based on poNo, lineOptChar1, and status
+
 
 #                       Create a new move stock line when item is received
                         line_detail = request.env['stock.move.line'].create({
@@ -250,18 +267,19 @@ class ApiVen(http.Controller):
 #                             "lot_id": temp_lot['id'],
                             "qty_done": line["quantityReceived"],
                             "company_id": 1,
-                            "state": "done"
+                            "state": "done",
+                            "x_wms_rec_no": rec['x_wms_rec_no']
                         })
                         
                         line_details.append(line_detail['id'])
 
                         #Get existing receipt line data based on poNo, lineOptChar1, and status
-                        receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
+#                         receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
                         
-                        if receipt_line['origin'] != rec['receiptNo']:
-                            error["Error"] = "Stock Move not found"
-                            is_error = True
-                            break
+#                         if receipt_line['origin'] != rec['receiptNo']:
+#                             error["Error"] = "Stock Move not found"
+#                             is_error = True
+#                             break
                     
                         #Get previous receipt line detail data
                         existing_detail = []
@@ -279,7 +297,10 @@ class ApiVen(http.Controller):
                             is_partial = False
                         else:
                             is_partial = True
-
+                            
+                        for move in receipt_line:
+                            for move_line in move.move_line_ids:
+                                move_line.x_wms_rec_no = rec['x_wms_rec_no']
 
 #                         INDENT  =====================
                     
@@ -409,47 +430,32 @@ class ApiVen(http.Controller):
             
 #        try:
         for rec in do:
-            #check soNo
-            if rec['doNo'] == "":
-                error["Error"] = "Field doNo is blank"
-                is_error = True
-                break
 
             sos = self.getRecord(model="sale.order", field="name", wms=rec['doNo'])
             if sos == -1:
                 error["Error"] = "doNo does not exist"
                 is_error = True
                 break
-
-#             return sos
                 
-            #check do header
-            do_header = request.env["stock.picking"].search(['&','&', ('origin', '=', rec['doNo']), ('picking_type_id', '=', 2), ('state', '=', 'assigned')])
-#             (STOCK PICKING NYA UDH DLM STATE READY (ASSIGNED) BUKAN WAITING (CONFIRMED))
-#             do_header = request.env["stock.picking"].search(['&','&', ('origin', '=', rec['doNo']), ('picking_type_id', '=', 2), ('state', '=', 'confirmed')])
+            do_header = self.validate_obj_header(rec, error, "doNo", 2)
+            if do_header == -1:
+                is_error = True
+                break
             
-#                 uncommand
-            if do_header['origin'] != rec['doNo']:
-                error["Error"] = "DO not found"
+            dispatch_date = self.validate_obj_date(rec, error, "dispatchDate")
+            if dispatch_date == 1:
                 is_error = True
                 break
-
-                #DispatchDate
-            if rec["dispatchDate"] == "":
-                dispatch_date = ""
-            else:
-                try:
-                    dispatch_date = datetime.strptime(rec["dispatchDate"], '%d/%m/%Y').date()
-                except ValueError:
-                    error["Error"] = "Wrong date format on dispatchDate"
-                    is_error = True
-                    break
                 
-            #DocumentTransCode
-            if rec['documentTransCode'] == "":
-                error["Error"] = "Field documentTransCode is blank"
-                is_error = True
-                break
+#             if rec["dispatchDate"] == "":
+#                 dispatch_date = ""
+#             else:
+#                 try:
+#                     dispatch_date = datetime.strptime(rec["dispatchDate"], '%d/%m/%Y').date()
+#                 except ValueError:
+#                     error["Error"] = "Wrong date format on dispatchDate"
+#                     is_error = True
+#                     break
 
             #do Line
             for line in rec['details']:
@@ -462,17 +468,34 @@ class ApiVen(http.Controller):
 #                     is_error = True
 #                     break
 
-                #product
+#               LINE VALIDATION==========================
                 if line['product'] == "":
                     error["Error"] = "Field product is blank"
                     is_error = True
                     break
                     
-                 #soLineOptChar1
                 if line['soLineOptChar1'] == "":
                     error["Error"] = "Field soLineOptChar1 is blank"
                     is_error = True
-                    break   
+                    break
+                
+                if line['quantityShipped'] == "":
+                    error["Error"] = "Field quantityShipped is blank"
+                    is_error = True
+                    break
+                    
+                if line['stockStatusCode'] == "":
+                    error["Error"] = "Field stockStatusCode is blank"
+                    is_error = True
+                    break
+                    
+                dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
+    
+                if dispatch_line['origin'] != rec['doNo']:
+                    error["Error"] = "Stock Move not found"
+                    is_error = True
+                    break
+#               LINE VALIDATION END==============================
                     
                 #create product on the fly if product does not exist
                 temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
@@ -495,11 +518,6 @@ class ApiVen(http.Controller):
 # uncommand
 #                 for det in line['lineDetails']:
 
-                    #Check quantityShipped
-                if line['quantityShipped'] == "":
-                    error["Error"] = "Field quantityShipped is blank"
-                    is_error = True
-                    break
 
 #                     #Check expiryDate
 #                     if det['expiryDate'] == "":
@@ -518,11 +536,6 @@ class ApiVen(http.Controller):
 #                         is_error = True
 #                         break
 
-                    #Check stockStatusCode
-                if line['stockStatusCode'] == "":
-                    error["Error"] = "Field stockStatusCode is blank"
-                    is_error = True
-                    break
 
 #                     temp_lot = request.env["stock.production.lot"].search(['&',("product_id",'=',temp_product),("name", '=', det['lotNo'])])
 #                     if temp_lot['name'] != det['lotNo']:
@@ -543,6 +556,8 @@ class ApiVen(http.Controller):
 #                         "state": "done"
 #                     })
     
+                #Get existing dispatch line data based on doNo and lineOptChar1
+    
 #                 LOCATION ID AMA DEST ID SBLMNNYA SAMA2 1, product uom id nya tadinya 1
                 line_detail = request.env['stock.move.line'].create({
                     "product_id": temp_product,
@@ -555,18 +570,19 @@ class ApiVen(http.Controller):
 #                         "expiration_date": expiry_date,
                     "qty_done": line["quantityShipped"],
                     "company_id": 1,
-                    "state": "done"
+                    "state": "done",
+                    "x_wms_rec_no": rec['x_wms_rec_no']
                 })
 
                 line_details.append(line_detail['id'])
 
-                #Get existing dispatch line data based on doNo and lineOptChar1
-                dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
+#                 #Get existing dispatch line data based on doNo and lineOptChar1
+#                 dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
     
-                if dispatch_line['origin'] != rec['doNo']:
-                    error["Error"] = "Stock Move not found"
-                    is_error = True
-                    break
+#                 if dispatch_line['origin'] != rec['doNo']:
+#                     error["Error"] = "Stock Move not found"
+#                     is_error = True
+#                     break
     
                 #Get previous dispatch line detail data
                 existing_detail = []
@@ -582,8 +598,11 @@ class ApiVen(http.Controller):
                 #Check partial receipt
                 if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
                     dispatch_line._set_quantities_to_reservation()
-#                     test.append(dispatch_line['move_line_ids'][0]._check_reserved_done_quantity())
-#                     dispatch_line._quantity_done_compute()
+                    
+                    for move in dispatch_line:
+                        for move_line in move.move_line_ids:
+                            move_line.x_wms_rec_no = rec['x_wms_rec_no']
+                            
                     is_partial = False
                 else:
                     for move in dispatch_line:
@@ -596,6 +615,8 @@ class ApiVen(http.Controller):
                                 move_line.qty_done = 0
                             else:
                                 move_line.qty_done = line["quantityShipped"]
+                            
+                            move_line.x_wms_rec_no = rec['x_wms_rec_no']
                     
                    
 #                     for move_line in dispatch_line.move_line_ids:
