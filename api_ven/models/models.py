@@ -73,14 +73,18 @@ class StockReturnPickingExt(models.TransientModel):
         for pick in source:
             wms_no = pick.x_wms_rec_no
         
-        for pick in curr_pick:
-            pick.x_wms_rec_no = wms_no
+        curr_pick.write({'x_wms_rec_no': wms_no})
+        curr_pick.move_lines.write({'x_wms_rec_no': wms_no})
+        curr_pick.move_lines.move_line_ids.write({'x_wms_rec_no': wms_no})
+        
+#         for pick in curr_pick:
+#             pick.x_wms_rec_no = wms_no
             
-            for move in pick.move_lines:
-                move.x_wms_rec_no = wms_no
+#             for move in pick.move_lines:
+#                 move.x_wms_rec_no = wms_no
                 
-                for move_line in move.move_line_ids:
-                    move_line.x_wms_rec_no = wms_no
+#                 for move_line in move.move_line_ids:
+#                     move_line.x_wms_rec_no = wms_no
 
         return new_picking, pick_type_id
 
@@ -95,7 +99,7 @@ class api_ven(models.Model):
     status = fields.Selection([('new','New'),('process','Processing'),('success','Success'),('error','Error')])
     created_date = fields.Datetime(string="Created Date")
     response_date = fields.Datetime(string="Response Date")
-    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO'),('PO','DW_PO'),('SO','DW_SO')])
+    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO'),('PO','DW_PO'),('SO','DW_SO'),('RCPT_RET','CRT_RCPT_RET')])
     incoming_txt = fields.Many2one('ir.attachment', string="Incoming txt", readonly=True)
     response_txt = fields.Many2one('ir.attachment', string="Response txt", readonly=True)
     raw_data = fields.Binary(string="Raw Data", attachment=True)
