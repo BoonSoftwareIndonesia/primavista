@@ -317,9 +317,10 @@ class ApiVen(http.Controller):
                         else:
                             is_partial = True
                             
-                        for move in receipt_line:
-                            for move_line in move.move_line_ids:
-                                move_line.x_wms_rec_no = rec['x_wms_rec_no']
+#                         for move in receipt_line:
+#                             for move_line in move.move_line_ids:
+#                                 move_line.x_wms_rec_no = rec['x_wms_rec_no']
+                    receipt_line.move_line_ids.write({'x_wms_rec_no'}: rec['x_wms_rec_no'])
 
                     # INDENT  =====================
                     if is_error == True:
@@ -435,8 +436,6 @@ class ApiVen(http.Controller):
         line_details = []
         is_partial = False
         api_log = request.env['api_ven.api_ven']
-        
-#         return request.env["stock.picking"].search_read([('id', '=', '259')])
 
         #Create log
         try:
@@ -528,32 +527,12 @@ class ApiVen(http.Controller):
                     # Create a new product does not exist yet, else use existing product
                     temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
                     
-                    # GA KEPAKE =======================================================
-#                     if temp_product == -1:
-
-#                         created_product = request.env['product.product'].create({
-#                             "type": "product",
-#                             "default_code": line['product'],
-#                             "name": line['product'],
-#                             "tracking": "lot",
-# #                                 "use_expiration_date": 1,
-#                             "company_id": 1
-#                         })
-
-#                         temp_product = created_product['id']
-
-#                         warn_str = "Message " + str(warn_cnt)
-#                         error[warn_str] = "Product " + line['product'] + " has been created"
-#                         warn_cnt += 1
-                    # GA KEPAKE =======================================================
-
-    
-                    # TEST PAKE .WRITE ================================================
+                    # Create move_line and attach to stock move
                     receipt_line.move_line_ids.write({
                             "product_id": temp_product,
                             "product_uom_id": 26,
-                            "location_id": 4,
-                            "location_dest_id": 8,
+                            "location_id": 8,
+                            "location_dest_id": 4,
 #                             "lot_id": "",
 #                             "expiration_date": ,
 #                             "lot_id": temp_lot['id'],
@@ -562,48 +541,12 @@ class ApiVen(http.Controller):
                             "state": "done",
                             "x_wms_rec_no": rec['x_wms_rec_no']
                         })
-                    # TEST PAKE .WRITE ================================================
-    
-                    # Create a new move stock line when item is received
-#                     try:
-#                         line_detail = request.env['stock.move.line'].create({
-#                             "product_id": temp_product,
-#                             "product_uom_id": 26,
-#                             "location_id": 4,
-#                             "location_dest_id": 8,
-# #                             "lot_id": "",
-# #                             "expiration_date": ,
-# #                             "lot_id": temp_lot['id'],
-#                             "qty_done": line["quantityReceived"],
-#                             "company_id": 1,
-#                             "state": "done",
-#                             "x_wms_rec_no": rec['x_wms_rec_no']
-#                         })
-#                     except:
-#                         return "Error creating stock move line"
-
-#                     line_details.append(line_detail['id'])
-
-#                     #Get previous receipt line detail data
-#                     existing_detail = []
-#                     for i in receipt_line['move_line_nosuggest_ids']:
-#                         existing_detail.append(i['id'])
-
-#                     #Merge new line details from JSON and existing line details
-#                     line_details += existing_detail
-
-#                     #Update line details data
-#                     receipt_line['move_line_nosuggest_ids'] = line_details
 
                     #Check if qty received is partial or not
                     if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
                         is_partial = False
                     else:
                         is_partial = True
-
-                    for move in receipt_line:
-                        for move_line in move.move_line_ids:
-                            move_line.x_wms_rec_no = rec['x_wms_rec_no']
 
                    # INDENT  =====================
 
@@ -648,11 +591,6 @@ class ApiVen(http.Controller):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-
-
-#             except Exception as e:
-#                 error["Error"] = str(e)
-#                 is_error = True
 
         return message
 
