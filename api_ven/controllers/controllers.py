@@ -320,7 +320,7 @@ class ApiVen(http.Controller):
 #                         for move in receipt_line:
 #                             for move_line in move.move_line_ids:
 #                                 move_line.x_wms_rec_no = rec['x_wms_rec_no']
-                    receipt_line.move_line_ids.write({'x_wms_rec_no'}: rec['x_wms_rec_no'])
+                    receipt_line.move_line_ids.write({'x_wms_rec_no': rec['x_wms_rec_no']})
 
                     # INDENT  =====================
                     if is_error == True:
@@ -810,9 +810,11 @@ class ApiVen(http.Controller):
                 if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
                     dispatch_line._set_quantities_to_reservation()
                     
-                    for move in dispatch_line:
-                        for move_line in move.move_line_ids:
-                            move_line.x_wms_rec_no = rec['x_wms_rec_no']
+                    dispatch_line.move_line_ids.write({'x_wms_rec_no': rec['x_wms_rec_no']})
+                    
+#                     for move in dispatch_line:
+#                         for move_line in move.move_line_ids:
+#                             move_line.x_wms_rec_no = rec['x_wms_rec_no']
                             
                     is_partial = False
                 else:
@@ -886,9 +888,9 @@ class ApiVen(http.Controller):
         return message
 
     # Return DO     
-#     @http.route('/web/api/return_do', type='json' auth='user', methods=['POST'])
-#     def return_do(self, do):
-#         return "Yey"
+    @http.route('/web/api/return_do', type='json', auth='user', methods=['POST'])
+    def return_do(self, do):
+        return "Yey"
     
     def create_immediate_transfer_so(self, so_name):
         so_obj = request.env['sale.order'].search([('name', '=', so_name )])
