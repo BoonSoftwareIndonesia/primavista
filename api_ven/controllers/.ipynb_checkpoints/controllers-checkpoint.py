@@ -321,8 +321,7 @@ class ApiVen(http.Controller):
                             for move_line in move.move_line_ids:
                                 move_line.x_wms_rec_no = rec['x_wms_rec_no']
 
-#                         INDENT  =====================
-                    
+                    # INDENT  =====================
                     if is_error == True:
                         break
             
@@ -330,20 +329,18 @@ class ApiVen(http.Controller):
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 
 #                   Receipt Validate
-                    self.validate_receipt(receipt_header, po, is_partial)
+                    self.validate_receipt(receipt_header, is_partial)
     
                     response_msg = "GRN updated successfully"
-#                         INDENT ================
+                    # INDENT =======================
                         
             except Exception as e:
                 error["Error"] = str(e)
                 is_error = True
                     
-#           ini dipindahin kebawah
             if is_error == True:
     #            Response.status = "400"
                 api_log['status'] = 'error'
-#                     pass
             else:
                 Response.status = "200"
                 api_log['status'] = 'success'
@@ -392,22 +389,25 @@ class ApiVen(http.Controller):
 
             return res
     
-    def validate_receipt(self, receipt_header, po, is_partial):
+    def validate_receipt(self, receipt_header, is_partial):
         if is_partial == False:
-        # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock      immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
+        # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock 
+        # immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be 
+        # changed to done.
+
 #             po_name = 'P00' + str(int(po))
             po_name = receipt_header['origin']
-#             po_name = 'P00216'
             res = self.create_immediate_transfer(po_name)
             receipt_header.with_context(cancel_backorder=True)._action_done()
     #       res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
         else:
-        # If there is a partial order, we do not change it to stock.immediate as we want to create backorder. So, we get the stock.picking, and process while also create a backorder.
+        # If there is a partial order, we do not change it to stock.immediate as we want to create backorder. So, we get the stock.picking, and process while also
+        # create a backorder.
             receipt_header.with_context(cancel_backorder=False)._action_done()
         
     def validate_return_obj_header(self, rec, error, pick_type_id):
-        #         OBJ_HEADER VALIDATION
-        obj_header = request.env["stock.picking"].search(['&','&',('x_wms_rec_no', '=', rec['x_wms_rec_no']), ('picking_type_id', '=', pick_type_id), ('state', '=', 'assigned')])
+        # OBJ_HEADER VALIDATION
+        obj_header = request.env["stock.picking"].search(['&', ('x_wms_rec_no', '=', rec['x_wms_rec_no']), ('state', '=', 'assigned')])
 
         if obj_header['x_wms_rec_no'] != rec['x_wms_rec_no']:
             if pick_type_id == 2 :
@@ -416,11 +416,13 @@ class ApiVen(http.Controller):
                 error["Error"] = "Return delivery order does not exist"
             return -1
         
-#         SET WMS REC NO OF STOCK PICKING
+        # SET WMS REC NO OF STOCK PICKING
         obj_header['x_wms_rec_no'] = rec['x_wms_rec_no']
 
         return obj_header
-# PO-RETURN
+    
+    
+# PO-RETURN ===================================================================================
     @http.route('/web/api/return_rcpt', type='json', auth='user', methods=['POST'])
     def return_rcpt(self, rcpt):
         created = 0
@@ -432,8 +434,9 @@ class ApiVen(http.Controller):
         message = {}
         line_details = []
         is_partial = False
+        api_log = request.env['api_ven.api_ven']
         
-        return request.env["stock.picking"].search_read([('id', '=', '259')])
+#         return request.env["stock.picking"].search_read([('id', '=', '259')])
 
         #Create log
         try:
@@ -441,11 +444,11 @@ class ApiVen(http.Controller):
                 'status': 'new',
                 'created_date': datetime.now(),
                 'incoming_msg': rcpt,
-                'message_type': 'Return_RCPT'
+                'message_type': 'RCPT_RET'
             })
 
             api_log['status'] = 'process'
-        except:
+        except Exception as e:
             error['Error'] = str(e)
             is_error = True
 
@@ -470,7 +473,7 @@ class ApiVen(http.Controller):
                     break
                     
 #               ReceiptHeader
-                receipt_header = self.validate_obj_header(rec, error, "receiptNo", 1)
+                receipt_header = self.validate_return_obj_header(rec, error, 1)
                 if receipt_header == -1:
                     is_error = True
                     break
@@ -518,32 +521,35 @@ class ApiVen(http.Controller):
                         is_error = True
                         break
 
-#                         SET WMS REC NO OF STOCK MOVE
+                    # SET WMS REC NO OF STOCK MOVE
                     receipt_line['x_wms_rec_no'] = rec['x_wms_rec_no']
-#                       LINE VALIDATION END===============
+                    # LINE VALIDATION END==============================================
 
-#                       Create a new product does not exist yet, else use existing product
+                    # Create a new product does not exist yet, else use existing product
                     temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
-                    if temp_product == -1:
+                    
+                    # GA KEPAKE =======================================================
+#                     if temp_product == -1:
 
-                        created_product = request.env['product.product'].create({
-                            "type": "product",
-                            "default_code": line['product'],
-                            "name": line['product'],
-                            "tracking": "lot",
-#                                 "use_expiration_date": 1,
-                            "company_id": 1
-                        })
+#                         created_product = request.env['product.product'].create({
+#                             "type": "product",
+#                             "default_code": line['product'],
+#                             "name": line['product'],
+#                             "tracking": "lot",
+# #                                 "use_expiration_date": 1,
+#                             "company_id": 1
+#                         })
 
-                        temp_product = created_product['id']
+#                         temp_product = created_product['id']
 
-                        warn_str = "Message " + str(warn_cnt)
-                        error[warn_str] = "Product " + line['product'] + " has been created"
-                        warn_cnt += 1
+#                         warn_str = "Message " + str(warn_cnt)
+#                         error[warn_str] = "Product " + line['product'] + " has been created"
+#                         warn_cnt += 1
+                    # GA KEPAKE =======================================================
 
-#                       Create a new move stock line when item is received
-                    try:
-                        line_detail = request.env['stock.move.line'].create({
+    
+                    # TEST PAKE .WRITE ================================================
+                    receipt_line.move_line_ids.write({
                             "product_id": temp_product,
                             "product_uom_id": 26,
                             "location_id": 4,
@@ -556,21 +562,38 @@ class ApiVen(http.Controller):
                             "state": "done",
                             "x_wms_rec_no": rec['x_wms_rec_no']
                         })
-                    except:
-                        return "Error creating stock move line"
+                    # TEST PAKE .WRITE ================================================
+    
+                    # Create a new move stock line when item is received
+#                     try:
+#                         line_detail = request.env['stock.move.line'].create({
+#                             "product_id": temp_product,
+#                             "product_uom_id": 26,
+#                             "location_id": 4,
+#                             "location_dest_id": 8,
+# #                             "lot_id": "",
+# #                             "expiration_date": ,
+# #                             "lot_id": temp_lot['id'],
+#                             "qty_done": line["quantityReceived"],
+#                             "company_id": 1,
+#                             "state": "done",
+#                             "x_wms_rec_no": rec['x_wms_rec_no']
+#                         })
+#                     except:
+#                         return "Error creating stock move line"
 
-                    line_details.append(line_detail['id'])
+#                     line_details.append(line_detail['id'])
 
-                    #Get previous receipt line detail data
-                    existing_detail = []
-                    for i in receipt_line['move_line_nosuggest_ids']:
-                        existing_detail.append(i['id'])
+#                     #Get previous receipt line detail data
+#                     existing_detail = []
+#                     for i in receipt_line['move_line_nosuggest_ids']:
+#                         existing_detail.append(i['id'])
 
-                    #Merge new line details from JSON and existing line details
-                    line_details += existing_detail
+#                     #Merge new line details from JSON and existing line details
+#                     line_details += existing_detail
 
-                    #Update line details data
-                    receipt_line['move_line_nosuggest_ids'] = line_details
+#                     #Update line details data
+#                     receipt_line['move_line_nosuggest_ids'] = line_details
 
                     #Check if qty received is partial or not
                     if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
@@ -582,7 +605,7 @@ class ApiVen(http.Controller):
                         for move_line in move.move_line_ids:
                             move_line.x_wms_rec_no = rec['x_wms_rec_no']
 
-#                         INDENT  =====================
+                   # INDENT  =====================
 
                 if is_error == True:
                     break
@@ -591,7 +614,7 @@ class ApiVen(http.Controller):
                 receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 
 #                   Receipt Validate
-                self.validate_receipt(receipt_header, po, is_partial)
+                self.validate_receipt(receipt_header, is_partial)
 
                 response_msg = "GRN updated successfully"
 #                         INDENT ================
@@ -646,7 +669,7 @@ class ApiVen(http.Controller):
         message = {}
         line_details = []
         is_partial = False
-        test = []
+#         test = []
         
         try:
             api_log = request.env['api_ven.api_ven'].create({
