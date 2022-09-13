@@ -54,7 +54,23 @@ class ApiVen(http.Controller):
                 return {"Error": "Failed to authenticate user"}
 
     def validate_obj_header(self, rec, error, rec_no_type, pick_type_id):
-#         REC VALIDATION
+        #         OBJ_HEADER VALIDATION
+        obj_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec[rec_no_type]), ('picking_type_id', '=', pick_type_id), ('state', '=', 'assigned')])
+
+        if obj_header['origin'] != rec[rec_no_type]:
+            if rec_no_type == 'receiptNo':
+                error["Error"] = "Receipt does not exist"
+            else:
+                error["Error"] = "Delivery order does not exist"
+            return -1
+        
+#         SET WMS REC NO OF STOCK PICKING
+        obj_header['x_wms_rec_no'] = rec['x_wms_rec_no']
+
+        return obj_header
+
+    def validate_obj_json(self, rec, error, rec_no_type):
+        #REC VALIDATION
         if rec[rec_no_type] == "":
             error["Error"] = "Field " + rec_no_type + " is blank"  
             return -1
@@ -67,17 +83,7 @@ class ApiVen(http.Controller):
             error["Error"] = "Field WMS Receipt Number is blank"
             return -1
         
-#         OBJ_HEADER VALIDATION
-        obj_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec[rec_no_type]), ('picking_type_id', '=', pick_type_id), ('state', '=', 'assigned')])
-
-        if obj_header['origin'] != rec[rec_no_type]:
-            if rec_no_type == 'receiptNo':
-                error["Error"] = "Receipt does not exist"
-            else:
-                error["Error"] = "Delivery order does not exist"
-            return -1
-
-        return obj_header
+        return 1
     
     def validate_obj_date(self, rec, error, date_type):
         if rec[date_type] == "":
@@ -138,6 +144,11 @@ class ApiVen(http.Controller):
                         error["Error"] = "receiptNo does not exist"
                         is_error = True
                         break
+                    
+                    json_valid = self.validate_obj_json(rec, error, "receiptNo")
+                    if json_valid == -1:
+                        is_error = True
+                        break
                 
 #                   ReceiptHeader
                     receipt_header = self.validate_obj_header(rec, error, "receiptNo", 1)
@@ -193,6 +204,9 @@ class ApiVen(http.Controller):
                             error["Error"] = "Stock Move not found"
                             is_error = True
                             break
+                        
+#                         SET WMS REC NO OF STOCK MOVE
+                        receipt_line['x_wms_rec_no'] = rec['x_wms_rec_no']
 #                       LINE VALIDATION END===============
                             
 #                       Create a new product does not exist yet, else use existing product
@@ -272,7 +286,7 @@ class ApiVen(http.Controller):
                                 "x_wms_rec_no": rec['x_wms_rec_no']
                             })
                         except:
-                            return "Error Here"
+                            return "Error creating stock move line"
                         
                         line_details.append(line_detail['id'])
                         
@@ -391,10 +405,233 @@ class ApiVen(http.Controller):
         # If there is a partial order, we do not change it to stock.immediate as we want to create backorder. So, we get the stock.picking, and process while also create a backorder.
             receipt_header.with_context(cancel_backorder=False)._action_done()
         
+    def validate_return_obj_header(self, rec, error, pick_type_id):
+        #         OBJ_HEADER VALIDATION
+        obj_header = request.env["stock.picking"].search(['&','&',('x_wms_rec_no', '=', rec['x_wms_rec_no']), ('picking_type_id', '=', pick_type_id), ('state', '=', 'assigned')])
+
+        if obj_header['x_wms_rec_no'] != rec['x_wms_rec_no']:
+            if pick_type_id == 2 :
+                error["Error"] = "Return receipt does not exist"
+            else:
+                error["Error"] = "Return delivery order does not exist"
+            return -1
+        
+#         SET WMS REC NO OF STOCK PICKING
+        obj_header['x_wms_rec_no'] = rec['x_wms_rec_no']
+
+        return obj_header
 # PO-RETURN
-#     @http.route('/web/api/return_rcpt', type='json' auth='user', methods=['POST'])
-#     def return_rcpt(self, rcpt):
-#         return "Yey"
+    @http.route('/web/api/return_rcpt', type='json', auth='user', methods=['POST'])
+    def return_rcpt(self, rcpt):
+        created = 0
+        error = {}
+        warn_cnt = 1
+        rcpt_lines = []
+        is_error = False
+        response_msg = "Failed to create GRN!"
+        message = {}
+        line_details = []
+        is_partial = False
+        
+        return request.env["stock.return.picking"].search_read([('id', '=', '221')])
+
+        #Create log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': rcpt,
+                'message_type': 'Return_RCPT'
+            })
+
+            api_log['status'] = 'process'
+        except:
+            error['Error'] = str(e)
+            is_error = True
+
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(rcpt), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        try:
+            for rec in rcpt:
+                json_valid = self.validate_obj_json(rec, error, "receiptNo")
+                if json_valid == -1:
+                    is_error = True
+                    break
+                    
+#               ReceiptHeader
+                receipt_header = self.validate_obj_header(rec, error, "receiptNo", 1)
+                if receipt_header == -1:
+                    is_error = True
+                    break
+
+#                   ReceiptDate
+                receipt_date = self.validate_obj_date(rec, error, "receiptDate")
+                if receipt_date == -1:
+                    is_error = True
+                    break
+
+                #Receipt Line
+                for line in rec['details']:
+                    line_details = []
+
+                    temp_product = 0
+#                       LINE VALIDATION========================
+                    #inwardLineOptChar1
+                    if line['inwardLineOptChar1'] == "":
+                        error["Error"] = "Field inwardLineOptChar1 is blank"
+                        is_error = True
+                        break
+
+                    #product
+                    if line['product'] == "":
+                        error["Error"] = "Field product is blank"
+                        is_error = True
+                        break
+
+#                       check status code
+                    if line['stockStatusCode'] == "":
+                        error["Error"] = "Field stockStatusCode is blank"
+                        is_error = True
+                        break
+
+#                       check quantityReceived
+                    if line['quantityReceived'] == "":
+                        error["Error"] = "Field quantityReceived is blank"
+                        is_error = True
+                        break
+
+                    receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['receiptNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
+
+                    if receipt_line['origin'] != rec['receiptNo']:
+                        error["Error"] = "Stock Move not found"
+                        is_error = True
+                        break
+
+#                         SET WMS REC NO OF STOCK MOVE
+                    receipt_line['x_wms_rec_no'] = rec['x_wms_rec_no']
+#                       LINE VALIDATION END===============
+
+#                       Create a new product does not exist yet, else use existing product
+                    temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                    if temp_product == -1:
+
+                        created_product = request.env['product.product'].create({
+                            "type": "product",
+                            "default_code": line['product'],
+                            "name": line['product'],
+                            "tracking": "lot",
+#                                 "use_expiration_date": 1,
+                            "company_id": 1
+                        })
+
+                        temp_product = created_product['id']
+
+                        warn_str = "Message " + str(warn_cnt)
+                        error[warn_str] = "Product " + line['product'] + " has been created"
+                        warn_cnt += 1
+
+#                       Create a new move stock line when item is received
+                    try:
+                        line_detail = request.env['stock.move.line'].create({
+                            "product_id": temp_product,
+                            "product_uom_id": 26,
+                            "location_id": 4,
+                            "location_dest_id": 8,
+#                             "lot_id": "",
+#                             "expiration_date": ,
+#                             "lot_id": temp_lot['id'],
+                            "qty_done": line["quantityReceived"],
+                            "company_id": 1,
+                            "state": "done",
+                            "x_wms_rec_no": rec['x_wms_rec_no']
+                        })
+                    except:
+                        return "Error creating stock move line"
+
+                    line_details.append(line_detail['id'])
+
+                    #Get previous receipt line detail data
+                    existing_detail = []
+                    for i in receipt_line['move_line_nosuggest_ids']:
+                        existing_detail.append(i['id'])
+
+                    #Merge new line details from JSON and existing line details
+                    line_details += existing_detail
+
+                    #Update line details data
+                    receipt_line['move_line_nosuggest_ids'] = line_details
+
+                    #Check if qty received is partial or not
+                    if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
+                        is_partial = False
+                    else:
+                        is_partial = True
+
+                    for move in receipt_line:
+                        for move_line in move.move_line_ids:
+                            move_line.x_wms_rec_no = rec['x_wms_rec_no']
+
+#                         INDENT  =====================
+
+                if is_error == True:
+                    break
+
+                receipt_header['date_done'] = receipt_date
+                receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
+
+#                   Receipt Validate
+                self.validate_receipt(receipt_header, po, is_partial)
+
+                response_msg = "GRN updated successfully"
+#                         INDENT ================
+
+        except Exception as e:
+            error["Error"] = str(e)
+            is_error = True
+
+#           ini dipindahin kebawah
+        if is_error == True:
+#            Response.status = "400"
+            api_log['status'] = 'error'
+#                     pass
+        else:
+            Response.status = "200"
+            api_log['status'] = 'success'
+
+        message = {
+            'response': response_msg, 
+            'message': error
+        } 
+
+        api_log['response_msg'] = message
+        api_log['response_date'] = datetime.now()
+
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(message), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+
+
+#             except Exception as e:
+#                 error["Error"] = str(e)
+#                 is_error = True
+
+        return message
 
 
 #DW-DO
@@ -442,6 +679,11 @@ class ApiVen(http.Controller):
             sos = self.getRecord(model="sale.order", field="name", wms=rec['doNo'])
             if sos == -1:
                 error["Error"] = "doNo does not exist"
+                is_error = True
+                break
+                
+            json_valid = self.validate_obj_json(rec, error, "doNo")
+            if json_valid == -1:
                 is_error = True
                 break
                 
