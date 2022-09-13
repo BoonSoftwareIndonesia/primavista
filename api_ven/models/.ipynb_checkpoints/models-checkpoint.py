@@ -75,6 +75,12 @@ class StockReturnPickingExt(models.TransientModel):
         
         for pick in curr_pick:
             pick.x_wms_rec_no = wms_no
+            
+            for move in pick.move_lines:
+                move.x_wms_rec_no = wms_no
+                
+                for move_line in move.move_line_ids:
+                    move_line.x_wms_rec_no = wms_no
 
         return new_picking, pick_type_id
 

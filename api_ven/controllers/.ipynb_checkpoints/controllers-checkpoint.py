@@ -433,7 +433,7 @@ class ApiVen(http.Controller):
         line_details = []
         is_partial = False
         
-        return request.env["stock.return.picking"].search_read([('id', '=', '221')])
+        return request.env["stock.picking"].search_read([('id', '=', '259')])
 
         #Create log
         try:
