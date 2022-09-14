@@ -268,6 +268,12 @@ class ApiVen(http.Controller):
                         else:
                             is_partial = True
 
+#                         for move in receipt_line:
+#                             for move_line in move.move_line_ids:
+#                                 move_line.x_wms_rec_no = rec['x_wms_rec_no']
+
+#                     receipt_line.move_line_ids.write({'x_wms_rec_no': rec['x_wms_rec_no']})
+
                     # INDENT  =========================
                     if is_error == True:
                         break
@@ -488,7 +494,7 @@ class ApiVen(http.Controller):
                             "company_id": 1,
                             "state": "done",
                             "x_wms_rec_no": rec['x_wms_rec_no']
-                        })
+                    })
 
                     # Check if qty received is partial or not
                     if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
@@ -581,7 +587,6 @@ class ApiVen(http.Controller):
             
        #try:
         for rec in do:
-
             sos = self.getRecord(model="sale.order", field="name", wms=rec['doNo'])
             if sos == -1:
                 error["Error"] = "doNo does not exist"
@@ -657,7 +662,7 @@ class ApiVen(http.Controller):
                 temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
                 
 #                 for det in line['lineDetails']:
-#                     #Check expiryDate
+#                     # Check expiryDate
 #                     if det['expiryDate'] == "":
 #                         expiry_date = ""
 #                     else:
@@ -668,7 +673,7 @@ class ApiVen(http.Controller):
 #                             is_error = True
 #                             break
                             
-#                     #Check lotNo
+#                     # Check lotNo
 #                     if det['lotNo'] == "":
 #                         error["Error"] = "Field lotNo is blank"
 #                         is_error = True
@@ -693,82 +698,27 @@ class ApiVen(http.Controller):
 #                         "company_id": 1,
 #                         "state": "done"
 #                     })
-    
-                # Get existing dispatch line data based on doNo and lineOptChar1
+
                 # LOCATION ID AMA DEST ID SBLMNNYA SAMA2 1, product uom id nya tadinya 1
-                line_detail = request.env['stock.move.line'].create({
-                    "product_id": temp_product,
-#                     "product_uom_id":  1,
-                    "product_uom_id":  26,
-                    "location_id": 8,
-                    "location_dest_id": 5,
-#                         "lot_id": temp_lot['id'], nanti unccommand
-#                         "lot_id": 1,
-#                         "expiration_date": expiry_date,
-                    "qty_done": line["quantityShipped"],
-                    "company_id": 1,
-                    "state": "done",
-                    "x_wms_rec_no": rec['x_wms_rec_no']
+                dispatch_line.move_line_ids.write({
+                        "product_id": temp_product,
+                        "product_uom_id": 26,
+                        "location_id": 8,
+                        "location_dest_id": 5,
+#                             "lot_id": "",
+#                             "expiration_date": ,
+#                             "lot_id": temp_lot['id'],
+                        "qty_done": line["quantityShipped"],
+                        "company_id": 1,
+                        "state": "done",
+                        "x_wms_rec_no": rec['x_wms_rec_no']
                 })
-
-                line_details.append(line_detail['id'])
-
-#                 # Get existing dispatch line data based on doNo and lineOptChar1
-#                 dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
-    
-#                 if dispatch_line['origin'] != rec['doNo']:
-#                     error["Error"] = "Stock Move not found"
-#                     is_error = True
-#                     break
-    
-                #Get previous dispatch line detail data
-                existing_detail = []
-                for i in dispatch_line['move_line_ids']:
-                    existing_detail.append(i['id'])
-                    
-                #Merge new line details from JSON and existing line details
-                line_details += existing_detail
                 
-                #Update line details data
-                dispatch_line['move_line_ids'] = line_details
-                
-                #Check partial receipt
+                # Check partial receipt
                 if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
                     dispatch_line._set_quantities_to_reservation()
-                    
-                    dispatch_line.move_line_ids.write({'x_wms_rec_no': rec['x_wms_rec_no']})
-                    
-#                     for move in dispatch_line:
-#                         for move_line in move.move_line_ids:
-#                             move_line.x_wms_rec_no = rec['x_wms_rec_no']
-                            
                     is_partial = False
                 else:
-                    for move in dispatch_line:
-                        if move.state not in ('partially_available', 'assigned'):
-                            continue
-                        for move_line in move.move_line_ids:
-                            if move.has_tracking != 'none' and not (move_line.lot_id or move_line.lot_name):
-                                continue
-                            if move_line.qty_done != 0:
-                                move_line.qty_done = 0
-                            else:
-                                move_line.qty_done = line["quantityShipped"]
-                            
-                            move_line.x_wms_rec_no = rec['x_wms_rec_no']
-                    
-                   
-#                     for move_line in dispatch_line.move_line_ids:
-#                         if dispatch_line.has_tracking != 'none' and not (move_line.lot_id or move_line.lot_name):
-#                             continue
-#                         move_line.qty_done = line["quantityShipped"]
-                    
-                    
-#                     move_line = dispatch_line['move_line_ids'][1]
-#                     if dispatch_line.has_tracking != 'none' and not (move_line.lot_id or move_line.lot_name):
-#                         continue
-#                     move_line.qty_done = line["quantityShipped"]
-
                     is_partial = True
 
                 if is_error == True:
@@ -780,7 +730,7 @@ class ApiVen(http.Controller):
             do_header['x_studio_dispatch_date'] = dispatch_date
             do_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 
-#             Delivery Order Validate
+            # Delivery Order Validate
             self.validate_delivery(do_header, sos, is_partial)
             
             response_msg = "DO updated successfully"
