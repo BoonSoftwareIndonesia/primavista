@@ -56,7 +56,7 @@ class ApiVen(http.Controller):
 
             
     def validate_obj_header(self, rec, error, rec_no_type, pick_type_id):
-        # Obj_header validation
+        # obj_header validation
         obj_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec[rec_no_type]), ('picking_type_id', '=', pick_type_id), ('state', '=', 'assigned')])
 
         if obj_header['origin'] != rec[rec_no_type]:
@@ -66,13 +66,13 @@ class ApiVen(http.Controller):
                 error["Error"] = "Delivery order does not exist"
             return -1
         
-        # Set WMS rec no of stock picking
+        # set WMS rec no of stock picking
         obj_header['x_wms_rec_no'] = rec['x_wms_rec_no']
 
         return obj_header
 
     def validate_obj_json(self, rec, error, rec_no_type):
-        # Rec validation
+        # rec validation
         if rec[rec_no_type] == "":
             error["Error"] = "Field " + rec_no_type + " is blank"  
             return -1
@@ -144,7 +144,7 @@ class ApiVen(http.Controller):
 
                     po = self.getRecord(model="purchase.order", field="name", wms=rec['receiptNo'])
                     if po == -1:
-                        error["Error"] = "receiptNo does not exist"
+                        error["Error"] = "receipt no does not exist"
                         is_error = True
                         break
                     
@@ -184,19 +184,19 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
                         
-                        #product
+                        # product
                         if line['product'] == "":
                             error["Error"] = "Field product is blank"
                             is_error = True
                             break
                             
-#                       check status code
+                        # check status code
                         if line['stockStatusCode'] == "":
                             error["Error"] = "Field stockStatusCode is blank"
                             is_error = True
                             break
                     
-#                       check quantityReceived
+                        # check quantityReceived
                         if line['quantityReceived'] == "":
                             error["Error"] = "Field quantityReceived is blank"
                             is_error = True
@@ -209,13 +209,17 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
                         
-                        # Set WMS Rec No of stock move
+                        # set WMS Rec No of stock move
                         receipt_line['x_wms_rec_no'] = rec['x_wms_rec_no']
                         
                         # LINE VALIDATION END ==============================================================
                             
-                        # Search existing product
+                        # search existing product
                         temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                        if temp_product == -1:
+                            error["Error"] = "Product does not exist"
+                            is_error = True
+                            break
                         
                         # Check expiryDate
 #                         if det['expiryDate'] == "":
@@ -247,7 +251,13 @@ class ApiVen(http.Controller):
 #                         test = request.env['uom.uom'].search([('id', '=', 26)])
 #                         return test['name']
 
-#                       Create a new move stock line when item is received
+                        # check whether quantityReceived exceeds the demand
+                        if receipt_line["product_uom_qty"] < int(line["quantityReceived"]):
+                            error["Error"] = "quantity received exceeds demand"
+                            is_error = True
+                            break
+
+                        # create a new move stock line when item is received
                         receipt_line.move_line_ids.write({
                             "product_id": temp_product,
                             "product_uom_id": 26,
@@ -262,7 +272,7 @@ class ApiVen(http.Controller):
                             "x_wms_rec_no": rec['x_wms_rec_no']
                         })
         
-                        #Check if qty received is partial or not
+                        # check if qty received is partial or not
                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
                             is_partial = False
                         else:
@@ -281,7 +291,7 @@ class ApiVen(http.Controller):
                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
 
-#                   Receipt Validate
+                    # receipt Validate
                     self.validate_receipt(receipt_header, is_partial)
     
                     response_msg = "GRN updated successfully"
