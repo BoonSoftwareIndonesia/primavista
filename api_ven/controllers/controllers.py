@@ -98,7 +98,6 @@ class ApiVen(http.Controller):
                 error["Error"] = "Wrong date format on " + date_type 
                 return -1
 
-    # TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     def rollback_move(self, rec, error, lines, rec_no_type):
         if lines:
             # if there are previous products
@@ -108,16 +107,6 @@ class ApiVen(http.Controller):
                 
                 curr_move.move_line_nosuggest_ids.write({'qty_done': 0})
 #                 curr_move._do_unreserve()
-                
-#                 curr_ml = request.env['stock.move.line'].search(['&', ('move_id','=', curr_move['id']), ('state', '=', 'done')])
-#                 return curr_ml['product_uom_qty']
-#                 curr_ml.write({'qty_done': 0})
-#                 return curr_ml['qty_done']
-#                 curr_ml.write({'product_uom_qty': 0})
-#                 curr_ml.unlink()
-        # else:
-            # if it is the first product
-            # no need to unreserve any previous move lines, so just return 
         
     # CREATE RCPT (PO) API ===================================================================================
     @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['POST'])
@@ -298,7 +287,6 @@ class ApiVen(http.Controller):
                             "x_wms_rec_no": rec['x_wms_rec_no']
                         })
                         
-                        # TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                         lines.append(line["inwardLineOptChar1"])
         
                         # check if qty received is partial or not
@@ -458,6 +446,7 @@ class ApiVen(http.Controller):
         
         try:
             for rec in rcpt:
+                lines = []
                 json_valid = self.validate_obj_json(rec, error, "receiptNo")
                 if json_valid == -1:
                     is_error = True
@@ -542,9 +531,11 @@ class ApiVen(http.Controller):
 #                             "lot_id": temp_lot['id'],
                             "qty_done": line["quantityReceived"],
                             "company_id": 1,
-                            "state": "done",
+#                             "state": "done",
                             "x_wms_rec_no": rec['x_wms_rec_no']
                     })
+                    
+                    lines.append(line["inwardLineOptChar1"])
 
                     # Check if qty received is partial or not
                     if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
@@ -555,6 +546,7 @@ class ApiVen(http.Controller):
                 # INDENT  ==========================
 
                 if is_error == True:
+                    self.rollback_move(rec, error, lines, "receiptNo")
                     break
 
                 receipt_header['date_done'] = receipt_date
