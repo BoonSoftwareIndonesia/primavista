@@ -253,7 +253,7 @@ class ApiVen(http.Controller):
 
                         # check whether quantityReceived exceeds the demand
                         if receipt_line["product_uom_qty"] < int(line["quantityReceived"]):
-                            error["Error"] = "quantity received exceeds demand"
+                            error["Error"] = "Quantity received exceeds demand"
                             is_error = True
                             break
 
@@ -490,6 +490,16 @@ class ApiVen(http.Controller):
 
                     # Create a new product does not exist yet, else use existing product
                     temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                    if temp_product == -1:
+                            error["Error"] = "Product does not exist"
+                            is_error = True
+                            break
+                    
+                    # check whether quantityReceived exceeds the demand
+                    if receipt_line["product_uom_qty"] < int(line["quantityReceived"]):
+                        error["Error"] = "Quantity received exceeds demand"
+                        is_error = True
+                        break
                     
                     # Create move_line and attach to stock move
                     receipt_line.move_line_ids.write({
@@ -670,6 +680,16 @@ class ApiVen(http.Controller):
                     
                 # create product on the fly if product does not exist
                 temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                if temp_product == -1:
+                    error["Error"] = "Product does not exist"
+                    is_error = True
+                    break
+                
+                # check whether quantityReceived exceeds the demand
+                if dispatch_line["product_uom_qty"] < int(line["quantityShipped"]):
+                    error["Error"] = "Quantity shipped exceeds demand"
+                    is_error = True
+                    break
                 
 #                 for det in line['lineDetails']:
 #                     # Check expiryDate
