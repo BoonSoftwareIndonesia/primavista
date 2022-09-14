@@ -98,6 +98,28 @@ class ApiVen(http.Controller):
                 error["Error"] = "Wrong date format on " + date_type 
                 return -1
 
+    # TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    def rollback_move(self, rec, error, lines):
+        if lines:
+            # if there are previous products
+            # loop through the list, search for the stock move, unreserve the stock move
+            for line in lines:
+                curr_move = request.env['stock.move'].search(['&', '&', ('origin','=', rec['receiptNo']),('x_studio_opt_char_1', '=', str(line)), ('state', '=', 'assigned')])
+
+#                 curr_move.move_line_nosuggest_ids.unlink()
+                curr_move.move_line_nosuggest_ids.write({'qty_done': '0'})
+#                 curr_move._do_unreserve()
+                
+#                 curr_ml = request.env['stock.move.line'].search(['&', ('move_id','=', curr_move['id']), ('state', '=', 'done')])
+#                 return curr_ml['product_uom_qty']
+#                 curr_ml.write({'qty_done': 0})
+#                 return curr_ml['qty_done']
+#                 curr_ml.write({'product_uom_qty': 0})
+#                 curr_ml.unlink()
+        # else:
+            # if it is the first product
+            # no need to unreserve any previous move lines, so just return 
+        
     # CREATE RCPT (PO) API ===================================================================================
     @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['POST'])
     def post_rcpt(self, rcpt):
@@ -141,7 +163,9 @@ class ApiVen(http.Controller):
 #             new_rcpt = json.dumps(rcpt)
             try:
                 for rec in rcpt:
-
+                    # TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    lines = []
+                
                     po = self.getRecord(model="purchase.order", field="name", wms=rec['receiptNo'])
                     if po == -1:
                         error["Error"] = "receipt no does not exist"
@@ -186,6 +210,9 @@ class ApiVen(http.Controller):
                         
                         # product
                         if line['product'] == "":
+#                             self.rollback_move(rec, error, lines)
+#                             test = self.rollback_move(rec, error, lines)
+#                             return test
                             error["Error"] = "Field product is blank"
                             is_error = True
                             break
@@ -268,9 +295,12 @@ class ApiVen(http.Controller):
 #                             "lot_id": temp_lot['id'],
                             "qty_done": line["quantityReceived"],
                             "company_id": 1,
-                            "state": "done",
+#                             "state": "done",
                             "x_wms_rec_no": rec['x_wms_rec_no']
                         })
+                        
+                        # TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        lines.append(line["inwardLineOptChar1"])
         
                         # check if qty received is partial or not
                         if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
@@ -286,6 +316,7 @@ class ApiVen(http.Controller):
 
                     # INDENT  =========================
                     if is_error == True:
+                        self.rollback_move(rec, error, lines)
                         break
             
                     receipt_header['date_done'] = receipt_date
