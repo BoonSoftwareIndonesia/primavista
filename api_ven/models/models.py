@@ -20,6 +20,7 @@ class PurchaseOrderLineExt(models.Model):
             rec['x_studio_opt_char_1'] = self.x_studio_opt_char_1
         return res
 
+# set the x studio opt char value in stock move based on the value from PO and SO line
 class StockRuleExt(models.Model):
     _inherit = 'stock.rule'
 
@@ -51,6 +52,7 @@ class SaleOrderLineExt(models.Model):
         res.update({'x_studio_opt_char_1': self.x_studio_line_no})
         return res
 
+# set the wms rec no value in stock picking when the return button is clicked in a DO or PO RCPT
 class StockReturnPickingExt(models.TransientModel):
     _inherit = 'stock.return.picking'
     
@@ -78,7 +80,7 @@ class StockReturnPickingExt(models.TransientModel):
         curr_pick.move_lines.move_line_ids.write({'x_wms_rec_no': wms_no})
         return new_picking, pick_type_id
 
-
+# API VEN MODEL ==========================================================================
 class api_ven(models.Model):
     _name = 'api_ven.api_ven'
     _description = 'api_ven.api_ven'
@@ -101,7 +103,8 @@ class api_ven(models.Model):
             vals['name'] = self.env['ir.sequence'].next_by_code('api.seq') or ('New')
         result = super(api_ven, self).create(vals)
         return result
-    
+
+# PURCHASE ORDER ==========================================================================
 class ApiController(models.Model):
     _inherit = "purchase.order"
     
@@ -232,8 +235,9 @@ class ApiController(models.Model):
             'mimetype': 'text/plain'
         })
 #         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-        
-        
+
+
+# SALES ORDER ==========================================================================        
 class ApiControllerSO(models.Model):
     _inherit = "sale.order"
     
