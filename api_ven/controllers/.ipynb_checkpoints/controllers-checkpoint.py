@@ -387,7 +387,7 @@ class ApiVen(http.Controller):
             receipt_header.with_context(cancel_backorder=False)._action_done()
         
     def validate_return_obj_header(self, rec, error, pick_type_id):
-        # obj_header validation for po return api
+        # obj_header validation for po and so return api
         obj_header = request.env["stock.picking"].search(['&', ('x_wms_rec_no', '=', rec['x_wms_rec_no']), ('state', '=', 'assigned')])
 
         if obj_header['x_wms_rec_no'] != rec['x_wms_rec_no']:
@@ -453,6 +453,7 @@ class ApiVen(http.Controller):
                     break
                     
                 # ReceiptHeader
+                # search the stock picking based on x wms rec no
                 receipt_header = self.validate_return_obj_header(rec, error, 1)
                 if receipt_header == -1:
                     is_error = True
@@ -873,7 +874,8 @@ class ApiVen(http.Controller):
                 if json_valid == -1:
                     is_error = True
                     break
-                    
+                
+                # search the stock picking based on x wms rec no
                 do_header = self.validate_return_obj_header(rec, error, 2)
                 if do_header == -1:
                     is_error = True
