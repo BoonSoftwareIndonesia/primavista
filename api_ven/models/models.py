@@ -85,6 +85,7 @@ class api_ven(models.Model):
     _name = 'api_ven.api_ven'
     _description = 'api_ven.api_ven'
     
+    # for the changes to take effect, upgrade the API VEN module in apps 
     name = fields.Char(string="Message ID", required=True, copy=False, readonly=True, index=True, default=lambda self: ('New'))
     incoming_msg = fields.Text(string="Incoming Message")
     response_msg = fields.Text(string="Response Message")
