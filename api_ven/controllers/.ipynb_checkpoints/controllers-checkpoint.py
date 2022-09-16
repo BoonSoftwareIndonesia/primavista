@@ -372,9 +372,9 @@ class ApiVen(http.Controller):
     
     def validate_receipt(self, receipt_header, is_partial):
         if is_partial == False:
-            # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). When stock picking change to stock 
-            # immediate, it will be picked urgently and backorder cannot be created. So, each product has to fullfil the required qty. Then, the picking status will be
-            # changed to done.
+            # If there is no partial received items, then change the stock picking to stock.immediate(similar to pushing a button). 
+            # When stock picking change to stock immediate, it will be picked urgently and backorder cannot be created. 
+            # So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
 
             # po_name = 'P00' + str(int(po))
             po_name = receipt_header['origin']
@@ -382,16 +382,16 @@ class ApiVen(http.Controller):
             receipt_header.with_context(cancel_backorder=True)._action_done()
             # res.with_context(button_validate_picking_ids=res.pick_ids.ids).process()
         else:
-            # If there is a partial order, we do not change it to stock.immediate as we want to create backorder. So, we get the stock.picking, and process while also
-            # create a backorder.
+            # If there is a partial order, we do not change it to stock.immediate as we want to create backorder. 
+            # So, we get the stock.picking, and process while also create a backorder.
             receipt_header.with_context(cancel_backorder=False)._action_done()
         
     def validate_return_obj_header(self, rec, error, pick_type_id):
-        # Obj_header validation for po return api
+        # obj_header validation for po return api
         obj_header = request.env["stock.picking"].search(['&', ('x_wms_rec_no', '=', rec['x_wms_rec_no']), ('state', '=', 'assigned')])
 
         if obj_header['x_wms_rec_no'] != rec['x_wms_rec_no']:
-            if pick_type_id == 2 :
+            if pick_type_id == 1 :
                 error["Error"] = "Return receipt does not exist"
             else:
                 error["Error"] = "Return delivery order does not exist"
@@ -589,7 +589,7 @@ class ApiVen(http.Controller):
         return message
 
 
-#   POST DO
+#   POST DO ===================================================================================
     @http.route('/web/api/downloaddo', type='json', auth='user', methods=['POST'])
     def post_do(self, do):
         created = 0
@@ -702,7 +702,7 @@ class ApiVen(http.Controller):
                         break
                     # LINE VALIDATION END =================================
                         
-                    # create product on the fly if product does not exist
+                    # check if product exists
                     temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
                     if temp_product == -1:
                         error["Error"] = "Product does not exist"
@@ -795,9 +795,11 @@ class ApiVen(http.Controller):
 
         if is_error == True:
 #            Response.status = "400"
-            pass
+#             pass
+            api_log['status'] = 'error'
         else:
             Response.status = "200"
+            api_log['status'] = 'success'
         
         message = {
             'response': response_msg, 
@@ -819,11 +821,198 @@ class ApiVen(http.Controller):
         return message
 
 
-
-    # Return DO     
+    # Return DO ===================================================================================    
     @http.route('/web/api/return_do', type='json', auth='user', methods=['POST'])
     def return_do(self, do):
-        return "Yey"
+        created = 0
+        error = {}
+        warn_cnt = 1
+        rcpt_lines = []
+        is_error = False
+        response_msg = "Failed to create DO!"
+        message = {}
+        line_details = []
+        is_partial = False
+        
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                 'status': 'new',
+                 'created_date': datetime.now(),
+                 'incoming_msg': do,
+                 'message_type': 'DO_RET'
+               })
+            api_log['status'] = 'process'
+        except:
+            error['Error'] = str(e)
+            is_error = True
+            
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(do), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        try:
+            for rec in do:
+                lines = []
+                
+                sos = self.getRecord(model="sale.order", field="name", wms=rec['doNo'])
+                if sos == -1:
+                    error["Error"] = "doNo does not exist"
+                    is_error = True
+                    break
+                   
+                json_valid = self.validate_obj_json(rec, error, "doNo")
+                if json_valid == -1:
+                    is_error = True
+                    break
+                    
+                do_header = self.validate_return_obj_header(rec, error, 2)
+                if do_header == -1:
+                    is_error = True
+                    break
+                
+                dispatch_date = self.validate_obj_date(rec, error, "dispatchDate")
+                if dispatch_date == 1:
+                    is_error = True
+                    break
+                
+    #             if rec["dispatchDate"] == "":
+    #                 dispatch_date = ""
+    #             else:
+    #                 try:
+    #                     dispatch_date = datetime.strptime(rec["dispatchDate"], '%d/%m/%Y').date()
+    #                 except ValueError:
+    #                     error["Error"] = "Wrong date format on dispatchDate"
+    #                     is_error = True
+    #                     break
+
+                # do Line
+                for line in rec['details']:
+                    line_details = []
+                    temp_product = 0
+
+                    #customerPO (DIISI APA DI POSTMAN?)
+    #                 if line['customerPO'] == "":
+    #                     error["Error"] = "Field customerPO is blank"
+    #                     is_error = True
+    #                     break
+
+                    # LINE VALIDATION =================================
+                    if line['product'] == "":
+                        error["Error"] = "Field product is blank"
+                        is_error = True
+                        break
+                        
+                    if line['soLineOptChar1'] == "":
+                        error["Error"] = "Field soLineOptChar1 is blank"
+                        is_error = True
+                        break
+                    
+                    if line['quantityShipped'] == "":
+                        error["Error"] = "Field quantityShipped is blank"
+                        is_error = True
+                        break
+                        
+                    if line['stockStatusCode'] == "":
+                        error["Error"] = "Field stockStatusCode is blank"
+                        is_error = True
+                        break
+                        
+                    dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['doNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
+        
+                    if dispatch_line['origin'] != rec['doNo']:
+                        error["Error"] = "Stock Move not found"
+                        is_error = True
+                        break
+                    # LINE VALIDATION END =================================
+                        
+                    # check if product exists
+                    temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                    if temp_product == -1:
+                        error["Error"] = "Product does not exist"
+                        is_error = True
+                        break
+                    
+                    # check whether quantityReceived exceeds the demand
+                    if dispatch_line["product_uom_qty"] < int(line["quantityShipped"]):
+                        error["Error"] = "Quantity shipped exceeds demand"
+                        is_error = True
+                        break
+                    
+                    # LOCATION ID AMA DEST ID SBLMNNYA SAMA2 1, product uom id nya tadinya 1
+                    dispatch_line.move_line_ids.write({
+                            "product_id": temp_product,
+                            "product_uom_id": 26,
+                            "location_id": 5,
+                            "location_dest_id": 8,
+    #                             "lot_id": "",
+    #                             "expiration_date": ,
+    #                             "lot_id": temp_lot['id'],
+                            "qty_done": line["quantityShipped"],
+                            "company_id": 1,
+#                             "state": "done",
+                            "x_wms_rec_no": rec['x_wms_rec_no']
+                    })
+            
+                    lines.append(line["soLineOptChar1"])
+                    
+                    # Check partial receipt
+                    if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
+                        is_partial = False
+                    else:
+                        is_partial = True
+                    
+    #           INDENT===============
+                if is_error == True:
+                    self.rollback_move(rec, error, lines, "doNo")
+                    break
+                
+                do_header['x_studio_dispatch_date'] = dispatch_date
+                do_header['x_studio_document_trans_code'] = rec["documentTransCode"]
+
+                # Delivery Order Validate
+                self.validate_delivery(do_header, sos, is_partial)
+                
+                response_msg = "DO updated successfully"
+            
+        except Exception as e:
+           error["Error"] = str(e)
+           is_error = True
+
+        if is_error == True:
+#            Response.status = "400"
+#             pass
+            api_log['status'] = 'error'
+        else:
+            Response.status = "200"
+            api_log['status'] = 'success'
+        
+        message = {
+            'response': response_msg, 
+            'message': error
+        }
+        
+        api_log['response_msg'] = message
+        api_log['response_date'] = datetime.now()
+
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(message), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+        
+        return message
     
     def create_immediate_transfer_so(self, so_name):
         so_obj = request.env['sale.order'].search([('name', '=', so_name )])
