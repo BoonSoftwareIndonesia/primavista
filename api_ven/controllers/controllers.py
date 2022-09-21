@@ -251,7 +251,7 @@ class ApiVen(http.Controller):
                         break
             
                     receipt_header['date_done'] = receipt_date
-                    receipt_header['x_studio_document_trans_code'] = rec["documentTransCode"]
+                    receipt_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
 
                     # receipt Validate
                     self.validate_receipt(receipt_header, is_partial)
@@ -474,7 +474,7 @@ class ApiVen(http.Controller):
                     break
                 
                 do_header['x_studio_dispatch_date'] = dispatch_date
-                do_header['x_studio_document_trans_code'] = rec["documentTransCode"]
+                do_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
 
                 # Delivery Order Validate
                 self.validate_delivery(do_header, sos, is_partial)
