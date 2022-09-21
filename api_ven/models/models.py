@@ -8,7 +8,7 @@ from datetime import datetime
 from odoo import http
 from odoo.exceptions import UserError
 
-# override stock move create when PO is confirmed
+# override stock move create when PO is confirmedd
 class PurchaseOrderLineExt(models.Model):
     _inherit = 'purchase.order.line'
     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
@@ -51,34 +51,6 @@ class SaleOrderLineExt(models.Model):
         res = super(SaleOrderLineExt, self)._prepare_procurement_values(group_id)
         res.update({'x_studio_opt_char_1': self.x_studio_line_no})
         return res
-
-# set the wms rec no value in stock picking when the return button is clicked in a DO or PO RCPT
-class StockReturnPickingExt(models.TransientModel):
-    _inherit = 'stock.return.picking'
-    
-    @api.model
-    def _create_returns(self):
-        new_picking, pick_type_id = super(StockReturnPickingExt, self)._create_returns()
-        
-        # Search for the new picking
-        curr_pick = request.env['stock.picking'].search([('id', '=', int(new_picking))], limit=1)
-    
-        # Get the stock.picking source name
-        in_num = curr_pick.origin
-        in_num = in_num[10:]
-        
-        # Get the source stock.picking (origin)
-        source = request.env['stock.picking'].search([('name', '=', in_num)], limit=1)
-        
-        # Set current stock.picking x_wms_rec_no to source stock.picking's (loop is mandatory as search returns ResultSet not one record)
-        wms_no = 0
-        for pick in source:
-            wms_no = pick.x_wms_rec_no
-        
-        curr_pick.write({'x_wms_rec_no': wms_no})
-        curr_pick.move_lines.write({'x_wms_rec_no': wms_no})
-        curr_pick.move_lines.move_line_ids.write({'x_wms_rec_no': wms_no})
-        return new_picking, pick_type_id
 
 # API VEN MODEL ==========================================================================
 class api_ven(models.Model):
