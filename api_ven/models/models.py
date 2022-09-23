@@ -92,7 +92,7 @@ class api_ven(models.Model):
     status = fields.Selection([('new','New'),('process','Processing'),('success','Success'),('error','Error')])
     created_date = fields.Datetime(string="Created Date")
     response_date = fields.Datetime(string="Response Date")
-    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO'),('PO','DW_PO'),('SO','DW_SO'),('RCPT_RET','CRT_RCPT_RET'),('DO_RET','CRT_DO_RET')])
+    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO'),('PO','DW_PO'),('SO','DW_SO'),('PO_RET','DW_PO_RET'),('SO_RET','DW_SO_RET'),('RCPT_RET','CRT_RCPT_RET'),('DO_RET','CRT_DO_RET')])
     incoming_txt = fields.Many2one('ir.attachment', string="Incoming txt", readonly=True)
     response_txt = fields.Many2one('ir.attachment', string="Response txt", readonly=True)
     raw_data = fields.Binary(string="Raw Data", attachment=True)
@@ -368,3 +368,287 @@ class ApiControllerSO(models.Model):
         })
         
 #         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+
+# STOCK PICKING FOR RETURNS ===================================================================
+class ApiControllerStockPicking(models.Model):
+    _inherit ='stock.picking'
+    
+    # Returning a PO (receive item -> return to vendor) using SO format =======================================
+    def api_return_po(self, record):
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        
+        wms_no = 0
+        line_no = 1
+        item_lines = []
+        origin_name = ""
+        partner_shipping = request.env['res.partner']
+        
+        # Return PO lines from stock.picking.move_ids_without_package
+        for line in record.move_ids_without_package:
+            item_line = {
+                "soLineOptChar1": line['x_studio_opt_char_1'],
+                "product": line['product_id']["product_tmpl_id"]["default_code"],
+                "quantityOrder": str(int(line['product_uom_qty'])),
+#                 "originalOrderUOM": line['product_uom']['name'],
+                "originalOrderUOM": "PCS",
+                "lotNo": "LOT", 
+                "filterTransactionCode": "NM",
+                "soLineOptChar2": ""
+            }
+            line_no += 1
+            
+            item_lines.append(item_line)
+            
+            # Searching for Origin and WMS receipt No from PO confirm====
+            origin_name = record['origin'] #Return of WH/IN/00009
+            origin_name = origin_name[10:] #WH/IN/00009
+            source_sp = request.env['stock.picking'].search([('name', '=', origin_name)], limit=1) #Get WH/IN/00009
+            
+#           origin_name = WH/IN/00009.origin, wms_no = WH/IN/00009.x_wms_rec_no
+            for pick in source_sp:
+                origin_name = pick.origin
+                wms_no = pick.x_wms_rec_no
+                
+#           Searching for partner_shipping===
+            source_po = request.env['purchase.order'].search([('name', '=', origin_name)])
+            po_record = request.env['purchase.order']
+            for po in source_po:
+                po_record = po
+            partner_shipping = po_record.partner_id
+        
+        payload = {
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "namespace": "http://www.boonsoftware.com/createSO/POV",
+            "order":[
+                {
+                    "customerPO":"",
+                    "reference":origin_name,
+                    "receiptNo": wms_no,
+                    "customerCode":"" if partner_shipping['x_studio_customer_id'] == False else partner_shipping['x_studio_customer_id'],
+                    "soHeaderOptChar3":"",
+                    "documentTransCode":"GRN",
+                    "orderDate":"" if record['create_date'] == False else datetime.strftime(record['create_date'], '%d/%m/%Y'),
+                    "requestedDeliveryDate":"",
+                    "ownerCode":"PRIMAVISTA",
+                    "warehouseCode": "AVI",
+                    "shipNo": "" if partner_shipping['x_studio_customer_id'] == False else partner_shipping['x_studio_customer_id'],
+                    "shipAddress1":"" if partner_shipping["street"] == False else partner_shipping["street"],
+                    "shipCity":"" if partner_shipping["city"] == False else partner_shipping["city"],
+#                     "shipNo": "" if record['partner_shipping_id']['x_studio_customer_id'] == False else record['partner_shipping_id']['x_studio_customer_id'],
+#                     "shipAddress1":"" if record['partner_shipping_id']["street"] == False else record['partner_shipping_id']["street"],
+#                     "shipCity":"" if record['partner_shipping_id']["city"] == False else record['partner_shipping_id']["city"],
+                    "shipZipCode":"12345",
+#                     "shipCountry":"" if record['partner_shipping_id']["country_id"]["name"] == False else record['partner_shipping_id']["country_id"]["name"],
+                    "shipCountry":"" if partner_shipping["country_id"]["name"] == False else partner_shipping["country_id"]["name"],
+                    "shipZone":"NA",
+                    "shipRoute":"NA",
+                    "shipArea":"SHIP",
+                    "remark2":"",
+                    "remark1":"",
+                    "allocatequantityOrder":"TRUE",
+                    "shipInFull":"FALSE",
+                    "orderLine": item_lines
+
+                }
+            ]
+        }
+        
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive",
+            "Accept": "*/*"
+        }
+        
+        #Create log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': payload,
+                'message_type': 'PO_RET'
+            })
+
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+        
+        api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
+        
+        if r.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
+        
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+
+
+    # Returning a SO (sell item -> return to us) using PO format =======================================
+    def api_return_so(self, record):
+        # PROSES KIRIM API
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        
+        # PO_LINES: Contains every product in the PO
+#         line_no = 1
+        po_lines = []
+        return_origin = ""
+        origin_name = ""
+        wms_no = 0
+        doc_trans_code = ""
+        
+        for line in record['move_ids_without_package']:
+            # line['x_studio_opt_char_1'] = str(line_no)
+            
+            po_line = {
+                "inwardLineOptChar1": line['x_studio_opt_char_1'],
+                "inwardLineOptChar2": "",
+                "product": line['product_id']["product_tmpl_id"]["default_code"],
+                "quantityOrdered": str(line['product_qty']),
+#                 "uomCode": line['product_uom']['name'],
+                "uomCode": "PCS",
+                "stockStatusCode": "NM"
+            }
+            # line_no += 1
+            po_lines.append(po_line)
+
+            return_origin = record['origin'] #Return of WH/IN/00009
+            return_origin = return_origin[10:] #WH/IN/00009
+            source_sp = request.env['stock.picking'].search([('name', '=', return_origin)], limit=1) #Get WH/IN/00009
+
+            for pick in source_sp:
+                origin_name = pick.origin # WH/IN/00009.origin = soNo nya
+                wms_no = pick.x_wms_rec_no # WH/IN/00009.x_wms_rec_no = wms rec no utk diassign ke doNo
+#                 po_date = datetime.strftime(pick.create_date, '%d/%m/%Y')
+#                 arrival_date = datetime.strftime(pick.scheduled_date, '%d/%m/%Y')
+
+#                     sale_orders = request.env['sale.order'].search([('name', '=', origin_name)], limit=1) #Get SO0009
+
+#                     for so in sale_orders:
+#                         doc_trans_code = so.x_studio_doc_trans_code
+        
+        
+        payload = {
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "namespace": "http://www.boonsoftware.com/createASN/POV",
+            "asn": [
+                {
+                     
+                    "ownerReferences": "",
+                    "poNo": origin_name, # record['name]
+                    "supplierReferences": "", # record['partner_ref']
+                    "sender": "",
+                    "documentTransCode": "POR", # record['x_studio_doc_trans_code']
+                    "ownerCode": "PRIMAVISTA",
+                    "warehouseCode": "AVI",
+#                     "poDate": po_date, # datetime.strftime(record['date_approve'],'%d/%m/%Y')
+                    "poDate": "" if record['create_date'] == False else datetime.strftime(record['create_date'], '%d/%m/%Y'),
+#                     "expectedArrivalDate": arrival_date, # datetime.strftime(record['date_planned'],'%d/%m/%Y'),
+                    "expectedArrivalDate": "" if record['scheduled_date'] == False else datetime.strftime(record['scheduled_date'], '%d/%m/%Y'),
+                    "otherReferences": "",
+                    "remark1": "",
+                    "doNo": wms_no,
+#                     "ownerReferences":"",
+#                     "poNo":"15220014721",
+#                     "supplierReferences":"V-80",
+#                     "sender":"VITA HEALTH INDONESIA, PT",
+#                     "documentTransCode":"PODR",
+#                     "ownerCode":"VITAHEALTH",
+#                     "warehouseCode":"AVI",
+#                     "poDate":"13-07-2022",
+#                     "expectedArrivalDate":"13-07-2022",
+#                     "otherReferences":"STCK TRS APL",
+#                     "remark1":" Stock Transfer from APL 29 Jun'22\rSurat Jalan No: 9910278722, 9910278725, 9910278745, 9910278771, 9910278722",
+#                     "doNo":"",
+                    "asnLine": po_lines
+                }
+            ]
+        }
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive",
+            "Accept": "*/*"
+        }
+        
+        #Create log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': payload,
+                'message_type': 'SO_RET'
+            })
+
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+#        try:
+        r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+#        except Exception as e:
+#            is_error = True
+#            api_log['status'] = 'error'
+            
+#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        
+        api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
+        
+        """if is_error == False:
+            api_log['status'] = 'success'
+        elif '"returnStatus":"-1"' in api_log['response_msg']:
+            api_log['status'] = 'error'
+        else:
+            api_log['status'] = 'success'"""
+        
+        if r.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
+        
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
