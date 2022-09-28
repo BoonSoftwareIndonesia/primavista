@@ -38,6 +38,12 @@ class StockRuleExt(models.Model):
         res['x_studio_opt_char_1'] = values.get('x_studio_opt_char_1', False)
         return res
 
+class CalendarEventExt(models.Model):
+    _inherit = 'calendar.event'
+    
+    def action_test(self):
+        return "TEST"
+
 class StockMoveExt(models.Model):
     _inherit = 'stock.move'
     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
@@ -140,7 +146,6 @@ class ApiController(models.Model):
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
-                     
                     "ownerReferences": "",
                     "poNo": "" if record['name'] == False else record['name'],
                     "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
@@ -416,8 +421,7 @@ class ApiControllerStockPicking(models.Model):
                 po_record = po
             partner_shipping = po_record.partner_id
         
-        payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -426,7 +430,7 @@ class ApiControllerStockPicking(models.Model):
                     "receiptNo": wms_no,
                     "customerCode":"" if partner_shipping['x_studio_customer_id'] == False else partner_shipping['x_studio_customer_id'],
                     "soHeaderOptChar3":"",
-                    "documentTransCode":"GRN",
+                    "documentTransCode":"POR",
                     "orderDate":"" if record['create_date'] == False else datetime.strftime(record['create_date'], '%d/%m/%Y'),
                     "requestedDeliveryDate":"",
                     "ownerCode":"PRIMAVISTA",
@@ -556,12 +560,11 @@ class ApiControllerStockPicking(models.Model):
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
-                     
                     "ownerReferences": "",
-                    "poNo": origin_name, # record['name]
-                    "supplierReferences": "", # record['partner_ref']
+                    "poNo": origin_name, 
+                    "supplierReferences": "", 
                     "sender": "",
-                    "documentTransCode": "POR", # record['x_studio_doc_trans_code']
+                    "documentTransCode": "GRA", 
                     "ownerCode": "PRIMAVISTA",
                     "warehouseCode": "AVI",
 #                     "poDate": po_date, # datetime.strftime(record['date_approve'],'%d/%m/%Y')
@@ -570,7 +573,7 @@ class ApiControllerStockPicking(models.Model):
                     "expectedArrivalDate": "" if record['scheduled_date'] == False else datetime.strftime(record['scheduled_date'], '%d/%m/%Y'),
                     "otherReferences": "",
                     "remark1": "",
-                    "doNo": wms_no,
+                    "doNo": "", #wms_no,
 #                     "ownerReferences":"",
 #                     "poNo":"15220014721",
 #                     "supplierReferences":"V-80",
