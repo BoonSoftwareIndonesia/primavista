@@ -10,40 +10,44 @@ odoo.define('api_ven.CheckinButton', function(require){
     var widgetRegistry = require('web.widget_registry')
     
     var Checkin = Widget.extend({
-        eventId: -1,
+        calendarId: -1,
         template: 'CheckinButton',
-        events: {
-            "click .checkin_button":'getChecked',
-        },
         init: function (parent) {
             this._super(parent);
         },
-        getChecked:function(){
-            console.log('Clicked!');
-            this.do_notify(_t("Success"), _t("Your signature request has been sent."));
-        },
     });
     
-//     var AbstractField = require('web.AbstractField');
-//     var FieldRegistry = require('web.field_registry');
     
-//     var Checkin = AbstractField.extend({
-//         eventId: -1,
-//         template: 'CheckinButton',
-//         events: {
-//             'click .checkin_button': 'getChecked',
-//         },
-//         init: function () {
-//             this._super.apply(this, arguments);
-//             if(this.nodeOptions.eventId){
-//               this.eventId = this.nodeOptions.eventId;  
-//             }
-//         },
-//         getChecked: function () {
-//             alert('clieked');
-//             console.log('Clicked!');
-//         },
-//     });
+    $(document).on('click', '.checkin_button.o_widget', function(){
+         navigator.geolocation.getCurrentPosition(function(position){
+            let dist = getDistance(position.coords.longitude, position.coords.latitude);
+            console.log(dist);
+                    
+        });
+     });
+    
+    function getDistance(longitude, latitude){
+        const R = 6371; //Radius of earth in KM
+
+        const latTarget = -6.191048862358757;
+        const longTarget = 106.76797591217014;
+
+        let x1 = latTarget - latitude;
+        let dLat = x1.toRad();
+        let x2 = longTarget - longitude;
+        let dLong = x2.toRad();
+
+        let a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(latitude.toRad()) * Math.cos(latTarget.toRad()) * Math.sin(dLong/2) * Math.sin(dLong/2);
+
+        let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        let d = R * c;
+
+        return d;
+    }
+    
+    Number.prototype.toRad = function() {
+        return this * Math.PI / 180;
+    } 
     
     widgetRegistry.add(
         'CheckinButton', Checkin
