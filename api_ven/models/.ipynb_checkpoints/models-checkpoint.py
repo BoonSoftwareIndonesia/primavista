@@ -70,18 +70,26 @@ class StockReturnPickingExt(models.TransientModel):
         curr_pick = request.env['stock.picking'].search([('id', '=', int(new_picking))], limit=1)
     
         # Get the stock.picking source name
+        trans_code = ""
         in_num = curr_pick.origin
         in_num = in_num[10:]
+        if "IN" in in_num:
+            trans_code = "POR"
+        else:
+            trans_code = "GRA"
+        
         
         # Get the source stock.picking (origin)
         source = request.env['stock.picking'].search([('name', '=', in_num)], limit=1)
         
         # Set current stock.picking x_wms_rec_no to source stock.picking's (loop is mandatory as search returns ResultSet not one record)
         wms_no = 0
+        
         for pick in source:
             wms_no = pick.x_wms_rec_no
+
         
-        curr_pick.write({'x_wms_rec_no': wms_no})
+        curr_pick.write({'x_wms_rec_no': wms_no, 'x_studio_doc_trans_code':trans_code})
         curr_pick.move_lines.write({'x_wms_rec_no': wms_no})
         curr_pick.move_lines.move_line_ids.write({'x_wms_rec_no': wms_no})
         return new_picking, pick_type_id

@@ -951,3 +951,13 @@ class ApiVen(http.Controller):
             do_header.with_context(cancel_backorder=True)._action_done()
         else:
             do_header.with_context(cancel_backorder=False)._action_done()
+            
+            ret_partial = request.env['stock.picking'].search([('state','in',['assigned','waiting','confirmed']),('origin', '=', do_header['origin'])], limit=1)
+            
+            for pick in ret_partial:
+                pick.write({'x_wms_rec_no': do_header.x_wms_rec_no, 'x_studio_doc_trans_code': do_header.x_studio_doc_trans_code})
+        
+        
+            
+        
+            

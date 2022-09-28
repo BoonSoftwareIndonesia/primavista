@@ -22,9 +22,22 @@ odoo.define('api_ven.CheckinButton', function(require){
          navigator.geolocation.getCurrentPosition(function(position){
             let dist = getDistance(position.coords.longitude, position.coords.latitude);
             console.log(dist);
-                    
+//             console.log(window.location.href);
+//             console.log(getParsedUrl(window.location.href));
+            let id = getParsedUrl(window.location.href);
+            console.log(id);
         });
      });
+    
+    function getParsedUrl(url){
+        let result = "";
+        let indexIdStart = url.indexOf('#id='); //Getting the '#' index
+        let indexIdEnd = url.indexOf('&'); //Getting index '&' in '#id=9&'
+        indexIdStart += 4; //Getting index after '='
+        result = url.slice(indexIdStart, indexIdEnd);
+        
+        return result
+    }
     
     function getDistance(longitude, latitude){
         const R = 6371; //Radius of earth in KM
