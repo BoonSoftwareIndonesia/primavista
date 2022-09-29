@@ -19,13 +19,15 @@ odoo.define('api_ven.CheckinButton', function(require){
     
     
     $(document).on('click', '.checkin_button.o_widget', function(){
-         navigator.geolocation.getCurrentPosition(function(position){
+        navigator.geolocation.getCurrentPosition(function(position){
             let dist = getDistance(position.coords.longitude, position.coords.latitude);
             console.log(dist);
-//             console.log(window.location.href);
-//             console.log(getParsedUrl(window.location.href));
+
             let id = getParsedUrl(window.location.href);
             console.log(id);
+
+            let loc = $("td > span[name='location']").text();
+            console.log(loc);
         });
      });
     

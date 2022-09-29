@@ -82,7 +82,8 @@ class StockReturnPickingExt(models.TransientModel):
         # Get the source stock.picking (origin)
         source = request.env['stock.picking'].search([('name', '=', in_num)], limit=1)
         
-        # Set current stock.picking x_wms_rec_no to source stock.picking's (loop is mandatory as search returns ResultSet not one record)
+        # Set current stock.picking x_wms_rec_no to source stock.picking's (loop is mandatory as search returns ResultSet not one 
+        # record)
         wms_no = 0
         
         for pick in source:
@@ -106,7 +107,7 @@ class api_ven(models.Model):
     status = fields.Selection([('new','New'),('process','Processing'),('success','Success'),('error','Error')])
     created_date = fields.Datetime(string="Created Date")
     response_date = fields.Datetime(string="Response Date")
-    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO'),('PO','DW_PO'),('SO','DW_SO'),('PO_RET','DW_PO_RET'),('SO_RET','DW_SO_RET'),('RCPT_RET','CRT_RCPT_RET'),('DO_RET','CRT_DO_RET')])
+    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO'),('PO','DW_PO'),('SO','DW_SO'),('PO_RET','DW_PO_RET'),('SO_RET','DW_SO_RET'),('RCPT_RET','CRT_RCPT_RET'),('DO_RET','CRT_DO_RET'),('CUST','DW_CUST'),('PROD','DW_PROD')])
     incoming_txt = fields.Many2one('ir.attachment', string="Incoming txt", readonly=True)
     response_txt = fields.Many2one('ir.attachment', string="Response txt", readonly=True)
     raw_data = fields.Binary(string="Raw Data", attachment=True)
@@ -119,16 +120,19 @@ class api_ven(models.Model):
         result = super(api_ven, self).create(vals)
         return result
 
+    
+    
+    
 # PURCHASE ORDER ==========================================================================
 class ApiController(models.Model):
     _inherit = "purchase.order"
     
     def api_dw_po(self, record):
             
-#       PROSES KIRIM API
+        # PROSES KIRIM API
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
         
-#       PO_LINES: Contains every product in the PO
+        # PO_LINES: Contains every product in the PO
         line_no = 1
         po_lines = []
         
@@ -191,7 +195,7 @@ class ApiController(models.Model):
             "Accept": "*/*"
         }
         
-        #Create log
+        # Create log
         try:
             api_log = request.env['api_ven.api_ven'].create({
                 'status': 'new',
@@ -252,6 +256,9 @@ class ApiController(models.Model):
 #         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
 
 
+
+
+
 # SALES ORDER ==========================================================================        
 class ApiControllerSO(models.Model):
     _inherit = "sale.order"
@@ -262,7 +269,7 @@ class ApiControllerSO(models.Model):
         line_no = 1
         so_lines = []
         
-#       so_lines = every items in the SO
+        # so_lines = every items in the SO
         for line in record['order_line']:
             line['x_studio_line_no'] = str(line_no)
             
@@ -382,6 +389,9 @@ class ApiControllerSO(models.Model):
         
 #         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
 
+
+
+
 # STOCK PICKING FOR RETURNS ===================================================================
 class ApiControllerStockPicking(models.Model):
     _inherit ='stock.picking'
@@ -422,7 +432,7 @@ class ApiControllerStockPicking(models.Model):
                 origin_name = pick.origin
                 wms_no = pick.x_wms_rec_no
                 
-#           Searching for partner_shipping===
+            # Searching for partner_shipping ===
             source_po = request.env['purchase.order'].search([('name', '=', origin_name)])
             po_record = request.env['purchase.order']
             for po in source_po:
@@ -518,6 +528,8 @@ class ApiControllerStockPicking(models.Model):
             'mimetype': 'text/plain'
         })
 
+        
+        
 
     # Returning a SO (sell item -> return to us) using PO format =======================================
     def api_return_so(self, record):
@@ -554,13 +566,6 @@ class ApiControllerStockPicking(models.Model):
             for pick in source_sp:
                 origin_name = pick.origin # WH/IN/00009.origin = soNo nya
                 wms_no = pick.x_wms_rec_no # WH/IN/00009.x_wms_rec_no = wms rec no utk diassign ke doNo
-#                 po_date = datetime.strftime(pick.create_date, '%d/%m/%Y')
-#                 arrival_date = datetime.strftime(pick.scheduled_date, '%d/%m/%Y')
-
-#                     sale_orders = request.env['sale.order'].search([('name', '=', origin_name)], limit=1) #Get SO0009
-
-#                     for so in sale_orders:
-#                         doc_trans_code = so.x_studio_doc_trans_code
         
         
         payload = {
@@ -663,3 +668,221 @@ class ApiControllerStockPicking(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
+        
+
+        
+        
+# CUSTOMER  ==========================================================================
+class ApiController(models.Model):
+    _inherit = "res.partner"
+    
+    def api_dw_customer(self, record):
+            
+#       PROSES KIRIM API (DIGANTI JADI APA ????????????????)
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        
+        payload = {
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+#             "namespace": "http://www.boonsoftware.com/createASN/POV",
+            "customer": [
+                {
+                    "ownerCode": "PRIMAVISTA",
+                    "custCode": "" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
+                    "name": "" if record['name'] == False else record['name'],
+                    "custGroup": "" if record['x_studio_customer_group'] == False else record['x_studio_customer_group'],
+                    "address1": "" if record['street'] == False else record['street'],
+                    "city": "" if record['city'] == False else record['city'],
+                    "state": "" if record['state_id']['name'] == False else record['state_id']['name'],
+                    "zipCode": "" if record['zip'] == False else record['zip'],
+                    "country": "" if record['country_id']['name'] == False else record['country_id']['name'],
+                    "route": "NA",
+                    "zone": "NA",
+                    "custType": "IO",
+                    "slsmnCode": "JLK",
+                    "taxCode": "NA",
+                    "termCode": "NA"
+                }
+            ]
+        }
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive",
+            "Accept": "*/*"
+        }
+        
+        #Create log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': payload,
+                'message_type': 'CUST'
+            })
+
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+#        try:
+        r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+#        except Exception as e:
+#            is_error = True
+#            api_log['status'] = 'error'
+            
+#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        
+        api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
+        
+        """if is_error == False:
+            api_log['status'] = 'success'
+        elif '"returnStatus":"-1"' in api_log['response_msg']:
+            api_log['status'] = 'error'
+        else:
+            api_log['status'] = 'success'"""
+        
+        if r.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
+        
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+        
+        
+        
+        
+# PRODUCT  ==========================================================================
+class ApiController(models.Model):
+    _inherit = "product.template"
+    
+    def api_dw_product(self, record):
+            
+#       PROSES KIRIM API (DIGANTI JADI APA ????????????????)
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        
+        payload = {
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+#             "namespace": "http://www.boonsoftware.com/createASN/POV",
+            "product": [
+                {
+                    "ownerCode": "PRIMAVISTA",
+                    "warehouseCode": "AVI",
+                    "product": "",
+                    "desc1": "",
+                    "brandName": "",
+                    "baseUOM": "",
+                    "prodGroup": "NA",
+                    "subPrdGrp": "NA",
+                    "storageType": "AB-RACK",
+                    "altStorageType": "AB-BULK",
+                    "wholeUOM": "",
+                    "wholeDenomination": "",
+                    "palletDeno": "100",
+                    "volume": "1",
+                    "weight": "1",
+                    "length": "",
+                    "breadth": "",
+                    "height": "",
+                    "archived": "",
+                    "prodStatus": "N",
+                    "inbLeadtime2expiry": "",
+                    "leadtime2expiry": "",
+                    "shelfLife": "",
+                    "issueType": "1",
+                    "lotNoCtrl": "",
+                    "autoSerial": "",
+                    "expDateCtrl": "",
+                    "palletCtrl": "",
+                    "capSerialOut": "",
+                    "price": ""
+                }
+            ]
+        }
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive",
+            "Accept": "*/*"
+        }
+        
+        #Create log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': payload,
+                'message_type': 'CUST'
+            })
+
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+#        try:
+        r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+#        except Exception as e:
+#            is_error = True
+#            api_log['status'] = 'error'
+            
+#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        
+        api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
+        
+        """if is_error == False:
+            api_log['status'] = 'success'
+        elif '"returnStatus":"-1"' in api_log['response_msg']:
+            api_log['status'] = 'error'
+        else:
+            api_log['status'] = 'success'"""
+        
+        if r.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
+        
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+
