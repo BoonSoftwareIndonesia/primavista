@@ -15,6 +15,7 @@ odoo.define('api_ven.CheckinButton', function(require){
         calendarId: -1,
         selector: ".checkin_button.o_widget",
         template: 'CheckinButton',
+        model: "calendar.event",
         events: {
             'click': '_onClick',
         },
@@ -22,31 +23,31 @@ odoo.define('api_ven.CheckinButton', function(require){
             this._super(parent);
         },
         _onClick: function(){
+            var self = this;
+            let dist;
+            
             navigator.geolocation.getCurrentPosition(function(position){
-            let id = getParsedUrl(window.location.href);
-            console.log(id);
+                let id = getParsedUrl(window.location.href);
+                console.log(id);
 
-            let locLat = $("td > span[name='x_studio_latitude']").text();
-            let locLong = $("td > span[name='x_studio_longitude']").text();
-            
-            let dist = getDistance(position.coords.longitude, position.coords.latitude, locLong, locLat);
-            console.log("From on click " + dist);
-            let notifString ="You are currently " + dist + " km away from the meeting location";
-            
-//             var def1 = rpc.query({
-//                 model: 'calendar.event',
-//                 method: 'action_test',
-//                 args: ['id' = id],
-//             });
-            
-//             var self = this;
-//             this._rpc({
-//                 model: 'calendar.event',
-//                 method: 'action_test',
-//                 args: [id],
-//             }).then(function (result) {
-//                 self.do_action(result);
-//             });
+                let locLat = $("td > span[name='x_studio_latitude']").text();
+                let locLong = $("td > span[name='x_studio_longitude']").text();
+
+                dist = getDistance(position.coords.longitude, position.coords.latitude, locLong, locLat);
+                console.log("From on click " + dist);
+                let notifString ="You are currently " + dist + " km away from the meeting location";
+                
+                let res = rpc.query({
+                    model: self.model,
+                    method: 'action_test'
+                }).then(function(result){
+                    console.log("Result rpc " + result);
+                    self.do_action(result);
+                }).catch(function(err){
+                    console.log(err);
+                });
+
+                console.log('With model: '+ self.model);
             });
         }
     });
