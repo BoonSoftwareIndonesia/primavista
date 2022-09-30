@@ -6,6 +6,7 @@ from odoo.http import request, Response
 import json, datetime, requests, base64, unicodedata
 from datetime import datetime
 from odoo import http
+import requests
 from odoo.exceptions import UserError
 
 # override stock move create when PO is confirmedd
@@ -40,9 +41,46 @@ class StockRuleExt(models.Model):
 
 class CalendarEventExt(models.Model):
     _inherit = 'calendar.event'
+    x_studio_latitude = fields.Float('Location Latitude', compute = '_compute_lat_long')
+    x_studio_longitude = fields.Float('Location Longitude', compute = '_compute_lat_long')
     
     def action_test(self):
-        return "TEST"
+        x = requests.get('https://w3schools.com')
+        curr_loc = self.location
+        
+        notification = {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Warning'),
+                'message': 'You cannot do this action now',
+                'sticky': True,
+            }
+        }
+        return notification
+#         APIKey = 'AIzaSyBH4JCdioG8uH8HVtHJLwucbbiHxtRNMPE'
+#         base_url = 'https://maps.googleapis.com/maps/api/geocode/json'
+#         endpoint = f"{base_url}?address={curr_loc}&key={APIKey}"
+#         r = requests.get(endpoint)
+#         if r.status_code not in range(200,299):
+#             return None,None
+# #         try:
+#         results = r.json()['results'][0]
+#         lat = results['geometry']['location']['lat']
+#         lng = results['geometry']['location']['lng']
+#         except:
+#             pass
+#         return lat, lng
+    
+    @api.depends('location')
+    def _compute_lat_long(self):
+        for rec in self:
+            if rec.location:
+                rec.x_studio_latitude = 10
+                rec.x_studio_longitude = 20
+            else:
+                rec.x_studio_latitude = None
+                rec.x_studio_longitude = None
 
 class StockMoveExt(models.Model):
     _inherit = 'stock.move'

@@ -7,29 +7,72 @@ odoo.define('api_ven.CheckinButton', function(require){
     var core = require('web.core');
     var QWeb = core.qweb;
     var Widget = require('web.Widget');
-    var widgetRegistry = require('web.widget_registry')
+    var widgetRegistry = require('web.widget_registry');
+    var rpc = require('web.rpc');
+    
     
     var Checkin = Widget.extend({
         calendarId: -1,
+        selector: ".checkin_button.o_widget",
         template: 'CheckinButton',
+        events: {
+            'click': '_onClick',
+        },
         init: function (parent) {
             this._super(parent);
         },
-    });
-    
-    
-    $(document).on('click', '.checkin_button.o_widget', function(){
-        navigator.geolocation.getCurrentPosition(function(position){
-            let dist = getDistance(position.coords.longitude, position.coords.latitude);
-            console.log(dist);
-
+        _onClick: function(){
+            navigator.geolocation.getCurrentPosition(function(position){
             let id = getParsedUrl(window.location.href);
             console.log(id);
 
-            let loc = $("td > span[name='location']").text();
-            console.log(loc);
-        });
-     });
+            let locLat = $("td > span[name='x_studio_latitude']").text();
+            let locLong = $("td > span[name='x_studio_longitude']").text();
+            
+            let dist = getDistance(position.coords.longitude, position.coords.latitude, locLong, locLat);
+            console.log("From on click " + dist);
+            let notifString ="You are currently " + dist + " km away from the meeting location";
+            
+//             var def1 = rpc.query({
+//                 model: 'calendar.event',
+//                 method: 'action_test',
+//                 args: ['id' = id],
+//             });
+            
+//             var self = this;
+//             this._rpc({
+//                 model: 'calendar.event',
+//                 method: 'action_test',
+//                 args: [id],
+//             }).then(function (result) {
+//                 self.do_action(result);
+//             });
+            });
+        }
+    });
+    
+//     From JQuerry
+//     $(document).on('click', '.checkin_button.o_widget', function(){
+//         navigator.geolocation.getCurrentPosition(function(position){
+//             let id = getParsedUrl(window.location.href);
+//             console.log(id);
+
+//             let locLat = $("td > span[name='x_studio_latitude']").text();
+//             let locLong = $("td > span[name='x_studio_longitude']").text();
+            
+//             let dist = getDistance(position.coords.longitude, position.coords.latitude, locLong, locLat);
+//             console.log(dist);
+//             let notifString ="You are currently " + dist + " km away from the meeting location"
+            
+//             this._rpc({
+//                 model: 'calendar.event',
+//                 method: 'action_test',
+//                 args: [id],
+//             }).then(function (result) {
+//                 this.do_action(result);
+//             });
+//         });
+//      });
     
     function getParsedUrl(url){
         let result = "";
@@ -41,12 +84,12 @@ odoo.define('api_ven.CheckinButton', function(require){
         return result
     }
     
-    function getDistance(longitude, latitude){
+    function getDistance(longitude, latitude, longEvent, latEvent){
         const R = 6371; //Radius of earth in KM
 
-        const latTarget = -6.191048862358757;
-        const longTarget = 106.76797591217014;
-
+        const longTarget = Number(parseFloat(longEvent));
+        const latTarget = Number(parseFloat(latEvent));
+            
         let x1 = latTarget - latitude;
         let dLat = x1.toRad();
         let x2 = longTarget - longitude;
