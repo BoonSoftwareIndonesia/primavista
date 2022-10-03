@@ -255,7 +255,7 @@ class ApiVen(http.Controller):
 
                     # receipt Validate
                     self.validate_receipt(receipt_header, is_partial)
-    
+                    
                     response_msg = "GRN updated successfully"
                     # INDENT ===========================
                         

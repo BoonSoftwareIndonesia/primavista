@@ -45,7 +45,7 @@ class CalendarEventExt(models.Model):
     x_studio_longitude = fields.Float('Location Longitude', compute = '_compute_lat_long')
     
     @api.model
-    def action_test(self):
+    def action_test(self, val_list=None):
         x = requests.get('https://w3schools.com')
         curr_loc = self.location
         
@@ -53,8 +53,8 @@ class CalendarEventExt(models.Model):
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': 'Warning',
-                'message': 'You cannot do this action now',
+                'title': val_list[0],
+                'message': val_list[1],
                 'sticky': True,
             }
         }
