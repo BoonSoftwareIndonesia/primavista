@@ -84,7 +84,7 @@ class ApiController(models.Model):
     def api_dw_po(self, record):
             
 #       PROSES KIRIM API
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
         
 #       PO_LINES: Contains every product in the PO
         line_no = 1
@@ -216,7 +216,7 @@ class ApiControllerSO(models.Model):
     _inherit = "sale.order"
     
     def api_dw_so(self, record):
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
         
         line_no = 1
         so_lines = []
