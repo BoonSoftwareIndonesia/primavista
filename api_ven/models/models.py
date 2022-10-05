@@ -43,6 +43,18 @@ class CalendarEventExt(models.Model):
     _inherit = 'calendar.event'
     x_studio_latitude = fields.Float('Location Latitude', compute = '_compute_lat_long')
     x_studio_longitude = fields.Float('Location Longitude', compute = '_compute_lat_long')
+    x_studio_check_status = fields.Boolean('Check in status of the meeting', default = False)
+    
+    @api.model
+    def checking_in(self, eventId):
+        curr_pick = request.env['calendar.event'].search([('id', '=', int(eventId))], limit=1)
+        curr_pick.update({'x_studio_check_status': True})
+        return True
+    
+    @api.model
+    def get_check_status(self, eventId):
+        curr_pick = request.env['calendar.event'].search([('id', '=', int(eventId))], limit=1)
+        return curr_pick.x_studio_check_status
     
     @api.model
     def action_test(self, val_list=None):
@@ -76,12 +88,12 @@ class CalendarEventExt(models.Model):
     @api.depends('location')
     def _compute_lat_long(self):
         for rec in self:
-            if rec.location:
-                rec.x_studio_latitude = 10
-                rec.x_studio_longitude = 20
-            else:
+            if rec.location == 'Online' or not rec.location:
                 rec.x_studio_latitude = None
                 rec.x_studio_longitude = None
+            elif rec.location:
+                rec.x_studio_latitude = 20
+                rec.x_studio_longitude = 10
 
 class StockMoveExt(models.Model):
     _inherit = 'stock.move'
@@ -718,7 +730,7 @@ class ApiController(models.Model):
     def api_dw_customer(self, record):
             
 #       PROSES KIRIM API (DIGANTI JADI APA ????????????????)
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createcustomer"
         
         payload = {
             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
@@ -819,7 +831,7 @@ class ApiController(models.Model):
     def api_dw_product(self, record):
             
 #       PROSES KIRIM API (DIGANTI JADI APA ????????????????)
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
         
         payload = {
             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
@@ -872,7 +884,7 @@ class ApiController(models.Model):
                 'status': 'new',
                 'created_date': datetime.now(),
                 'incoming_msg': payload,
-                'message_type': 'CUST'
+                'message_type': 'PROD'
             })
 
             api_log['status'] = 'process'

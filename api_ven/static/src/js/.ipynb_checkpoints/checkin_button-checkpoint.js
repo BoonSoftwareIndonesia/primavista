@@ -31,28 +31,28 @@ odoo.define('api_ven.CheckinButton', function(require){
                 console.log("Init with id: " + self.eventId);
             }, 1000);
             
-            console.log(self.$el.find(['[id="checkin_text"]']));
+            console.log(document.getElementById('checkin_text').innerHTML);
             console.log('Updated');
         },
-//         _render: function(){
-//             var self = this;
-//             let res = rpc.query({
-//                 model: self.model,
-//                 method: 'get_check_status',
-//                 args:[("eventId", '=',self.eventId)]
-//             }).then(function(result){
-//                 console.log("Result rpc: " + result);
+        _render: function(){
+            var self = this;
+            let res = rpc.query({
+                model: self.model,
+                method: 'get_check_status',
+                args:[("eventId", '=',self.eventId)]
+            }).then(function(result){
+                console.log("Result rpc: " + result);
                 
-// //                 Still not working, span not selected
-//                 console.log(document.getElementById('checkin_text').innerHTML);
+//                 Still not working, span not selected
+                console.log(document.getElementById('checkin_text').innerHTML);
 
-//                 if(result && !(self.$('span#checkin_text').hasClass('text-warning'))){
-//                     self.$('#checkin_btn > span#checkin_text').addClass('text-warning');
-//                 }
-//             }).catch(function(err){
-//                 console.log(err);
-//             });
-//         },
+                if(result && !(self.$('span#checkin_text').hasClass('text-warning'))){
+                    self.$('#checkin_btn > span#checkin_text').addClass('text-warning');
+                }
+            }).catch(function(err){
+                console.log(err);
+            });
+        },
         _onClick: function(){
             var self = this;
             let dist;

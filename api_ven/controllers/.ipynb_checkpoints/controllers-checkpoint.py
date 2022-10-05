@@ -19,7 +19,7 @@ class ApiVen(http.Controller):
 
     # API for authentication ===================================================================================
     @http.route('/web/session/authenticate', type='json', auth='none', methods=['POST'])
-    def authenticate(self, db, login, password, base_location=None):
+    def authenticate(self, db, login, password):
             try:
                 request.session.authenticate(db, login, password)
                 return request.env['ir.http'].session_info()
