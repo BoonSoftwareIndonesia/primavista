@@ -9,7 +9,7 @@ from odoo import http
 import requests
 from odoo.exceptions import UserError
 
-# override stock move create when PO is confirmedd
+# override stock move create when PO is confirmed
 class PurchaseOrderLineExt(models.Model):
     _inherit = 'purchase.order.line'
     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
@@ -109,10 +109,25 @@ class SaleOrderLineExt(models.Model):
         res.update({'x_studio_opt_char_1': self.x_studio_line_no})
         return res
 
-# set the wms rec no value in stock picking when the return button is clicked in a DO or PO RCPT
 class StockReturnPickingExt(models.TransientModel):
     _inherit = 'stock.return.picking'
     
+    # trigger send return api when the original return receipt is created. so when there is partial return, 
+    # the api is sent to wms again
+    def create_returns(self):
+        new_picking = super(StockReturnPickingExt, self).create_returns()
+        
+        curr_picking = request.env['stock.picking'].search([('id','=',int(new_picking['res_id']))])
+        
+        if "IN" in curr_picking['origin']:
+            # po ret
+            self.env['stock.picking'].api_return_po(curr_picking)
+        else:
+            self.env['stock.picking'].api_return_so(curr_picking)
+            
+        return new_picking
+    
+    # set the wms rec no value in stock picking when the return button is clicked in a DO or PO RCPT
     @api.model
     def _create_returns(self):
         new_picking, pick_type_id = super(StockReturnPickingExt, self)._create_returns()
@@ -145,6 +160,42 @@ class StockReturnPickingExt(models.TransientModel):
         curr_pick.move_lines.write({'x_wms_rec_no': wms_no})
         curr_pick.move_lines.move_line_ids.write({'x_wms_rec_no': wms_no})
         return new_picking, pick_type_id
+
+class ImportInheritExt(models.TransientModel):
+    _inherit = 'base_import.import'
+
+#     @api.multi
+    def execute_import(self, fields, columns, options, dryrun=False):
+        if 'test_import' not in self._context:
+            res = super(ImportInheritExt, self).with_context(test_import=dryrun).execute_import(fields, columns, options, dryrun)
+        else:
+            res = super(ImportInheritExt, self).execute_import(fields, columns, options, dryrun)
+        return res
+    
+class ProductExt(models.Model):
+    _inherit = 'product.product'
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        tmpl_id = vals_list[0]['product_tmpl_id']
+        tmpl = request.env['product.template'].search([('id', '=', int(tmpl_id))], limit=1)
+
+#         raise UserError((self._context.get('test_import')))
+        
+        passing_var = {
+            "default_code": tmpl['default_code'],
+            "standard_price": tmpl['standard_price']
+        }
+        
+        products = super(ProductExt, self).create(vals_list)
+        
+        test_import = self._context.get('test_import')
+        if not test_import:
+            self.env['product.product'].api_dw_product(products, passing_var)
+        
+#     def write(self, values):
+#         res = super(ProductExt, self).write(values)
+#         self.env['product.product'].api_dw_product(res, passing_var)
     
 # API VEN MODEL ==========================================================================
 class api_ven(models.Model):
@@ -826,10 +877,10 @@ class ApiController(models.Model):
         
 # PRODUCT  ==========================================================================
 class ApiController(models.Model):
-    _inherit = "product.template"
+    _inherit = "product.product"
     
-    def api_dw_product(self, record):
-            
+    def api_dw_product(self, record, passing_var):
+#         raise UserError((record['product_tmpl_id']['default_code']))    
 #       PROSES KIRIM API (DIGANTI JADI APA ????????????????)
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
         
@@ -840,34 +891,37 @@ class ApiController(models.Model):
                 {
                     "ownerCode": "PRIMAVISTA",
                     "warehouseCode": "AVI",
-                    "product": "" if record['default_code'] == False else record['default_code'],
-                    "desc1": "" if record['name'] == False else record['name'],
+#                     "product": "" if record['default_code'] == False else record['default_code'],
+                    "product": "" if passing_var['default_code'] == False else passing_var['default_code'],
+                    "desc1": "" if record['product_tmpl_id']['name'] == False else record['product_tmpl_id']['name'],
                     "brandName": "",
-                    "baseUOM": "" if record['uom_id']['name'] == False else record['uom_id']['name'],
+                    "baseUOM": "" if record['product_tmpl_id']['uom_id']['name'] == False else record['product_tmpl_id']['uom_id']['name'],
                     "prodGroup": "NA",
                     "subPrdGrp": "NA",
                     "storageType": "AB-RACK",
                     "altStorageType": "AB-BULK",
-                    "wholeUOM": "" if record['uom_id']['name'] == False else record['uom_id']['name'],
-                    "wholeDenomination": "" if record['uom_id']['ratio'] == False else record['uom_id']['ratio'],
+                    "wholeUOM": "" if record['product_tmpl_id']['uom_id']['name'] == False else record['product_tmpl_id']['uom_id']['name'],
+                    "wholeDenomination": "" if record['product_tmpl_id']['uom_id']['ratio'] == False else record['product_tmpl_id']['uom_id']['ratio'],
                     "palletDeno": "100",
                     "volume": "1",
                     "weight": "1",
                     "length": "",
                     "breadth": "",
                     "height": "",
-                    "archived": "" if record['active'] == False else record['active'],
+                    "archived": "" if record['product_tmpl_id']['active'] == False else record['product_tmpl_id']['active'],
                     "prodStatus": "N",
                     "inbLeadtime2expiry": "",
                     "leadtime2expiry": "",
                     "shelfLife": "",
                     "issueType": "1",
-                    "lotNoCtrl": "" if record['tracking'] == False else record['tracking'],
+                    "lotNoCtrl": "" if record['product_tmpl_id']['tracking'] == False else record['product_tmpl_id']['tracking'],
                     "autoSerial": "",
                     "expDateCtrl": "",
                     "palletCtrl": "",
                     "capSerialOut": "",
-                    "price": "" if record['standard_price'] == False else record['standard_price']
+#                     "price": "" if record['standard_price'] == False else record['standard_price']
+                    "price": "" if passing_var['standard_price'] == False else passing_var['standard_price'],
+#                     "yuhuu": passing_var
                 }
             ]
         }

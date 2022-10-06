@@ -31,7 +31,11 @@ class ApiVen(http.Controller):
     # Validations
     def validate_obj_header(self, rec, error, rec_no_type, pick_type_id):
         # obj_header validation
-        obj_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec[rec_no_type]), ('picking_type_id', '=', pick_type_id), ('state', '=', 'assigned')])
+        try:
+            obj_header = request.env["stock.picking"].search(['&','&',('origin', '=', rec[rec_no_type]), ('picking_type_id', '=', pick_type_id), ('state', '=', 'assigned')])
+        except Exception as e:
+            error['Error'] = 'Error in searching stock.picking ' + str(e)
+            return -1
 
         if obj_header['origin'] != rec[rec_no_type]:
             if rec_no_type == 'poNo':
@@ -197,7 +201,12 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
                         
-                        receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
+                        try:
+                            receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
+                        except Exception as e:
+                            error['Error'] = "Searching stock move error " +str(e)
+                            is_error = True
+                            break
                         
                         if receipt_line['origin'] != rec['poNo']:
                             error["Error"] = "Stock Move not found"
@@ -210,7 +219,13 @@ class ApiVen(http.Controller):
                         # LINE VALIDATION END ==============================================================
                             
                         # search existing product
-                        temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                        try:
+                            temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                        except Exception as e:
+                            error["Error"] = "Error in searching existing product " + str(e)
+                            is_error = True
+                            break
+                            
                         if temp_product == -1:
                             error["Error"] = "Product does not exist"
                             is_error = True
@@ -328,7 +343,11 @@ class ApiVen(http.Controller):
      # stock picking validation for returns (search based on wms rec no)
     def validate_return_obj_header(self, rec, error, pick_type_id, rec_no_type):
         # obj_header validation for po and so return api
-        obj_header = request.env["stock.picking"].search(['&', ('x_wms_rec_no', '=', rec[rec_no_type]), ('state', '=', 'assigned')])
+        try:
+            obj_header = request.env["stock.picking"].search(['&', ('x_wms_rec_no', '=', rec[rec_no_type]), ('state', '=', 'assigned')])
+        except Exception as e:
+            error["Error"] = 'Error in searching stock picking ' + str(e)
+            return -1
 
         if obj_header['x_wms_rec_no'] != rec[rec_no_type]:
             if pick_type_id == 1 :
@@ -432,7 +451,12 @@ class ApiVen(http.Controller):
                         break
                     
                     # search stock move
-                    receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['soNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
+                    try:
+                        receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['soNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
+                    except Exception as e:
+                        error["Error"] = "Error in searching stock move " + str(e)
+                        is_error = True
+                        break
 
                     if receipt_line['origin'] != rec['soNo']:
                         error["Error"] = "Stock Move not found"
@@ -445,7 +469,13 @@ class ApiVen(http.Controller):
                     # LINE VALIDATION END ==============================================
 
                     # Create a new product does not exist yet, else use existing product
-                    temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                    try:
+                        temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                    except Exception as e:
+                        error["Error"] = "Error in searching existing product " + str(e)
+                        is_error = True
+                        break
+                        
                     if temp_product == -1:
                             error["Error"] = "Product does not exist"
                             is_error = True
@@ -621,8 +651,13 @@ class ApiVen(http.Controller):
                         error["Error"] = "Field stockStatusCode is blank"
                         is_error = True
                         break
-                        
-                    dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['soNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
+                    
+                    try:
+                        dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['soNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
+                    except Exception as e:
+                        error["Error"] = 'Error in searching stock move ' + str(e)
+                        is_error = True
+                        break
         
                     if dispatch_line['origin'] != rec['soNo']:
                         error["Error"] = "Stock Move not found"
@@ -635,7 +670,13 @@ class ApiVen(http.Controller):
                     # LINE VALIDATION END =================================
                         
                     # check if product exists
-                    temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                    try:
+                        temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                    except Exception as e:
+                        error["Error"] = 'Error in searching existing product ' + str(e)
+                        is_error = True
+                        break
+                        
                     if temp_product == -1:
                         error["Error"] = "Product does not exist"
                         is_error = True
@@ -812,7 +853,12 @@ class ApiVen(http.Controller):
                         is_error = True
                         break
                         
-                    dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
+                    try:    
+                        dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
+                    except Exception as e:
+                        error["Error"] = 'Error in searching stock move ' + str(e)
+                        is_error = True
+                        break
         
                     if dispatch_line['origin'] != rec['poNo']:
                         error["Error"] = "Stock Move not found"
@@ -821,7 +867,13 @@ class ApiVen(http.Controller):
                     # LINE VALIDATION END =================================
                         
                     # check if product exists
-                    temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                    try:
+                        temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
+                    except Exception as e:
+                        error["Error"] = 'Error in searching existing product ' + str(e)
+                        is_error = True
+                        break
+                        
                     if temp_product == -1:
                         error["Error"] = "Product does not exist"
                         is_error = True
