@@ -8,8 +8,9 @@ from datetime import datetime
 from odoo import http
 import requests
 from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError
 
-# override stock move create when PO is confirmed
+# override stock move create when PO is confirmed 
 class PurchaseOrderLineExt(models.Model):
     _inherit = 'purchase.order.line'
     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
@@ -112,8 +113,8 @@ class SaleOrderLineExt(models.Model):
 class StockReturnPickingExt(models.TransientModel):
     _inherit = 'stock.return.picking'
     
-    # trigger send return api when the original return receipt is created. so when there is partial return, 
-    # the api is sent to wms again
+    # this prevents multiple api logs from being sent to the wms when there is a partial case
+    # and this triggers the api return po and so function that sends the original return receipt to wms
     def create_returns(self):
         new_picking = super(StockReturnPickingExt, self).create_returns()
         
@@ -127,7 +128,7 @@ class StockReturnPickingExt(models.TransientModel):
             
         return new_picking
     
-    # set the wms rec no value in stock picking when the return button is clicked in a DO or PO RCPT
+    # set the wms rec no and doc trans code value in stock picking when the return button is clicked in a DO or PO RCPT
     @api.model
     def _create_returns(self):
         new_picking, pick_type_id = super(StockReturnPickingExt, self)._create_returns()
@@ -143,7 +144,6 @@ class StockReturnPickingExt(models.TransientModel):
             trans_code = "POR"
         else:
             trans_code = "GRA"
-        
         
         # Get the source stock.picking (origin)
         source = request.env['stock.picking'].search([('name', '=', in_num)], limit=1)
@@ -164,20 +164,58 @@ class StockReturnPickingExt(models.TransientModel):
 class ImportInheritExt(models.TransientModel):
     _inherit = 'base_import.import'
 
+    # set the context from the dry run value
     def execute_import(self, fields, columns, options, dryrun=False):
         if 'test_import' not in self._context:
             res = super(ImportInheritExt, self).with_context(test_import=dryrun).execute_import(fields, columns, options, dryrun)
         else:
             res = super(ImportInheritExt, self).execute_import(fields, columns, options, dryrun)
         return res
+
+class ProductTemplateExt(models.Model):
+    _inherit = 'product.template'
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        if 'default_code' in vals_list[0].keys():
+            def_code = vals_list[0]['default_code']
+        
+            if def_code != False:
+                duplicates = request.env['product.template'].search([('default_code','=',def_code)])
+                if duplicates:
+                    raise UserError('Product Code ' + str(def_code) + ' has existed')
+        
+        res = super(ProductTemplateExt, self).create(vals_list)
+        return res
+    
+    def write(self, vals):
+        res = super(ProductTemplateExt, self).write(vals)
+        
+#         raise UserError((self.default_code))
+        product = request.env['product.product'].search([('default_code', '=', self.default_code)], limit=1)
+        
+        passing_var = {
+            "default_code": False,
+            "standard_price": False
+        }
+        
+        self.env['product.product'].api_dw_product(product, passing_var)
+        
+        return res
     
 class ProductExt(models.Model):
     _inherit = 'product.product'
     
+    # triggers the api dw product function that sends an api log when a product is created 
     @api.model_create_multi
     def create(self, vals_list):
         tmpl_id = vals_list[0]['product_tmpl_id']
         tmpl = request.env['product.template'].search([('id', '=', int(tmpl_id))], limit=1)
+        
+#         if tmpl['default_code'] != False:
+#             duplicates = request.env['product.template'].search([('id','!=',int(tmpl_id)),('default_code','=',tmpl['default_code'])])
+#             if duplicates:
+#                 raise UserError('Product Code ' + str(tmpl['default_code']) + ' has existed')    
         
         passing_var = {
             "default_code": tmpl['default_code'],
@@ -186,23 +224,38 @@ class ProductExt(models.Model):
         
         products = super(ProductExt, self).create(vals_list)
         
+        # only send the data when we click import and not test
         test_import = self._context.get('test_import')
         if not test_import:
             self.env['product.product'].api_dw_product(products, passing_var)
         return products
         
 #     def write(self, values):
+# #         raise UserError((values))
+        
 #         res = super(ProductExt, self).write(values)
-#         self.env['product.product'].api_dw_product(res, passing_var)
+        
+# #         raise UserError((self.name))
+#         product = request.env['product.product'].search([('default_code', '=', self.default_code)], limit=1)
+        
+#         passing_var = {
+#             "default_code": False,
+#             "standard_price": False
+#         }
+        
+#         self.env['product.product'].api_dw_product(product, passing_var)
+        
+#         return res
 
 class PartnerExt(models.Model):
     _inherit = 'res.partner'
     
+    # triggers the api dw product function that sends an api log when a product is created 
     @api.model_create_multi
     def create(self, vals_list):
-        
         partners = super(PartnerExt, self).create(vals_list)
         
+        # only send the data when we click import and not test
         test_import = self._context.get('test_import')
         if not test_import:
             self.env['res.partner'].api_dw_customer(partners)
@@ -894,6 +947,18 @@ class ApiController(models.Model):
 #         raise UserError((record['product_tmpl_id']['default_code']))    
 #       PROSES KIRIM API (DIGANTI JADI APA ????????????????)
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
+    
+        standard_price = ""
+        if passing_var['standard_price'] != False:
+            standard_price = passing_var['standard_price']
+        elif record['standard_price'] != False:
+            standard_price = record['standard_price']
+        
+        default_code = ""
+        if passing_var['default_code'] != False:
+            default_code = passing_var['default_code']
+        elif record['default_code'] != False:
+            default_code = record['default_code']
         
         payload = {
             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
@@ -903,7 +968,7 @@ class ApiController(models.Model):
                     "ownerCode": "PRIMAVISTA",
                     "warehouseCode": "AVI",
 #                     "product": "" if record['default_code'] == False else record['default_code'],
-                    "product": "" if passing_var['default_code'] == False else passing_var['default_code'],
+                    "product": default_code,
                     "desc1": "" if record['product_tmpl_id']['name'] == False else record['product_tmpl_id']['name'],
                     "brandName": "",
                     "baseUOM": "" if record['product_tmpl_id']['uom_id']['name'] == False else record['product_tmpl_id']['uom_id']['name'],
@@ -931,8 +996,7 @@ class ApiController(models.Model):
                     "palletCtrl": "",
                     "capSerialOut": "",
 #                     "price": "" if record['standard_price'] == False else record['standard_price']
-                    "price": "" if passing_var['standard_price'] == False else passing_var['standard_price'],
-#                     "yuhuu": passing_var
+                    "price": standard_price
                 }
             ]
         }
