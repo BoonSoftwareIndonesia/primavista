@@ -164,7 +164,6 @@ class StockReturnPickingExt(models.TransientModel):
 class ImportInheritExt(models.TransientModel):
     _inherit = 'base_import.import'
 
-#     @api.multi
     def execute_import(self, fields, columns, options, dryrun=False):
         if 'test_import' not in self._context:
             res = super(ImportInheritExt, self).with_context(test_import=dryrun).execute_import(fields, columns, options, dryrun)
@@ -179,8 +178,6 @@ class ProductExt(models.Model):
     def create(self, vals_list):
         tmpl_id = vals_list[0]['product_tmpl_id']
         tmpl = request.env['product.template'].search([('id', '=', int(tmpl_id))], limit=1)
-
-#         raise UserError((self._context.get('test_import')))
         
         passing_var = {
             "default_code": tmpl['default_code'],
@@ -192,10 +189,24 @@ class ProductExt(models.Model):
         test_import = self._context.get('test_import')
         if not test_import:
             self.env['product.product'].api_dw_product(products, passing_var)
+        return products
         
 #     def write(self, values):
 #         res = super(ProductExt, self).write(values)
 #         self.env['product.product'].api_dw_product(res, passing_var)
+
+class PartnerExt(models.Model):
+    _inherit = 'res.partner'
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        
+        partners = super(PartnerExt, self).create(vals_list)
+        
+        test_import = self._context.get('test_import')
+        if not test_import:
+            self.env['res.partner'].api_dw_customer(partners)
+        return partners
     
 # API VEN MODEL ==========================================================================
 class api_ven(models.Model):
