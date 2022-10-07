@@ -193,29 +193,18 @@ class ProductTemplateExt(models.Model):
             res = super(ProductTemplateExt, self).copy(default=default)
         return res
     
-#     @api.model_create_multi
-#     def create(self, vals_list):
-#         if 'default_code' in vals_list[0].keys():
-#             def_code = vals_list[0]['default_code']
-        
-#             if def_code != False:
-#                 duplicates = request.env['product.template'].search([('default_code','=',def_code)])
-#                 if duplicates:
-#                     raise UserError('Product Code ' + str(def_code) + ' has existed')
-        
-#         res = super(ProductTemplateExt, self).create(vals_list)
-#         return res
-    
     def write(self, vals):
         res = super(ProductTemplateExt, self).write(vals)
-        product = request.env['product.product'].search([('default_code', '=', self.default_code)], limit=1)
-        passing_var = {
-            "default_code": False,
-            "standard_price": False
-        }
-        test_import = self._context.get('test_import')
-        if not test_import:
-            self.env['product.product'].api_dw_product(product, passing_var)
+        
+        if self.default_code:
+            product = request.env['product.product'].search([('default_code', '=', self.default_code)], limit=1)
+            passing_var = {
+                "default_code": False,
+                "standard_price": False
+            }
+            test_import = self._context.get('test_import')
+            if not test_import:
+                self.env['product.product'].api_dw_product(product, passing_var)
         return res
     
 class ProductExt(models.Model):
@@ -236,12 +225,6 @@ class ProductExt(models.Model):
     def create(self, vals_list):
         tmpl_id = vals_list[0]['product_tmpl_id']
         tmpl = request.env['product.template'].search([('id', '=', int(tmpl_id))], limit=1)
-        
-#         if tmpl['default_code'] != False:
-#             duplicates = request.env['product.template'].search([('id','!=',int(tmpl_id)),('default_code','=',tmpl['default_code'])])
-#             if duplicates:
-#                 raise UserError('Product Code ' + str(tmpl['default_code']) + ' has existed')    
-        
         passing_var = {
             "default_code": tmpl['default_code'],
             "standard_price": tmpl['standard_price']
@@ -250,36 +233,10 @@ class ProductExt(models.Model):
         products = super(ProductExt, self).create(vals_list)
         
         # only send the data when we click import and not test
-#         test_import = self._context.get('test_import')
         copy_context = self._context.get('copy_context')
         if copy_context:
             self.env['product.product'].api_dw_product(products, passing_var)
-#             self.env.context.update({'copy_context': True})
-#             raise UserError((self._context.get('copy_context')))
-    
-#         if not test_import:
-#             if copy_context:
-#                 self.env['product.product'].api_dw_product(products, passing_var)
-#                 self.with_context({},copy_context=False)
-#                 raise UserError((self._context.get('copy_context')))
         return products
-        
-#     def write(self, values):
-# #         raise UserError((values))
-        
-#         res = super(ProductExt, self).write(values)
-        
-# #         raise UserError((self.name))
-#         product = request.env['product.product'].search([('default_code', '=', self.default_code)], limit=1)
-        
-#         passing_var = {
-#             "default_code": False,
-#             "standard_price": False
-#         }
-        
-#         self.env['product.product'].api_dw_product(product, passing_var)
-        
-#         return res
 
 class PartnerExt(models.Model):
     _inherit = 'res.partner'
