@@ -9,6 +9,7 @@ from odoo import http
 import requests
 from odoo.exceptions import UserError
 from odoo.exceptions import ValidationError
+import re
 
 # override stock move create when PO is confirmed 
 class PurchaseOrderLineExt(models.Model):
@@ -175,36 +176,60 @@ class ImportInheritExt(models.TransientModel):
 class ProductTemplateExt(models.Model):
     _inherit = 'product.template'
     
-    @api.model_create_multi
-    def create(self, vals_list):
-        if 'default_code' in vals_list[0].keys():
-            def_code = vals_list[0]['default_code']
-        
-            if def_code != False:
-                duplicates = request.env['product.template'].search([('default_code','=',def_code)])
-                if duplicates:
-                    raise UserError('Product Code ' + str(def_code) + ' has existed')
-        
-        res = super(ProductTemplateExt, self).create(vals_list)
+    @api.constrains('default_code')
+    def _check_default_code(self):
+        for product_tmpl in self:
+            if product_tmpl.default_code:
+                is_duplicate = False
+                is_duplicate = request.env['product.template'].search([('id','!=',product_tmpl.id),('default_code', '=', product_tmpl.default_code)])
+                if is_duplicate:
+                    raise UserError(('Duplicate exists: ' + product_tmpl.default_code))
+                    
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        if 'copy_context' not in self._context:
+            res = super(ProductTemplateExt, self).with_context(copy_context=True).copy(default=default)
+        else:
+            res = super(ProductTemplateExt, self).copy(default=default)
         return res
+    
+#     @api.model_create_multi
+#     def create(self, vals_list):
+#         if 'default_code' in vals_list[0].keys():
+#             def_code = vals_list[0]['default_code']
+        
+#             if def_code != False:
+#                 duplicates = request.env['product.template'].search([('default_code','=',def_code)])
+#                 if duplicates:
+#                     raise UserError('Product Code ' + str(def_code) + ' has existed')
+        
+#         res = super(ProductTemplateExt, self).create(vals_list)
+#         return res
     
     def write(self, vals):
         res = super(ProductTemplateExt, self).write(vals)
-        
-#         raise UserError((self.default_code))
         product = request.env['product.product'].search([('default_code', '=', self.default_code)], limit=1)
-        
         passing_var = {
             "default_code": False,
             "standard_price": False
         }
-        
-        self.env['product.product'].api_dw_product(product, passing_var)
-        
+        test_import = self._context.get('test_import')
+        if not test_import:
+            self.env['product.product'].api_dw_product(product, passing_var)
         return res
     
 class ProductExt(models.Model):
     _inherit = 'product.product'
+    
+    @api.constrains('default_code')
+    def _check_default_code(self):
+        for product_tmpl in self:
+            if product_tmpl.default_code:
+                is_duplicate = False
+                is_duplicate = request.env['product.product'].search([('id','!=',product_tmpl.id),('default_code', '=', product_tmpl.default_code)])
+                if is_duplicate:
+                    raise UserError(('Duplicate exists: ' + product_tmpl.default_code))
+                    
     
     # triggers the api dw product function that sends an api log when a product is created 
     @api.model_create_multi
@@ -225,9 +250,18 @@ class ProductExt(models.Model):
         products = super(ProductExt, self).create(vals_list)
         
         # only send the data when we click import and not test
-        test_import = self._context.get('test_import')
-        if not test_import:
+#         test_import = self._context.get('test_import')
+        copy_context = self._context.get('copy_context')
+        if copy_context:
             self.env['product.product'].api_dw_product(products, passing_var)
+#             self.env.context.update({'copy_context': True})
+#             raise UserError((self._context.get('copy_context')))
+    
+#         if not test_import:
+#             if copy_context:
+#                 self.env['product.product'].api_dw_product(products, passing_var)
+#                 self.with_context({},copy_context=False)
+#                 raise UserError((self._context.get('copy_context')))
         return products
         
 #     def write(self, values):
@@ -301,6 +335,14 @@ class ApiController(models.Model):
         # PO_LINES: Contains every product in the PO
         line_no = 1
         po_lines = []
+        res = ""
+        unique_res = ""
+        
+        
+        if record['origin']:
+            res = re.findall(r'S[\w\/]*', record['origin'])
+            unique_res = str(set(res))
+        
         
         for line in record['order_line']:
             line['x_studio_opt_char_1'] = str(line_no)
@@ -336,7 +378,7 @@ class ApiController(models.Model):
                     "poDate": "" if record['date_approve'] == False else datetime.strftime(record['date_approve'], '%d/%m/%Y'),
                     "expectedArrivalDate": "" if record['date_planned'] == False else datetime.strftime(record['date_planned'], '%d/%m/%Y'),
                     "otherReferences": "",
-                    "remark1": "",
+                    "remark1": "" if unique_res == False else unique_res,
                     "doNo": "",
 #                     "ownerReferences":"",
 #                     "poNo":"15220014721",
@@ -839,7 +881,7 @@ class ApiControllerStockPicking(models.Model):
         
         
 # CUSTOMER  ==========================================================================
-class ApiController(models.Model):
+class ApiControllerPartner(models.Model):
     _inherit = "res.partner"
     
     def api_dw_customer(self, record):
@@ -940,7 +982,7 @@ class ApiController(models.Model):
         
         
 # PRODUCT  ==========================================================================
-class ApiController(models.Model):
+class ApiControllerProduct(models.Model):
     _inherit = "product.product"
     
     def api_dw_product(self, record, passing_var):
