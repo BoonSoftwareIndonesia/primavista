@@ -2,7 +2,6 @@ odoo.define('api_ven.CheckinButton', function(require){
     'use strict';
     
     console.log('Checkin Widget Started');
-//     var FormController = require('web.FormController')
     
     var core = require('web.core');
     var QWeb = core.qweb;
@@ -12,7 +11,6 @@ odoo.define('api_ven.CheckinButton', function(require){
     
     var Checkin = Widget.extend({
         calendarId: -1,
-//         selector: ".checkin_button.o_widget",
         selector: "#checkin_btn",
         template: 'CheckinButton',
         model: "calendar.event",
@@ -21,6 +19,7 @@ odoo.define('api_ven.CheckinButton', function(require){
         },
         eventId: -1,
         init: function () {
+//             What happens when the widget is first initialized
             var self = this;
             this._super.apply(this, arguments);
             
@@ -31,32 +30,34 @@ odoo.define('api_ven.CheckinButton', function(require){
                 console.log("Init with id: " + self.eventId);
             }, 1000);
             
-            console.log(document.getElementById('checkin_text').innerHTML);
+            console.log(self.$el.find(['[id="checkin_text"]']));
             console.log('Updated');
         },
-        _render: function(){
-            var self = this;
-            let res = rpc.query({
-                model: self.model,
-                method: 'get_check_status',
-                args:[("eventId", '=',self.eventId)]
-            }).then(function(result){
-                console.log("Result rpc: " + result);
+//         _render: function(){
+//             var self = this;
+//             let res = rpc.query({
+//                 model: self.model,
+//                 method: 'get_check_status',
+//                 args:[("eventId", '=',self.eventId)]
+//             }).then(function(result){
+//                 console.log("Result rpc: " + result);
                 
-//                 Still not working, span not selected
-                console.log(document.getElementById('checkin_text').innerHTML);
+// //                 Still not working, span not selected
+//                 console.log(document.getElementById('checkin_text').innerHTML);
 
-                if(result && !(self.$('span#checkin_text').hasClass('text-warning'))){
-                    self.$('#checkin_btn > span#checkin_text').addClass('text-warning');
-                }
-            }).catch(function(err){
-                console.log(err);
-            });
-        },
+//                 if(result && !(self.$('span#checkin_text').hasClass('text-warning'))){
+//                     self.$('#checkin_btn > span#checkin_text').addClass('text-warning');
+//                 }
+//             }).catch(function(err){
+//                 console.log(err);
+//             });
+//         },
         _onClick: function(){
+//             var self = this to make sure the self refers to the record, not the navigator
             var self = this;
             let dist;
             
+//             navigator for user's location, jQuery to get calendar event's lat long loc
             navigator.geolocation.getCurrentPosition(function(position){
                 // Get lat long via jquery
                 let locLat = $("td > span[name='x_studio_latitude']").text();
@@ -65,6 +66,7 @@ odoo.define('api_ven.CheckinButton', function(require){
 
                 if(loc == 'Online'){
                     //Online
+//                    Check event as True, show notification, reload window to update the render
                     console.log('Online');
                     self._checkingEvent();
                     self._showNotification('Success', 'Online checkin success!');
@@ -74,12 +76,14 @@ odoo.define('api_ven.CheckinButton', function(require){
                 
                 if(loc == ""){
                     //None
+//                     No need to reload, nothing to be rendered again
                     console.log('No location');
                     //Show notification no location
                     self._showNotification('Failed', 'No location is attached to the calendar event. Please edit and fill in the location.');
                     return;
                 }
                 
+//                 Calculate distance using Haversine formula
                 dist = self._getDistance(position.coords.longitude, position.coords.latitude, locLong, locLat);
                 console.log("From on click " + dist);
                 let notifString ="You are currently " + dist + " km away from the meeting location";
@@ -98,6 +102,7 @@ odoo.define('api_ven.CheckinButton', function(require){
             });
         },
         _showNotification: function(notifTitle, notifMsg){
+//             Using rpc to call method from model
             var self = this;
             let res = rpc.query({
                 model: self.model,
@@ -124,6 +129,7 @@ odoo.define('api_ven.CheckinButton', function(require){
             });
         },
         _getParsedUrl: function(url){
+//             Getting calendar event's id from url
             let result = "";
             let indexIdStart = url.indexOf('#id='); //Getting the '#' index
             let indexIdEnd = url.indexOf('&'); //Getting index '&' in '#id=9&'
@@ -179,9 +185,12 @@ odoo.define('api_ven.CheckinButton', function(require){
         return this * Math.PI / 180;
     } 
     
+//     Register the widget in odoo System
     widgetRegistry.add(
         'CheckinButton', Checkin
     );
     
     return Checkin;
 });
+
+//The widget's UI is in api_ven/static/src/xml. We put it in odoo's module by calling it in in api_ven/views/. The widget's logic is in this file. And the method called from rpc is in the model.

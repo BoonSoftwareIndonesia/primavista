@@ -49,12 +49,14 @@ class CalendarEventExt(models.Model):
     
     @api.model
     def checking_in(self, eventId):
+#         Changing calendar event check status to True
         curr_pick = request.env['calendar.event'].search([('id', '=', int(eventId))], limit=1)
         curr_pick.update({'x_studio_check_status': True})
         return True
     
     @api.model
     def get_check_status(self, eventId):
+#         Getting check status of the calendar event
         curr_pick = request.env['calendar.event'].search([('id', '=', int(eventId))], limit=1)
         return curr_pick.x_studio_check_status
     
@@ -89,11 +91,15 @@ class CalendarEventExt(models.Model):
     
     @api.depends('location')
     def _compute_lat_long(self):
+#         Setting lat and long from the record location
+#         Accessing google API not implemented
         for rec in self:
             if rec.location == 'Online' or not rec.location:
+#                 If there is no location or the location is online, the lat and long will be 0, 0
                 rec.x_studio_latitude = None
                 rec.x_studio_longitude = None
             elif rec.location:
+#                 Should be changed with the long and lat from google API
                 rec.x_studio_latitude = 20
                 rec.x_studio_longitude = 10
 
@@ -162,17 +168,28 @@ class StockReturnPickingExt(models.TransientModel):
         curr_pick.move_lines.move_line_ids.write({'x_wms_rec_no': wms_no})
         return new_picking, pick_type_id
 
+    
 class ImportInheritExt(models.TransientModel):
     _inherit = 'base_import.import'
 
-    # set the context from the dry run value
     def execute_import(self, fields, columns, options, dryrun=False):
+        # if user clicks import, set the dryrun and test_import context to True so we always test first before importing
+        # this is to prevent odoo from sending an api log to wms when the user clicks import and there is an error in the file
+        if dryrun == False:
+            res = super(ImportInheritExt, self).with_context(test_import=True).execute_import(fields, columns, options, True)
+            # if the messages is not [], there is an error, so just return
+            # if the message is [], there is no error, so proceed 
+            if str(res['messages']) != '[]':
+                   return res
+        
         if 'test_import' not in self._context:
+            # if the context haven't been set, set the context
             res = super(ImportInheritExt, self).with_context(test_import=dryrun).execute_import(fields, columns, options, dryrun)
         else:
             res = super(ImportInheritExt, self).execute_import(fields, columns, options, dryrun)
         return res
 
+    
 class ProductTemplateExt(models.Model):
     _inherit = 'product.template'
     
@@ -193,19 +210,33 @@ class ProductTemplateExt(models.Model):
             res = super(ProductTemplateExt, self).copy(default=default)
         return res
     
+    @api.model_create_multi
+    def create(self, vals_list):
+        
+        products = super(ProductTemplateExt, self).create(vals_list)
+        
+        # check the context, if it is not a test, then send api log to wms
+        test_import = self._context.get('test_import')
+        if not test_import:
+            self.env['product.template'].api_dw_product(products)
+            
+        return products
+            
+        
     def write(self, vals):
         res = super(ProductTemplateExt, self).write(vals)
         
-        if self.default_code:
-            product = request.env['product.product'].search([('default_code', '=', self.default_code)], limit=1)
-            passing_var = {
-                "default_code": False,
-                "standard_price": False
-            }
+        if self.write_date != self.create_date:
+            # the result of the super() is a bool, so we need to search for the product template object to pass to the api function
+            product = request.env['product.template'].search([('id', '=', self.id)], limit=1)
+            
             test_import = self._context.get('test_import')
-            if not test_import:
-                self.env['product.product'].api_dw_product(product, passing_var)
+            copy_context = self._context.get('copy_context')
+            # if we are not testing and duplicating
+            if not test_import and not copy_context:
+                self.env['product.template'].api_dw_product(product)
         return res
+    
     
 class ProductExt(models.Model):
     _inherit = 'product.product'
@@ -218,26 +249,7 @@ class ProductExt(models.Model):
                 is_duplicate = request.env['product.product'].search([('id','!=',product_tmpl.id),('default_code', '=', product_tmpl.default_code)])
                 if is_duplicate:
                     raise UserError(('Duplicate exists: ' + product_tmpl.default_code))
-                    
-    
-    # triggers the api dw product function that sends an api log when a product is created 
-    @api.model_create_multi
-    def create(self, vals_list):
-        tmpl_id = vals_list[0]['product_tmpl_id']
-        tmpl = request.env['product.template'].search([('id', '=', int(tmpl_id))], limit=1)
-        passing_var = {
-            "default_code": tmpl['default_code'],
-            "standard_price": tmpl['standard_price']
-        }
-        
-        products = super(ProductExt, self).create(vals_list)
-        
-        # only send the data when we click import and not test
-        copy_context = self._context.get('copy_context')
-        if copy_context:
-            self.env['product.product'].api_dw_product(products, passing_var)
-        return products
-
+ 
 class PartnerExt(models.Model):
     _inherit = 'res.partner'
     
@@ -843,7 +855,7 @@ class ApiControllerPartner(models.Model):
     
     def api_dw_customer(self, record):
             
-#       PROSES KIRIM API (DIGANTI JADI APA ????????????????)
+#       PROSES KIRIM API 
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createcustomer"
         
         payload = {
@@ -940,24 +952,11 @@ class ApiControllerPartner(models.Model):
         
 # PRODUCT  ==========================================================================
 class ApiControllerProduct(models.Model):
-    _inherit = "product.product"
+    _inherit = "product.template"
     
-    def api_dw_product(self, record, passing_var):
-#         raise UserError((record['product_tmpl_id']['default_code']))    
-#       PROSES KIRIM API (DIGANTI JADI APA ????????????????)
+    def api_dw_product(self, record):
+        # PROSES KIRIM API 
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
-    
-        standard_price = ""
-        if passing_var['standard_price'] != False:
-            standard_price = passing_var['standard_price']
-        elif record['standard_price'] != False:
-            standard_price = record['standard_price']
-        
-        default_code = ""
-        if passing_var['default_code'] != False:
-            default_code = passing_var['default_code']
-        elif record['default_code'] != False:
-            default_code = record['default_code']
         
         payload = {
             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
@@ -966,36 +965,34 @@ class ApiControllerProduct(models.Model):
                 {
                     "ownerCode": "PRIMAVISTA",
                     "warehouseCode": "AVI",
-#                     "product": "" if record['default_code'] == False else record['default_code'],
-                    "product": default_code,
-                    "desc1": "" if record['product_tmpl_id']['name'] == False else record['product_tmpl_id']['name'],
+                    "product": "" if record['default_code'] == False else record['default_code'],
+                    "desc1": "" if record['name'] == False else record['name'],
                     "brandName": "",
-                    "baseUOM": "" if record['product_tmpl_id']['uom_id']['name'] == False else record['product_tmpl_id']['uom_id']['name'],
+                    "baseUOM": "" if record['uom_id']['name'] == False else record['uom_id']['name'],
                     "prodGroup": "NA",
                     "subPrdGrp": "NA",
                     "storageType": "AB-RACK",
                     "altStorageType": "AB-BULK",
-                    "wholeUOM": "" if record['product_tmpl_id']['uom_id']['name'] == False else record['product_tmpl_id']['uom_id']['name'],
-                    "wholeDenomination": "" if record['product_tmpl_id']['uom_id']['ratio'] == False else record['product_tmpl_id']['uom_id']['ratio'],
+                    "wholeUOM": "" if record['uom_id']['name'] == False else record['uom_id']['name'],
+                    "wholeDenomination": "" if record['uom_id']['ratio'] == False else record['uom_id']['ratio'],
                     "palletDeno": "100",
                     "volume": "1",
                     "weight": "1",
                     "length": "",
                     "breadth": "",
                     "height": "",
-                    "archived": "" if record['product_tmpl_id']['active'] == False else record['product_tmpl_id']['active'],
+                    "archived": "" if record['active'] == False else record['active'],
                     "prodStatus": "N",
                     "inbLeadtime2expiry": "",
                     "leadtime2expiry": "",
                     "shelfLife": "",
                     "issueType": "1",
-                    "lotNoCtrl": "" if record['product_tmpl_id']['tracking'] == False else record['product_tmpl_id']['tracking'],
+                    "lotNoCtrl": "" if record['tracking'] == False else record['tracking'],
                     "autoSerial": "",
                     "expDateCtrl": "",
                     "palletCtrl": "",
                     "capSerialOut": "",
-#                     "price": "" if record['standard_price'] == False else record['standard_price']
-                    "price": standard_price
+                    "price": "" if record['standard_price'] == False else record['standard_price']
                 }
             ]
         }
@@ -1064,4 +1061,5 @@ class ApiControllerProduct(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
+        
 

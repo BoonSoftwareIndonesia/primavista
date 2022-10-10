@@ -29,7 +29,7 @@
         'views/templates.xml',
         'views/location.xml',
     ],
-#     
+    
     'assets': {
         'web.assets_backend': [
             'api_ven/static/src/js/checkin_button.js',
