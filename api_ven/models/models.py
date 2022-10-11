@@ -45,7 +45,7 @@ class CalendarEventExt(models.Model):
     _inherit = 'calendar.event'
     x_studio_latitude = fields.Float('Location Latitude', compute = '_compute_lat_long')
     x_studio_longitude = fields.Float('Location Longitude', compute = '_compute_lat_long')
-    x_studio_check_status = fields.Boolean('Check in status of the meeting', default = False)
+    x_studio_check_status = fields.Boolean('Check in status of the meeting', default = False, copy = False)
     
     @api.model
     def checking_in(self, eventId):
@@ -59,6 +59,19 @@ class CalendarEventExt(models.Model):
 #         Getting check status of the calendar event
         curr_pick = request.env['calendar.event'].search([('id', '=', int(eventId))], limit=1)
         return curr_pick.x_studio_check_status
+    
+    @api.model
+    def send_notification(self, val_list=None):
+        notification = {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': val_list[0],
+                'message': val_list[1],
+                'sticky': True,
+            }
+        }
+        return notification
     
     @api.model
     def action_test(self, val_list=None):
@@ -253,7 +266,16 @@ class ProductExt(models.Model):
 class PartnerExt(models.Model):
     _inherit = 'res.partner'
     
-    # triggers the api dw product function that sends an api log when a product is created 
+#     @api.constrains('x_studio_customer_id')
+#     def _check_x_studio_customer_id(self):
+#         for cust in self:
+#             if cust.x_studio_customer_id:
+#                 is_duplicate = False
+#                 is_duplicate = request.env['res.partner'].search([('id','!=',cust.id),('x_studio_customer_id', '=',cust.x_studio_customer_id)])
+#                 if is_duplicate:
+#                     raise UserError(('Duplicate exists: ' + cust.x_studio_customer_id))
+    
+    # triggers the api dw product function that sends an api log when a customer is created 
     @api.model_create_multi
     def create(self, vals_list):
         partners = super(PartnerExt, self).create(vals_list)
@@ -263,6 +285,20 @@ class PartnerExt(models.Model):
         if not test_import:
             self.env['res.partner'].api_dw_customer(partners)
         return partners
+    
+    def write(self,vals):
+        res = super(PartnerExt, self).write(vals)
+        
+        if self.write_date != self.create_date:
+            # the result of the super() is a bool, so we need to search for the product template object to pass to the api function
+            partners = request.env['res.partner'].search([('id', '=', self.id)], limit=1)
+
+            test_import = self._context.get('test_import')
+            copy_context = self._context.get('copy_context')
+            # if we are not testing and duplicating
+            if not test_import and not copy_context:
+                self.env['res.partner'].api_dw_customer(partners)
+        return res
     
 # API VEN MODEL ==========================================================================
 class api_ven(models.Model):
@@ -869,8 +905,8 @@ class ApiControllerPartner(models.Model):
                     "custGroup": "" if record['x_studio_customer_group'] == False else record['x_studio_customer_group'],
                     "address1": "" if record['street'] == False else record['street'],
                     "city": "" if record['city'] == False else record['city'],
-                    "state": "" if record['state_id']['name'] == False else record['state_id']['name'],
-                    "zipCode": "" if record['zip'] == False else record['zip'],
+                    "state": "" if record['state_id']['name'] == False else str(record['state_id']['name']).upper(),
+                    "zipCode": "12345" if record['zip'] == False else record['zip'],
                     "country": "" if record['country_id']['name'] == False else record['country_id']['name'],
                     "route": "NA",
                     "zone": "NA",
@@ -968,13 +1004,13 @@ class ApiControllerProduct(models.Model):
                     "product": "" if record['default_code'] == False else record['default_code'],
                     "desc1": "" if record['name'] == False else record['name'],
                     "brandName": "",
-                    "baseUOM": "" if record['uom_id']['name'] == False else record['uom_id']['name'],
+                    "baseUOM": "" if record['uom_id']['name'] == False else str(record['uom_id']['name']).upper(),
                     "prodGroup": "NA",
                     "subPrdGrp": "NA",
                     "storageType": "AB-RACK",
                     "altStorageType": "AB-BULK",
-                    "wholeUOM": "" if record['uom_id']['name'] == False else record['uom_id']['name'],
-                    "wholeDenomination": "" if record['uom_id']['ratio'] == False else record['uom_id']['ratio'],
+                    "wholeUOM": "" if record['uom_id']['name'] == False else str(record['uom_id']['name']).upper(),
+                    "wholeDenomination": "" if record['uom_id']['ratio'] == False else str(int(record['uom_id']['ratio'])),
                     "palletDeno": "100",
                     "volume": "1",
                     "weight": "1",

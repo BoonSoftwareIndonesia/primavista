@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id='template' xml:space='preserve'>
     <t t-name='CheckinButton'>
-        <button id='checkin_btn' type='button' class='btn oe_stat_button'>
+        <button id='checkin_btn' type='button' class='oe_read_only btn oe_stat_button'>
             <span id='checkin_text'>Checkin</span>
         </button>
     </t>

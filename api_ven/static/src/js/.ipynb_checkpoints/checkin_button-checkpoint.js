@@ -10,7 +10,6 @@ odoo.define('api_ven.CheckinButton', function(require){
     var rpc = require('web.rpc');
     
     var Checkin = Widget.extend({
-        calendarId: -1,
         selector: "#checkin_btn",
         template: 'CheckinButton',
         model: "calendar.event",
@@ -19,7 +18,7 @@ odoo.define('api_ven.CheckinButton', function(require){
         },
         eventId: -1,
         init: function () {
-//             What happens when the widget is first initialized
+//          What happens when the widget is first initialized
             var self = this;
             this._super.apply(this, arguments);
             
@@ -30,8 +29,7 @@ odoo.define('api_ven.CheckinButton', function(require){
                 console.log("Init with id: " + self.eventId);
             }, 1000);
             
-            console.log(self.$el.find(['[id="checkin_text"]']));
-            console.log('Updated');
+//             console.log('Updated');
         },
 //         _render: function(){
 //             var self = this;
@@ -56,6 +54,12 @@ odoo.define('api_ven.CheckinButton', function(require){
 //             var self = this to make sure the self refers to the record, not the navigator
             var self = this;
             let dist;
+
+//          Check if event ID is really set
+            if(self.eventId == -1){
+                self.eventId = self._getParsedUrl(window.location.href);
+                console.log("Event ID changed to: " + self.eventId)
+            }
             
 //             navigator for user's location, jQuery to get calendar event's lat long loc
             navigator.geolocation.getCurrentPosition(function(position){
@@ -106,7 +110,7 @@ odoo.define('api_ven.CheckinButton', function(require){
             var self = this;
             let res = rpc.query({
                 model: self.model,
-                method: 'action_test',
+                method: 'send_notification',
                 args: [[notifTitle, notifMsg]]
             }).then(function(result){
                 console.log("Result rpc " + result);
@@ -129,9 +133,14 @@ odoo.define('api_ven.CheckinButton', function(require){
             });
         },
         _getParsedUrl: function(url){
-//             Getting calendar event's id from url
+//          Getting calendar event's id from url
             let result = "";
             let indexIdStart = url.indexOf('#id='); //Getting the '#' index
+            
+            if (indexIdStart == -1){
+                return -1;
+            }
+            
             let indexIdEnd = url.indexOf('&'); //Getting index '&' in '#id=9&'
             indexIdStart += 4; //Getting index after '='
             result = url.slice(indexIdStart, indexIdEnd);
