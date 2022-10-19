@@ -255,9 +255,7 @@ class ApiVen(http.Controller):
                         lines.append(line["inwardLineOptChar1"])
         
                         # check if qty received is partial or not
-                        if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-                            is_partial = False
-                        else:
+                        if receipt_line['product_uom_qty'] > receipt_line['quantity_done']:
                             is_partial = True
 
                     # INDENT  =========================
@@ -505,9 +503,7 @@ class ApiVen(http.Controller):
                     lines.append(line["soLineOptChar1"])
 
                     # Check if qty received is partial or not
-                    if receipt_line['product_uom_qty'] == receipt_line['quantity_done']:
-                        is_partial = False
-                    else:
+                    if receipt_line['product_uom_qty'] > receipt_line['quantity_done']:
                         is_partial = True
 
                 # INDENT  ==========================
@@ -706,9 +702,7 @@ class ApiVen(http.Controller):
                     lines.append(line["soLineOptChar1"])
                     
                     # Check partial receipt
-                    if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
-                        is_partial = False
-                    else:
+                    if dispatch_line['product_uom_qty'] > dispatch_line['quantity_done']:
                         is_partial = True
                     
     #           INDENT===============
@@ -903,9 +897,7 @@ class ApiVen(http.Controller):
                     lines.append(line["inwardLineOptChar1"])
                     
                     # Check partial receipt
-                    if dispatch_line['product_uom_qty'] == dispatch_line['quantity_done']:
-                        is_partial = False
-                    else:
+                    if dispatch_line['product_uom_qty'] > dispatch_line['quantity_done']:
                         is_partial = True
                     
     #           INDENT===============
