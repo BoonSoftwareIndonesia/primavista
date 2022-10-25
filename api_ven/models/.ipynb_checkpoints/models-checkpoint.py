@@ -81,8 +81,6 @@ class api_ven(models.Model):
         return result
 
     
-    
-    
 # PURCHASE ORDER ==========================================================================
 class ApiController(models.Model):
     _inherit = "purchase.order"
@@ -221,11 +219,6 @@ class ApiController(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-#         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-
-
-
-
 
 # SALES ORDER ==========================================================================        
 class ApiControllerSO(models.Model):
@@ -354,5 +347,3 @@ class ApiControllerSO(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-        
-#         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
