@@ -54,7 +54,6 @@ class SaleOrderLineExt(models.Model):
         res = super(SaleOrderLineExt, self)._prepare_procurement_values(group_id)
         res.update({'x_studio_opt_char_1': self.x_studio_line_no})
         return res
-
     
 # API VEN MODEL ==========================================================================
 class api_ven(models.Model):
@@ -220,10 +219,6 @@ class ApiController(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-#         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-
-
-
 
 
 # SALES ORDER ==========================================================================        
@@ -354,6 +349,3 @@ class ApiControllerSO(models.Model):
             'mimetype': 'text/plain'
         })
         
-#         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-
-

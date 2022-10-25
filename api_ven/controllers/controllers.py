@@ -336,8 +336,6 @@ class ApiVen(http.Controller):
             # If there is a partial order, we do not change it to stock.immediate as we want to create backorder. 
             # So, we get the stock.picking, and process while also create a backorder.
             receipt_header.with_context(cancel_backorder=False)._action_done()
-
-
     
 #   POST DO ===================================================================================
     @http.route('/web/api/downloaddo', type='json', auth='user', methods=['POST'])
@@ -536,7 +534,6 @@ class ApiVen(http.Controller):
         return message
 
     
-    
     def create_immediate_transfer_so(self, so_name):
         so_obj = request.env['sale.order'].search([('name', '=', so_name )])
         
@@ -554,7 +551,6 @@ class ApiVen(http.Controller):
             'show_transfers': False,
             'immediate_transfer_line_ids': immediate_transfer_line_ids
         })
-
         return res
 
     def validate_delivery(self, do_header, sos, is_partial):
