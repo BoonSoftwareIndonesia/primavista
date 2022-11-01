@@ -202,9 +202,32 @@ class ImportInheritExt(models.TransientModel):
             res = super(ImportInheritExt, self).execute_import(fields, columns, options, dryrun)
         return res
 
+class UomExt(models.Model):
+    _inherit = 'uom.uom'
+    ratio = fields.Float('Combined Ratio', compute='_compute_ratio', inverse='_set_ratio', store=False, required=True)
     
 class ProductTemplateExt(models.Model):
     _inherit = 'product.template'
+    
+    standard_price = fields.Float(
+        'Cost',
+        compute='_compute_standard_price',
+        inverse='_set_standard_price',
+        search='_search_standard_price',
+        required=True,
+        digits='Product Price', 
+        groups="base.group_user",
+        help="""In Standard Price & AVCO: value of the product (automatically computed in AVCO).
+        In FIFO: value of the next unit that will leave the stock (automatically computed).
+        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).
+        Used to compute margins on sale orders.""")
+    default_code = fields.Char(
+        'Internal Reference', 
+        compute='_compute_default_code',
+        inverse='_set_default_code', 
+        store=True, 
+        required=True)
+
     
     @api.constrains('default_code')
     def _check_default_code(self):
@@ -254,6 +277,19 @@ class ProductTemplateExt(models.Model):
 class ProductExt(models.Model):
     _inherit = 'product.product'
     
+    default_code = fields.Char('Internal Reference', index=True, required=True)
+	standard_price = fields.Float(
+        'Cost', 
+        company_dependent=True,
+        digits='Product Price',
+        required=True,
+        groups="base.group_user",
+        help="""In Standard Price & AVCO: value of the product (automatically computed in AVCO).
+        In FIFO: value of the next unit that will leave the stock (automatically computed).
+        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).
+        Used to compute margins on sale orders.""")
+
+    
     @api.constrains('default_code')
     def _check_default_code(self):
         for product_tmpl in self:
@@ -265,6 +301,15 @@ class ProductExt(models.Model):
  
 class PartnerExt(models.Model):
     _inherit = 'res.partner'
+    
+    name = fields.Char(index=True, required=True)
+    x_studio_customer_id = fields.Char(string='Customer ID',required=True)
+    x_studio_customer_group = fields.Char(string='Customer Group',required=True)
+    street = fields.Char(required=True)
+    zip = fields.Char(change_default=True,required=True)
+    city = fields.Char(required=True)
+    state_id = fields.Many2one("res.country.state", string='State', ondelete='restrict', domain="[('country_id', '=?', country_id)]",required=True)
+    country_id = fields.Many2one('res.country', string='Country', ondelete='restrict',required=True)
     
     @api.constrains('x_studio_customer_id')
     def _check_x_studio_customer_id(self):
