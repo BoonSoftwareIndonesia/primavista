@@ -266,14 +266,14 @@ class ProductExt(models.Model):
 class PartnerExt(models.Model):
     _inherit = 'res.partner'
     
-#     @api.constrains('x_studio_customer_id')
-#     def _check_x_studio_customer_id(self):
-#         for cust in self:
-#             if cust.x_studio_customer_id:
-#                 is_duplicate = False
-#                 is_duplicate = request.env['res.partner'].search([('id','!=',cust.id),('x_studio_customer_id', '=',cust.x_studio_customer_id)])
-#                 if is_duplicate:
-#                     raise UserError(('Duplicate exists: ' + cust.x_studio_customer_id))
+    @api.constrains('x_studio_customer_id')
+    def _check_x_studio_customer_id(self):
+        for cust in self:
+            if cust.x_studio_customer_id:
+                is_duplicate = False
+                is_duplicate = request.env['res.partner'].search([('id','!=',cust.id),('x_studio_customer_id', '=',cust.x_studio_customer_id)])
+                if is_duplicate:
+                    raise UserError(('Duplicate exists: ' + cust.x_studio_customer_id))
     
     # triggers the api dw product function that sends an api log when a customer is created 
     @api.model_create_multi
