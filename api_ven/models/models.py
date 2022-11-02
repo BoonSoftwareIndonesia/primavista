@@ -209,25 +209,24 @@ class UomExt(models.Model):
 class ProductTemplateExt(models.Model):
     _inherit = 'product.template'
     
-    standard_price = fields.Float(
-        'Cost',
-        compute='_compute_standard_price',
-        inverse='_set_standard_price',
-        search='_search_standard_price',
-        required=True,
-        digits='Product Price', 
-        groups="base.group_user",
-        help="""In Standard Price & AVCO: value of the product (automatically computed in AVCO).
-        In FIFO: value of the next unit that will leave the stock (automatically computed).
-        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).
-        Used to compute margins on sale orders.""")
+#     standard_price = fields.Float(
+#         'Cost',
+#         compute='_compute_standard_price',
+#         inverse='_set_standard_price',
+#         search='_search_standard_price',
+#         required=True,
+#         digits='Product Price', 
+#         groups="base.group_user",
+#         help="""In Standard Price & AVCO: value of the product (automatically computed in AVCO).
+#         In FIFO: value of the next unit that will leave the stock (automatically computed).
+#         Used to value the product when the purchase cost is not known (e.g. inventory adjustment).
+#         Used to compute margins on sale orders.""")
     default_code = fields.Char(
         'Internal Reference', 
         compute='_compute_default_code',
         inverse='_set_default_code', 
         store=True, 
         required=True)
-
     
     @api.constrains('default_code')
     def _check_default_code(self):
@@ -248,6 +247,12 @@ class ProductTemplateExt(models.Model):
     
     @api.model_create_multi
     def create(self, vals_list):
+#         raise UserError((vals_list))
+        
+        if vals_list[0]['default_code'] is False:
+            raise UserError(('Internal reference cannot be null (product template-create)'))
+        if vals_list[0]['standard_price'] is False:
+            raise UserError(('Cost cannot be null (product template-create)'))
         
         products = super(ProductTemplateExt, self).create(vals_list)
         
@@ -278,17 +283,16 @@ class ProductExt(models.Model):
     _inherit = 'product.product'
     
     default_code = fields.Char('Internal Reference', index=True, required=True)
-	standard_price = fields.Float(
-        'Cost', 
-        company_dependent=True,
-        digits='Product Price',
-        required=True,
-        groups="base.group_user",
-        help="""In Standard Price & AVCO: value of the product (automatically computed in AVCO).
-        In FIFO: value of the next unit that will leave the stock (automatically computed).
-        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).
-        Used to compute margins on sale orders.""")
-
+#     standard_price = fields.Float(
+#         'Cost',
+#         company_dependent=True,
+#         digits='Product Price',
+#         required=True,
+#         groups="base.group_user",
+#         help="""In Standard Price & AVCO: value of the product (automatically computed in AVCO). 
+#         In FIFO: value of the next unit that will leave the stock (automatically computed). 
+#         Used to value the product when the purchase cost is not known (e.g. inventory adjustment). 
+#         Used to compute margins on sale orders.""")
     
     @api.constrains('default_code')
     def _check_default_code(self):
