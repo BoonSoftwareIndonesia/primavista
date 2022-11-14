@@ -163,7 +163,7 @@ class StockReturnPickingExt(models.TransientModel):
         if "IN" in in_num:
             trans_code = "POR"
         else:
-            trans_code = "GRA"
+            trans_code = "GRN"
         
         # Get the source stock.picking (origin)
         source = request.env['stock.picking'].search([('name', '=', in_num)], limit=1)
@@ -205,22 +205,11 @@ class ImportInheritExt(models.TransientModel):
 class UomExt(models.Model):
     _inherit = 'uom.uom'
     ratio = fields.Float('Combined Ratio', compute='_compute_ratio', inverse='_set_ratio', store=False, required=True)
-    
+
+# PRODUCT TEMPLATE API =======================================================
 class ProductTemplateExt(models.Model):
     _inherit = 'product.template'
     
-#     standard_price = fields.Float(
-#         'Cost',
-#         compute='_compute_standard_price',
-#         inverse='_set_standard_price',
-#         search='_search_standard_price',
-#         required=True,
-#         digits='Product Price', 
-#         groups="base.group_user",
-#         help="""In Standard Price & AVCO: value of the product (automatically computed in AVCO).
-#         In FIFO: value of the next unit that will leave the stock (automatically computed).
-#         Used to value the product when the purchase cost is not known (e.g. inventory adjustment).
-#         Used to compute margins on sale orders.""")
     default_code = fields.Char(
         'Internal Reference', 
         compute='_compute_default_code',
@@ -248,11 +237,11 @@ class ProductTemplateExt(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
 #         raise UserError((vals_list))
-        
-        if vals_list[0]['default_code'] is False:
-            raise UserError(('Internal reference cannot be null (product template-create)'))
-        if vals_list[0]['standard_price'] is False:
-            raise UserError(('Cost cannot be null (product template-create)'))
+        if not self._context.get('copy_context'):
+            if vals_list[0]['default_code'] is False:
+                raise UserError(('Internal reference cannot be null (product template-create)'))
+            if vals_list[0]['standard_price'] is False:
+                raise UserError(('Cost cannot be null (product template-create)'))
         
         products = super(ProductTemplateExt, self).create(vals_list)
         
@@ -278,21 +267,11 @@ class ProductTemplateExt(models.Model):
                 self.env['product.template'].api_dw_product(product)
         return res
     
-    
+# PRODUCT =======================================================
 class ProductExt(models.Model):
     _inherit = 'product.product'
     
     default_code = fields.Char('Internal Reference', index=True, required=True)
-#     standard_price = fields.Float(
-#         'Cost',
-#         company_dependent=True,
-#         digits='Product Price',
-#         required=True,
-#         groups="base.group_user",
-#         help="""In Standard Price & AVCO: value of the product (automatically computed in AVCO). 
-#         In FIFO: value of the next unit that will leave the stock (automatically computed). 
-#         Used to value the product when the purchase cost is not known (e.g. inventory adjustment). 
-#         Used to compute margins on sale orders.""")
     
     @api.constrains('default_code')
     def _check_default_code(self):
@@ -302,18 +281,19 @@ class ProductExt(models.Model):
                 is_duplicate = request.env['product.product'].search([('id','!=',product_tmpl.id),('default_code', '=', product_tmpl.default_code)])
                 if is_duplicate:
                     raise UserError(('Duplicate exists: ' + product_tmpl.default_code))
- 
+
+# PARTNER API =======================================================
 class PartnerExt(models.Model):
     _inherit = 'res.partner'
     
     name = fields.Char(index=True, required=True)
-    x_studio_customer_id = fields.Char(string='Customer ID',required=True)
-    x_studio_customer_group = fields.Char(string='Customer Group',required=True)
-    street = fields.Char(required=True)
-    zip = fields.Char(change_default=True,required=True)
-    city = fields.Char(required=True)
+    x_studio_customer_id = fields.Char(string='Customer ID',copy=False)
+    x_studio_customer_group = fields.Char(string='Customer Group',default='IOC')
+    street = fields.Char(default='NA')
+    zip = fields.Char(change_default=True,default='12345')
+    city = fields.Char(default='NA')
     state_id = fields.Many2one("res.country.state", string='State', ondelete='restrict', domain="[('country_id', '=?', country_id)]",required=True)
-    country_id = fields.Many2one('res.country', string='Country', ondelete='restrict',required=True)
+    country_id = fields.Many2one('res.country', string='Country', ondelete='restrict',default=100)
     
     @api.constrains('x_studio_customer_id')
     def _check_x_studio_customer_id(self):
@@ -323,11 +303,42 @@ class PartnerExt(models.Model):
                 is_duplicate = request.env['res.partner'].search([('id','!=',cust.id),('x_studio_customer_id', '=',cust.x_studio_customer_id)])
                 if is_duplicate:
                     raise UserError(('Duplicate exists: ' + cust.x_studio_customer_id))
+                    
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        if 'copy_context' not in self._context:
+            res = super(PartnerExt, self).with_context(copy_context=True).copy(default=default)
+        else:
+            res = super(PartnerExt, self).copy(default=default)
+        return res
+    
+    # function to set default value if null
+    def set_default(self,partners):
+        if not partners.x_studio_customer_group:
+            partners.x_studio_customer_group = "IOC"
+        if not partners.street:
+            partners.street = "NA"
+        if not partners.city:
+            partners.city = "NA"
+        if not partners.zip:
+            partners.zip = "12345"
+        if not partners.country_id:
+            partners.country_id = 100
     
     # triggers the api dw product function that sends an api log when a customer is created 
     @api.model_create_multi
     def create(self, vals_list):
+        
+        if not self._context.get('copy_context'):
+            if vals_list[0]['x_studio_customer_id'] is False:
+                raise UserError(('Internal reference cannot be null (partner-create)'))
+                
+            if vals_list[0]['state_id'] is False:
+                raise UserError(('State cannot be null (partner-create)'))
+                
         partners = super(PartnerExt, self).create(vals_list)
+        
+        self.set_default(partners)
         
         # only send the data when we click import and not test
         test_import = self._context.get('test_import')
@@ -662,7 +673,7 @@ class ApiControllerStockPicking(models.Model):
     def api_return_po(self, record):
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
         
-        wms_no = 0
+        wms_no = ""
         line_no = 1
         item_lines = []
         origin_name = ""
@@ -803,7 +814,7 @@ class ApiControllerStockPicking(models.Model):
         po_lines = []
         return_origin = ""
         origin_name = ""
-        wms_no = 0
+        wms_no = ""
         doc_trans_code = ""
         
         for line in record['move_ids_without_package']:
@@ -839,7 +850,7 @@ class ApiControllerStockPicking(models.Model):
                     "poNo": origin_name, 
                     "supplierReferences": "", 
                     "sender": "",
-                    "documentTransCode": "GRA", 
+                    "documentTransCode": "GRN", 
                     "ownerCode": "PRIMAVISTA",
                     "warehouseCode": "AVI",
 #                     "poDate": po_date, # datetime.strftime(record['date_approve'],'%d/%m/%Y')
@@ -848,7 +859,7 @@ class ApiControllerStockPicking(models.Model):
                     "expectedArrivalDate": "" if record['scheduled_date'] == False else datetime.strftime(record['scheduled_date'], '%d/%m/%Y'),
                     "otherReferences": "",
                     "remark1": "",
-                    "doNo": "", #wms_no,
+                    "doNo": wms_no, #wms_no,
 #                     "ownerReferences":"",
 #                     "poNo":"15220014721",
 #                     "supplierReferences":"V-80",
