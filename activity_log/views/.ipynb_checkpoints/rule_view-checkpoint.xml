@@ -1,0 +1,89 @@
+<odoo>
+  <data>
+      <record id="action_log_rule" model="ir.actions.act_window">
+            <field name="name">Rules</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">activity_log.rule</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first activity log rule
+                </p>
+            </field>
+        </record>
+      
+      <menuitem id="activity_log_menu_rule"
+            name="Rules"
+            parent="activity_log_menu_root"
+            action="action_log_rule"
+            sequence="2"/>
+      
+      <record id="rule_tree" model="ir.ui.view">
+            <field name="name">activity_log.rule.tree</field>
+            <field name="model">activity_log.rule</field>
+            <field name="arch" type="xml">
+                <tree create="true" edit="false" delete="true">
+                    <field name="time_created" modifiers="{'readonly':true}"/>
+                    <field name="name" modifiers="{'readonly':true}"/>
+                    <field name="model" modifiers="{'readonly':true}"/>
+                    <field name="create_rule" modifiers="{'readonly':true}"/>
+                    <field name="write_rule" modifiers="{'readonly':true}"/>
+                    <field name="unlink_rule" modifiers="{'readonly':true}"/>
+                    <field name="active" modifiers="{'readonly':true}"/>
+                </tree>
+            </field>
+        </record>
+
+      <record id="rule_form" model="ir.ui.view">
+            <field name="name">activity_log.rule.form</field>
+            <field name="model">activity_log.rule</field>
+            <field name="arch" type="xml">
+                <form string="Rule">
+                    <sheet>
+                        <group string="Rule">
+                            <group colspan="1">
+                                <field name="name" required="1" />
+                                <field name="model" />
+                                <field name="active" />
+                            </group>
+                            <group colspan="1">
+                                <field name="create_rule" />
+                                <field name="write_rule" />
+                                <field name="unlink_rule" />
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+      
+      <record id="rule_search" model="ir.ui.view">
+            <field name="name">activity_log.rule.search</field>
+            <field name="model">activity_log.rule</field>
+            <field name="arch" type="xml">
+                <search string="Rules">
+                    <field name="name"/>
+                    <filter
+                        name="state_draft"
+                        domain="[('active','=','false')]"
+                        string="Draft"
+                    />
+                    <filter
+                        name="state_active"
+                        domain="[('active','=','true')]"
+                        string="Active"
+                    />
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter
+                            name="group_by_state"
+                            string="State"
+                            domain="[]"
+                            context="{'group_by':'active'}"
+                        />
+                    </group>
+                </search>
+            </field>
+        </record>
+  </data>
+</odoo>
