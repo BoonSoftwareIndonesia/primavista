@@ -62,7 +62,7 @@ class Rule(models.Model):
             
 #             raise UserError(str(new_vals))
             curr_rule = self.env['activity_log.rule'].search([('model', '=', self._name)])
-            curr_rule.create_activity_logs(self._name, self.ids, new_vals = new_vals, method = "create")
+            curr_rule.create_activity_logs(self._name, self.ids, "create",new_vals = new_vals)
                 
             return new_records
         
@@ -72,9 +72,9 @@ class Rule(models.Model):
         pass
     
     def _make_unlink(self):
-        pass
+        return None
     
-    def create_activity_logs(self, new_records_ids, new_vals = {}, old_vals = {} method):
+    def create_activity_logs(self, new_records_ids, method, new_vals = {}, old_vals = {}):
         activity_log_model = self.env['activity_log.activity_log']
         activity_log_line_model = self.env['activity_log.activity_log_line']
         model_model = self.env[self.model]
@@ -83,8 +83,8 @@ class Rule(models.Model):
             new_activity_log_vals = {
                 'method': method,
                 'rule_id': self.id,
-                'model': self.model
-                'resouce_id': id
+                'model': self.model,
+                'resource_id': id,
                 'resource_name': model_model.browse(id).name_get()
             }
             
