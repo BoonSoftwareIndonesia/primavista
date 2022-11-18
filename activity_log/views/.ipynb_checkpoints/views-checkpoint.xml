@@ -1,5 +1,9 @@
 <odoo>
   <data>
+      <menuitem id="activity_log_menu_root"
+            name="Activity Log"
+            sequence="0"/>
+      
     <!-- explicit list view definition -->
 
 <!--     <record model="ir.ui.view" id="activity_log.list">
@@ -56,8 +60,5 @@
     <menuitem name="Server to list" id="activity_log" parent="activity_log.menu_2"
               action="activity_log.action_server"/>
  -->
-      <menuitem id="activity_log_menu_root"
-            name="Activity Log"
-            sequence="0"/>
   </data>
 </odoo>
