@@ -9,6 +9,11 @@ class Rule(models.Model):
     name = fields.Char('Name')
     user = fields.Integer('User ID')
     active = fields.Boolean(default = True)
+#     state = fields.Selection(
+#         [("draft", "Draft"), ("subscribed", "Subscribed")],
+#         required=True,
+#         default="draft",
+#     )
     model = fields.Many2one(
         "ir.model",
         "Model",
@@ -53,20 +58,15 @@ class Rule(models.Model):
             
             new_vals = {}
             for rec in new_records:
-                new_vals[rec.id] = {}
-                
-                for fname, fval in rec._fields.items():
-                    new_vals[rec.id][fname] = fval.convert_to_read(
-                        rec[fname], rec
-                    )
+                for vals, rec in zip(vals_list, new_records):
+                    new_vals[rec.id] = vals
             
-#             raise UserError(str(new_vals))
             curr_rule = self.env['activity_log.rule'].search([('model', '=', self._name)])
             curr_rule.create_activity_logs(self._name, self.ids, "create",new_vals = new_vals)
                 
             return new_records
         
-        return None
+        return create
             
     def _make_write(self):
         pass
@@ -76,7 +76,6 @@ class Rule(models.Model):
     
     def create_activity_logs(self, new_records_ids, method, new_vals = {}, old_vals = {}):
         activity_log_model = self.env['activity_log.activity_log']
-        activity_log_line_model = self.env['activity_log.activity_log_line']
         model_model = self.env[self.model]
         
         for id in new_records_ids:
@@ -85,11 +84,39 @@ class Rule(models.Model):
                 'rule_id': self.id,
                 'model': self.model,
                 'resource_id': id,
-                'resource_name': model_model.browse(id).name_get()
+                'resource_name': new_vals[id]['name']
             }
             
-            new_log = activity_log_model.create(new_activity_log_vals)
+            new_log_id = activity_log_model.create(new_activity_log_vals)
+            
+            if method == 'create':
+                self._create_log_on_create(new_vals[id])
+            elif method == 'write':
+                pass
+            else:
+                pass
+            
         return None
     
-    def _create_log_on_create(self):
-        pass
+    def _create_log_on_create(self, new_value):
+        activity_log_line_model = self.env['activity_log.activity_log_line']
+        
+        for fname, fval in new_value:
+            field_desc = field_model.search([('model_id', '=', self._name), ('name','=',fname)])
+            
+            activity_log_line_model.create({
+                'field_label': str(field_desc['field_description']),
+                'field_technical': fname,
+                'new_value': str(fval)  
+            })
+        
+        return None
+    
+    def deactive_rule(self):
+        for rule in self:
+            model_model = self.env[rule.model]
+            for method in ["create", "write", "unlink"]:
+                model_model._revert_method(method)
+                    
+        return self.write({'active':False})
+            

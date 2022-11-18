@@ -23,6 +23,10 @@
             <field name="model">activity_log.rule</field>
             <field name="arch" type="xml">
                 <tree create="true" edit="false" delete="true">
+<!--                 <tree
+                        decoration-info="state == 'draft'"
+                        decoration-bf="state == 'subscribed'"
+                    >   -->
                     <field name="time_created" modifiers="{'readonly':true}"/>
                     <field name="name" modifiers="{'readonly':true}"/>
                     <field name="model" modifiers="{'readonly':true}"/>
@@ -30,6 +34,8 @@
                     <field name="write_rule" modifiers="{'readonly':true}"/>
                     <field name="unlink_rule" modifiers="{'readonly':true}"/>
                     <field name="active" modifiers="{'readonly':true}"/>
+                        
+<!--                     <field name="state" /> -->
                 </tree>
             </field>
         </record>
@@ -39,12 +45,28 @@
             <field name="model">activity_log.rule</field>
             <field name="arch" type="xml">
                 <form string="Rule">
+<!--                     <header>
+                        <button
+                            string="Subscribe"
+                            name=""
+                            type="object"
+                            states="draft"
+                            class="oe_highlight"
+                        />
+                        <button
+                            string="Unsubscribe"
+                            name=""
+                            type="object"
+                            states="subscribed"
+                        />
+                        <field name="active" widget="statusbar" />
+                    </header> -->
                     <sheet>
                         <group string="Rule">
                             <group colspan="1">
                                 <field name="name" required="1" />
                                 <field name="model" />
-                                <field name="active" />
+                                <field name="active" widget="boolean_toggle"/>
                             </group>
                             <group colspan="1">
                                 <field name="create_rule" />

@@ -7,7 +7,6 @@ class ActivityLogLine(models.Model):
     _description = 'Activity Log Line'
 
     id = fields.Integer()
-    activity_log_id = fields.Integer('Origin')
     field_label = fields.Char('Field')
     field_technical_name = fields.Char('Technical Name')
     activity_log_id = fields.Many2one('activity_log.activity_log')
