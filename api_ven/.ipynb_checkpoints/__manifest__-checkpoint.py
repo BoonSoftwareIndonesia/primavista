@@ -29,6 +29,7 @@
         'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
+        'views/activity_log_view.xml',
 #         'views/location.xml',
     ],
     
