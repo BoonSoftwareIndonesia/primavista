@@ -1,6 +1,7 @@
 import re
 import requests
 from odoo import models, fields, api
+from odoo.http import request, Response
 from odoo.exceptions import UserError
 
 class CalendarEventExt(models.Model):

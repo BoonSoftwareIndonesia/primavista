@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError
+from odoo.http import request, Response
 
 # set the x studio opt char value in stock move based on the value from PO and SO line
 class StockRuleExt(models.Model):

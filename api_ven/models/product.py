@@ -1,5 +1,7 @@
 from odoo import models, fields, api
+from odoo.http import request, Response
 from odoo.exceptions import UserError
+from datetime import datetime
 
 class ProductTemplateExt(models.Model):
     _inherit = 'product.template'

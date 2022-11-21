@@ -6,7 +6,6 @@ from odoo.http import request, Response
 import json, datetime, requests, base64, unicodedata
 from datetime import datetime
 from odoo import http
-import requests
 from odoo.exceptions import UserError
 from odoo.exceptions import ValidationError
 import re

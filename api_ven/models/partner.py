@@ -1,4 +1,7 @@
 from odoo import models, fields, api
+import requests
+from datetime import datetime
+from odoo.http import request, Response
 from odoo.exceptions import UserError
 
 class PartnerExt(models.Model):
