@@ -40,7 +40,11 @@ class ActivityLog(models.Model):
         return new_records
     
     def create_log_on_write(self, new_value, old_value, model_id):
-        pass
+        field_model = self.env['ir.model.fields']
+        activity_log_line_model = self.env['api_ven.activity_log_line']
+        return None
     
     def create_log_on_unlink(self, old_value):
-        pass
+        field_model = self.env['ir.model.fields']
+        activity_log_line_model = self.env['api_ven.activity_log_line']
+        return None
