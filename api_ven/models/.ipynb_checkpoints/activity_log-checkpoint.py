@@ -38,3 +38,9 @@ class ActivityLog(models.Model):
             
             new_records = activity_log_line_model.create(new_activity_log_line_value)
         return new_records
+    
+    def create_log_on_write(self, new_value, old_value, model_id):
+        pass
+    
+    def create_log_on_unlink(self, old_value):
+        pass
