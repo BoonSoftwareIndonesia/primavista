@@ -82,22 +82,28 @@ class PartnerExt(models.Model):
         activity_log_model = self.env['api_ven.activity_log']
         model_model = self.env[self._name]
         
+        curr_user_id = self._context
+        curr_user_id = curr_user_id.get('uid')
+        curr_user_name = self.env['res.users'].browse(curr_user_id)
+        
         for rec in new_records:
             new_activity_log_vals = {
                 'method': method,
+                'user':curr_user_id,
+                'user_name':curr_user_name[0].name,
                 'model_id': self._name,
-                'resource_id': rec.id,
-                'resource_name': new_vals[rec.id]['name']
+                'resource_id': rec['id'],
+                'resource_name': old_vals[rec['id']]['name'] if new_vals == {} else new_vals[rec['id']]['name']
             }
 
             new_log_id = activity_log_model.create(new_activity_log_vals)
 
             if method == 'create':
-                new_log_id[0].create_log_on_create(new_vals[rec.id], self._name)
+                new_log_id[0].create_log_on_create(new_vals[rec['id']], self._name)
             elif method == 'write':
                 pass
             else:
-                pass
+                new_log_id[0].create_log_on_unlink(old_vals[rec['id']], self._name)
             
         return None
     
@@ -114,4 +120,27 @@ class PartnerExt(models.Model):
             if not test_import and not copy_context:
                 self.env['res.partner'].api_dw_customer(partners)
         return res
+    
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_user(self):
+        old_vals = {}
+        records = []
+        
+        for rec in self:
+            old_vals[rec.id] = {
+                'custCode': "" if not rec.x_studio_customer_id else rec.x_studio_customer_id, 
+                'name': "" if not rec.name else rec.name, 
+                'custGroup': "" if not rec.x_studio_customer_group else rec.x_studio_customer_group, 
+                'address1': "" if not rec.street else rec.street, 
+                'city': "" if not rec.city else rec.city, 
+                'state': "" if not rec.state_id.name else rec.state_id.name, 
+                'zipCode': "" if not rec.zip else rec.zip, 
+                'country': "" if not rec.country_id.name else rec.country_id.name
+            }
+            records.append({'id': rec.id})
+        
+        super(PartnerExt, self)._unlink_except_user()
+        self.create_activity_logs(records, "unlink" , old_vals = old_vals)
+        
+        return None
     
