@@ -56,6 +56,11 @@ class ProductTemplateExt(models.Model):
             
         
     def write(self, vals):
+        # get the old vals
+        old_vals = {
+                rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())
+        }
+        
         res = super(ProductTemplateExt, self).write(vals)
         
         if self.write_date != self.create_date:
@@ -64,8 +69,14 @@ class ProductTemplateExt(models.Model):
             
             test_import = self._context.get('test_import')
             copy_context = self._context.get('copy_context')
-            # if we are not testing and duplicating
+            
+            # if we are not testing and duplicating, send api
             if not test_import and not copy_context:
+                # get new vals
+                new_vals = {rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())}
+                # create activity log for partner update
+                self.create_activity_logs(self, "write", new_vals=new_vals, old_vals=old_vals)
+                # send api 
                 self.env['product.template'].api_dw_product(product)
         return res
     
@@ -99,6 +110,33 @@ class ProductTemplateExt(models.Model):
             else:
                 new_log_id[0].create_log_on_unlink(old_vals[rec['id']], self._name)
 
+        return None
+    
+    
+    # @api.ondelete(at_uninstall=False)
+    def unlink(self):
+        # test = unlink.origin()
+        old_vals = {}
+        records = []
+        
+        for rec in self:
+            # get old vals
+            old_vals[rec.id] = {
+                'default_code': "" if not rec.default_code else rec.default_code, 
+                'name': "" if not rec.name else rec.name, 
+                'uom_id': "" if not rec.uom_id.name else rec.uom_id.name,
+                # 'whole_uom': "" if not rec.uom_id.name else rec.uom_id.name,
+                # 'whole_denomination': "" if not rec.uom_id.ratio else rec.uom_id.ratio,
+                'tracking': "" if not rec.tracking else rec.tracking, 
+                'standard_price': "" if not rec.standard_price else rec.standard_price, 
+            }
+            records.append({'id': rec.id, 'name': rec.name})
+        
+        super(ProductTemplateExt, self).unlink()
+        
+        # create activity log for partner deletion
+        self.create_activity_logs(records, "unlink" , old_vals = old_vals)
+        
         return None
     
 # PRODUCT =======================================================
