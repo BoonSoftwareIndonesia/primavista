@@ -43,7 +43,20 @@ class ActivityLog(models.Model):
     def create_log_on_write(self, new_value, old_value, model_id):
         field_model = self.env['ir.model.fields']
         activity_log_line_model = self.env['api_ven.activity_log_line']
-        return None
+        
+        for fname in old_value:
+            field_desc = field_model.search([('model_id', '=', model_id), ('name','=',fname)])
+            
+            new_activity_log_line_value = {
+                'field_label': str(field_desc['field_description']) if field_desc else "",
+                'field_technical_name': fname,
+                'new_value': new_value[fname],
+                'old_value': old_value[fname],
+                'activity_log_id': self.id
+            }
+            
+            new_records = activity_log_line_model.create(new_activity_log_line_value)
+        return new_records
     
     def create_log_on_unlink(self, old_value, model_id):
         field_model = self.env['ir.model.fields']

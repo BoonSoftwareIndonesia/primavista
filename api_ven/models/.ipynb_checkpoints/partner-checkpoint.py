@@ -65,18 +65,14 @@ class PartnerExt(models.Model):
         test_import = self._context.get('test_import')
         if not test_import:
             self.env['res.partner'].api_dw_customer(partners)
-            new_vals = self._format_data(vals_list, partners)
-            # raise UserError(str(new_vals))
+            
+            new_vals = {}
+            for rec in partners:
+                for vals, rec in zip(vals_list, partners):
+                    new_vals[rec.id] = vals
+                    
             self.create_activity_logs(partners, "create", new_vals = new_vals)
         return partners
-    
-    def _format_data(self, vals_list, new_records):
-        new_vals = {}
-        for rec in new_records:
-            for vals, rec in zip(vals_list, new_records):
-                new_vals[rec.id] = vals
-        return new_vals
-    
     
     def create_activity_logs(self, new_records, method, new_vals = {}, old_vals = {}):
         activity_log_model = self.env['api_ven.activity_log']
@@ -86,6 +82,8 @@ class PartnerExt(models.Model):
         curr_user_id = curr_user_id.get('uid')
         curr_user_name = self.env['res.users'].browse(curr_user_id)
         
+        # format_string = f"New values = {str(new_vals)} \n Old values = {str(old_vals)} \n Records = id:{str(new_records['id'])}, name:{str(new_records['name'])}"
+        
         for rec in new_records:
             new_activity_log_vals = {
                 'method': method,
@@ -93,7 +91,7 @@ class PartnerExt(models.Model):
                 'user_name':curr_user_name[0].name,
                 'model_id': self._name,
                 'resource_id': rec['id'],
-                'resource_name': old_vals[rec['id']]['name'] if new_vals == {} else new_vals[rec['id']]['name']
+                'resource_name': rec['name']
             }
 
             new_log_id = activity_log_model.create(new_activity_log_vals)
@@ -101,6 +99,7 @@ class PartnerExt(models.Model):
             if method == 'create':
                 new_log_id[0].create_log_on_create(new_vals[rec['id']], self._name)
             elif method == 'write':
+                new_log_id[0].create_log_on_write(new_vals[rec['id']], old_vals[rec['id']],self._name)
                 pass
             else:
                 new_log_id[0].create_log_on_unlink(old_vals[rec['id']], self._name)
@@ -108,6 +107,10 @@ class PartnerExt(models.Model):
         return None
     
     def write(self,vals):
+        old_vals = {
+                rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())
+        }
+                
         res = super(PartnerExt, self).write(vals)
         
         if self.write_date != self.create_date:
@@ -118,6 +121,8 @@ class PartnerExt(models.Model):
             copy_context = self._context.get('copy_context')
             # if we are not testing and duplicating
             if not test_import and not copy_context:
+                new_vals = {rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())}
+                self.create_activity_logs(self, "write", new_vals=new_vals, old_vals=old_vals)
                 self.env['res.partner'].api_dw_customer(partners)
         return res
     
@@ -128,16 +133,16 @@ class PartnerExt(models.Model):
         
         for rec in self:
             old_vals[rec.id] = {
-                'custCode': "" if not rec.x_studio_customer_id else rec.x_studio_customer_id, 
+                'x_studio_customer_id': "" if not rec.x_studio_customer_id else rec.x_studio_customer_id, 
                 'name': "" if not rec.name else rec.name, 
-                'custGroup': "" if not rec.x_studio_customer_group else rec.x_studio_customer_group, 
-                'address1': "" if not rec.street else rec.street, 
+                'x_studio_customer_group': "" if not rec.x_studio_customer_group else rec.x_studio_customer_group, 
+                'street': "" if not rec.street else rec.street, 
                 'city': "" if not rec.city else rec.city, 
-                'state': "" if not rec.state_id.name else rec.state_id.name, 
-                'zipCode': "" if not rec.zip else rec.zip, 
-                'country': "" if not rec.country_id.name else rec.country_id.name
+                'state_id': "" if not rec.state_id.name else rec.state_id.name, 
+                'zip': "" if not rec.zip else rec.zip, 
+                'country_id': "" if not rec.country_id.name else rec.country_id.name
             }
-            records.append({'id': rec.id})
+            records.append({'id': rec.id, 'name': rec.name})
         
         super(PartnerExt, self)._unlink_except_user()
         self.create_activity_logs(records, "unlink" , old_vals = old_vals)
