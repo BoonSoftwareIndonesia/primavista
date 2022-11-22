@@ -33,7 +33,7 @@ class ActivityLog(models.Model):
             new_activity_log_line_value = {
                 'field_label': str(field_desc['field_description']) if field_desc else "",
                 'field_technical_name': fname,
-                'new_value': new_value[fname],
+                'new_value': 'False' if ((type(new_value[fname]) == bool) and new_value[fname] is False) else new_value[fname],
                 'activity_log_id': self.id
             }
             
@@ -45,17 +45,18 @@ class ActivityLog(models.Model):
         activity_log_line_model = self.env['api_ven.activity_log_line']
         
         for fname in old_value:
-            field_desc = field_model.search([('model_id', '=', model_id), ('name','=',fname)])
-            
-            new_activity_log_line_value = {
-                'field_label': str(field_desc['field_description']) if field_desc else "",
-                'field_technical_name': fname,
-                'new_value': new_value[fname],
-                'old_value': old_value[fname],
-                'activity_log_id': self.id
-            }
-            
-            new_records = activity_log_line_model.create(new_activity_log_line_value)
+            if fname is not "id":
+                field_desc = field_model.search([('model_id', '=', model_id), ('name','=',fname)])
+
+                new_activity_log_line_value = {
+                    'field_label': str(field_desc['field_description']) if field_desc else "",
+                    'field_technical_name': fname,
+                    'new_value': 'False' if ((type(new_value[fname]) == bool) and new_value[fname] is False) else new_value[fname],
+                    'old_value': 'False' if ((type(old_value[fname]) == bool) and old_value[fname] is False) else old_value[fname],
+                    'activity_log_id': self.id
+                }
+
+                new_records = activity_log_line_model.create(new_activity_log_line_value)
         return new_records
     
     def create_log_on_unlink(self, old_value, model_id):
@@ -68,7 +69,7 @@ class ActivityLog(models.Model):
             new_activity_log_line_value = {
                 'field_label': str(field_desc['field_description']) if field_desc else "",
                 'field_technical_name': fname,
-                'old_value': old_value[fname],
+                'old_value': 'False' if ((type(old_value[fname]) == bool) and old_value[fname] is False) else old_value[fname],
                 'activity_log_id': self.id
             }
             

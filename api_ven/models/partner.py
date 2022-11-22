@@ -7,6 +7,7 @@ from odoo.exceptions import UserError
 class PartnerExt(models.Model):
     _inherit = 'res.partner'
     
+    # override fields
     name = fields.Char(index=True, required=True)
     x_studio_customer_id = fields.Char(string='Customer ID',copy=False)
     x_studio_customer_group = fields.Char(string='Customer Group',default='IOC')
@@ -16,6 +17,7 @@ class PartnerExt(models.Model):
     state_id = fields.Many2one("res.country.state", string='State', ondelete='restrict', domain="[('country_id', '=?', country_id)]",required=True)
     country_id = fields.Many2one('res.country', string='Country', ondelete='restrict',default=100)
     
+    # constraints to check for duplicate x_studio_customer_id
     @api.constrains('x_studio_customer_id')
     def _check_x_studio_customer_id(self):
         for cust in self:
@@ -24,7 +26,8 @@ class PartnerExt(models.Model):
                 is_duplicate = request.env['res.partner'].search([('id','!=',cust.id),('x_studio_customer_id', '=',cust.x_studio_customer_id)])
                 if is_duplicate:
                     raise UserError(('Duplicate exists: ' + cust.x_studio_customer_id))
-                    
+    
+    # set copy context if duplicating existing partner
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         if 'copy_context' not in self._context:
@@ -50,6 +53,7 @@ class PartnerExt(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         
+        # validation, internal reference and state cannot be null if we are not duplicating
         if not self._context.get('copy_context'):
             if vals_list[0]['x_studio_customer_id'] is False:
                 raise UserError(('Internal reference cannot be null (partner-create)'))
@@ -71,6 +75,7 @@ class PartnerExt(models.Model):
                 for vals, rec in zip(vals_list, partners):
                     new_vals[rec.id] = vals
                     
+            # create activity log for partner creation
             self.create_activity_logs(partners, "create", new_vals = new_vals)
         return partners
     
@@ -94,8 +99,10 @@ class PartnerExt(models.Model):
                 'resource_name': rec['name']
             }
 
+            # create activity log
             new_log_id = activity_log_model.create(new_activity_log_vals)
 
+            # create the activity log line for the activity log
             if method == 'create':
                 new_log_id[0].create_log_on_create(new_vals[rec['id']], self._name)
             elif method == 'write':
@@ -107,6 +114,7 @@ class PartnerExt(models.Model):
         return None
     
     def write(self,vals):
+        # get the old vals
         old_vals = {
                 rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())
         }
@@ -114,15 +122,19 @@ class PartnerExt(models.Model):
         res = super(PartnerExt, self).write(vals)
         
         if self.write_date != self.create_date:
-            # the result of the super() is a bool, so we need to search for the product template object to pass to the api function
+            # the result of the super() is a bool, so we need to search for the partner to pass to the api function
             partners = request.env['res.partner'].search([('id', '=', self.id)], limit=1)
 
             test_import = self._context.get('test_import')
             copy_context = self._context.get('copy_context')
-            # if we are not testing and duplicating
+            
+            # if we are not testing and duplicating, send api
             if not test_import and not copy_context:
+                # get new vals
                 new_vals = {rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())}
+                # create activity log for partner update
                 self.create_activity_logs(self, "write", new_vals=new_vals, old_vals=old_vals)
+                # send api 
                 self.env['res.partner'].api_dw_customer(partners)
         return res
     
@@ -132,6 +144,7 @@ class PartnerExt(models.Model):
         records = []
         
         for rec in self:
+            # get old vals
             old_vals[rec.id] = {
                 'x_studio_customer_id': "" if not rec.x_studio_customer_id else rec.x_studio_customer_id, 
                 'name': "" if not rec.name else rec.name, 
@@ -145,6 +158,7 @@ class PartnerExt(models.Model):
             records.append({'id': rec.id, 'name': rec.name})
         
         super(PartnerExt, self)._unlink_except_user()
+        # create activity log for partner deletion
         self.create_activity_logs(records, "unlink" , old_vals = old_vals)
         
         return None

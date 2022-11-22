@@ -44,6 +44,12 @@ class ProductTemplateExt(models.Model):
         # check the context, if it is not a test, then send api log to wms
         test_import = self._context.get('test_import')
         if not test_import:
+            new_vals = {}
+            for rec in products:
+                for vals, rec in zip(vals_list, products):
+                    new_vals[rec.id] = vals
+            
+            self.create_activity_logs(products, "create", new_vals = new_vals)
             self.env['product.template'].api_dw_product(products)
             
         return products
@@ -62,6 +68,38 @@ class ProductTemplateExt(models.Model):
             if not test_import and not copy_context:
                 self.env['product.template'].api_dw_product(product)
         return res
+    
+    def create_activity_logs(self, new_records, method, new_vals = {}, old_vals = {}):
+        activity_log_model = self.env['api_ven.activity_log']
+        model_model = self.env[self._name]
+
+        curr_user_id = self._context
+        curr_user_id = curr_user_id.get('uid')
+        curr_user_name = self.env['res.users'].browse(curr_user_id)
+
+        # format_string = f"New values = {str(new_vals)} \n Old values = {str(old_vals)} \n Records = id:{str(new_records['id'])}, name:{str(new_records['name'])}"
+
+        for rec in new_records:
+            new_activity_log_vals = {
+                'method': method,
+                'user':curr_user_id,
+                'user_name':curr_user_name[0].name,
+                'model_id': self._name,
+                'resource_id': rec['id'],
+                'resource_name': rec['name']
+            }
+
+            new_log_id = activity_log_model.create(new_activity_log_vals)
+
+            if method == 'create':
+                new_log_id[0].create_log_on_create(new_vals[rec['id']], self._name)
+            elif method == 'write':
+                new_log_id[0].create_log_on_write(new_vals[rec['id']], old_vals[rec['id']],self._name)
+                pass
+            else:
+                new_log_id[0].create_log_on_unlink(old_vals[rec['id']], self._name)
+
+        return None
     
 # PRODUCT =======================================================
 class ProductExt(models.Model):
