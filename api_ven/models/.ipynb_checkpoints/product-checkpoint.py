@@ -6,6 +6,7 @@ from datetime import datetime
 class ProductTemplateExt(models.Model):
     _inherit = 'product.template'
     
+    # override field(s)
     default_code = fields.Char(
         'Internal Reference', 
         compute='_compute_default_code',
@@ -13,6 +14,7 @@ class ProductTemplateExt(models.Model):
         store=True, 
         required=True)
     
+    # constraint for default_code
     @api.constrains('default_code')
     def _check_default_code(self):
         for product_tmpl in self:
@@ -22,6 +24,7 @@ class ProductTemplateExt(models.Model):
                 if is_duplicate:
                     raise UserError(('Duplicate exists: ' + product_tmpl.default_code))
                     
+    # copy context
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         if 'copy_context' not in self._context:
@@ -30,6 +33,7 @@ class ProductTemplateExt(models.Model):
             res = super(ProductTemplateExt, self).copy(default=default)
         return res
     
+    # create
     @api.model_create_multi
     def create(self, vals_list):
 #         raise UserError((vals_list))
