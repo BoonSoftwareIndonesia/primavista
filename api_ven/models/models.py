@@ -417,7 +417,7 @@ class ApiControllerStockPicking(models.Model):
                 {
                     "customerPO":"",
                     "reference":origin_name,
-                    "receiptNo": wms_no,
+                    "soHeaderOptChar1": wms_no,
                     "customerCode":"" if partner_shipping['x_studio_customer_id'] == False else partner_shipping['x_studio_customer_id'],
                     "soHeaderOptChar3":"",
                     "documentTransCode":"POR",
