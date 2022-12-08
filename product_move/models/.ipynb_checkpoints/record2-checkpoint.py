@@ -20,7 +20,7 @@ class ProductMove(models.Model):
         tools.drop_view_if_exists(self._cr, 'product_move_record2')
         query = """
             CREATE OR REPLACE view product_move_record2 as(
-            select 
+            SELECT 
                 row_number() OVER (ORDER BY 1) as id,
                 pm.start_date as start_date,
                 pm.product as product,
@@ -35,7 +35,7 @@ class ProductMove(models.Model):
                         ELSE it.total + ot.total
                     END
                 ) AS quantity_movement
-            from 
+            FROM 
                 product_move_product_move pm LEFT JOIN (
             select 
                 pm.id,

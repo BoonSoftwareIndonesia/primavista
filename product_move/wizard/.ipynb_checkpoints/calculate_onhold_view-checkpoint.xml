@@ -6,7 +6,7 @@
             <field name="arch" type="xml">
                 <form string="Calculate Onhold Quantity">
                     <group>
-                        <button name="calculate_onhold" string="Test" type="object" class="btn-primary"/>
+                        <button name="calculate_onhold" string="Calculate" type="object" class="btn-primary"/>
                     </group>
                     <footer>
                         <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z"/>
