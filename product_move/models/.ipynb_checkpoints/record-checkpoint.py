@@ -18,57 +18,67 @@ class ProductMove(models.Model):
         tools.drop_view_if_exists(self._cr, 'product_move_record')
         query = """
             CREATE OR REPLACE view product_move_record as(
-            select 
+            SELECT
                 row_number() OVER (ORDER BY 1) as id,
-                pm.start_date as start_date,
-                pm.product as product,
+                pm_out.start_date as start_date,
+                pm_out.quantity AS start_quantity,
+                pm_out.product as product,	
+                t1.IO_code as io_code,
+                t1.total as quantity
+            FROM
+                product_move_product_move pm_out JOIN (	
+            select
+                pm.id,
+                pm.start_date,
+                pm.product,
                 pm.quantity AS start_quantity,
-                'Ingoing' AS io_code,
+                'Ingoing' AS IO_code,
                 (
                     CASE WHEN EXISTS (
                             SELECT product_qty FROM stock_move sm WHERE
                             state in ('done') AND
                             location_dest_id = 8 AND
                             product_id = pm.product AND
-                            EXTRACT(MONTH FROM sm.date) = (EXTRACT(MONTH FROM pm.start_date) + 1) AND
+                            EXTRACT(MONTH FROM sm.date) = EXTRACT(MONTH FROM pm.start_date) AND
                             EXTRACT(YEAR FROM sm.date) = EXTRACT(YEAR FROM pm.start_date)
                     ) THEN (
                             SELECT SUM(product_qty) FROM stock_move sm WHERE
                             state in ('done') AND
                             location_dest_id = 8 AND
                             product_id = pm.product AND
-                            EXTRACT(MONTH FROM sm.date) = (EXTRACT(MONTH FROM pm.start_date) + 1) AND
+                            EXTRACT(MONTH FROM sm.date) = EXTRACT(MONTH FROM pm.start_date) AND
                             EXTRACT(YEAR FROM sm.date) = EXTRACT(YEAR FROM pm.start_date)
                     ) ELSE 0 END
-                ) AS quantity
+                ) AS Total
             from 
                 product_move_product_move pm
             UNION
-            select 
-                row_number() OVER (ORDER BY 1) as id,
-                pm.start_date as start_date,
-                pm.product as product,
+            select
+                pm.id, 
+                pm.start_date,
+                pm.product,
                 pm.quantity AS start_quantity,
-                'Outgoing' AS io_code,
+                'Outgoing' AS IO_code,
                 (
                     CASE WHEN EXISTS (
                             SELECT product_qty FROM stock_move sm WHERE
                             state in ('done') AND
                             location_id = 8 AND
                             product_id = pm.product AND
-                            EXTRACT(MONTH FROM sm.date) = (EXTRACT(MONTH FROM pm.start_date) + 1) AND
+                            EXTRACT(MONTH FROM sm.date) = EXTRACT(MONTH FROM pm.start_date) AND
                             EXTRACT(YEAR FROM sm.date) = EXTRACT(YEAR FROM pm.start_date)
                     ) THEN ((
                             SELECT SUM(product_qty) FROM stock_move sm WHERE
                             state in ('done') AND
                             location_id = 8 AND
                             product_id = pm.product AND
-                            EXTRACT(MONTH FROM sm.date) = (EXTRACT(MONTH FROM pm.start_date) + 1) AND
+                            EXTRACT(MONTH FROM sm.date) = EXTRACT(MONTH FROM pm.start_date) AND
                             EXTRACT(YEAR FROM sm.date) = EXTRACT(YEAR FROM pm.start_date)
                     ) * -1) ELSE 0 END
-                ) AS quantity
+                ) AS Total
             from 
                 product_move_product_move pm
+            ) as t1 ON pm_out.id = t1.id
             )
         """ 
         self._cr.execute(query)

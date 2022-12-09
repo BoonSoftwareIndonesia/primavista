@@ -14,7 +14,7 @@ class ProductMove(models.Model):
     product = fields.Many2one('product.product', string="Product",readonly=True)
     quantity_movement = fields.Float(string="Qty Movement",readonly=True)
     start_quantity = fields.Float(string="Start Qty",readonly=True)
-    # quantity = fields.Float(string="Quantity")
+    final_quantity = fields.Float(string="Final Qty",readonly=True)
     
     def init(self):
         tools.drop_view_if_exists(self._cr, 'product_move_record2')
@@ -34,7 +34,18 @@ class ProductMove(models.Model):
                         WHEN it.total IS NULL THEN ot.total
                         ELSE it.total + ot.total
                     END
-                ) AS quantity_movement
+                ) AS quantity_movement,
+                (
+                    (
+                    CASE 
+                        WHEN (it.total IS NULL AND ot.total IS NULL) THEN 0
+                        WHEN ot.total IS NULL THEN it.total
+                        WHEN it.total IS NULL THEN ot.total
+                        ELSE it.total + ot.total
+                    END
+                    ) + pm.quantity
+                ) AS final_quantity
+
             FROM 
                 product_move_product_move pm LEFT JOIN (
             select 

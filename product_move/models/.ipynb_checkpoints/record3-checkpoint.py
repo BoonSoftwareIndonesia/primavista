@@ -3,14 +3,15 @@
 from odoo import models, fields, tools, api
 
 class ProductMove(models.Model):
-    _name = 'product_move.record'
-    _description = 'Record Report'
+    _name = 'product_move.record3'
+    _description = 'Record Report3'
     _auto = False
 
     id = fields.Integer(string="Id",readonly=True)
     start_date = fields.Datetime(string="Start Date",readonly=True)
     io_code = fields.Char(string="IO Code",readonly=True)
     product = fields.Many2one('product.product', string="Product",readonly=True)
+    trans_code = fields.Char(string="Trans Code",readonly=True)
     start_quantity = fields.Float(string="Start Quantity",readonly=True)
     quantity = fields.Float(string="Quantity",readonly=True)
     

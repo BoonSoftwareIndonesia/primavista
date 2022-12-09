@@ -24,6 +24,7 @@
                     <field name="outgoing" modifiers="{'readonly':true}"/>
                     <field name="start_quantity" modifiers="{'readonly':true}"/>
                     <field name="quantity_movement" modifiers="{'readonly':true}"/>
+                    <field name="final_quantity" modifiers="{'readonly':true}"/>
                 </tree>
             </field>
         </record>
@@ -39,6 +40,7 @@
                     <field name="outgoing" />
                     <field name="start_quantity" />
                     <field name="quantity_movement" />
+                    <field name="final_quantity" />
                 </pivot>
             </field>
         </record>
