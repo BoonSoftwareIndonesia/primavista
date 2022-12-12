@@ -21,6 +21,7 @@
                     <field name="start_date" modifiers="{'readonly':true}"/>
                     <field name="product" modifiers="{'readonly':true}"/>
                     <field name="io_code" modifiers="{'readonly':true}"/>
+                    <field name="trans_code" modifiers="{'readonly':true}"/>
                     <field name="start_quantity" modifiers="{'readonly':true}"/>
                     <field name="quantity" modifiers="{'readonly':true}"/>
                 </tree>
@@ -35,6 +36,7 @@
                     <field name="start_date" />
                     <field name="product" />
                     <field name="io_code" />
+                    <field name="trans_code" />
                     <field name="start_quantity" />
                     <field name="quantity" />
                 </pivot>

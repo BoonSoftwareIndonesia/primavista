@@ -1,0 +1,103 @@
+<odoo>
+  <data>
+      <record id="action_product_move_line" model="ir.actions.act_window">
+            <field name="name">PML</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product_move.line</field>
+            <field name="view_mode">tree,form,pivot</field>
+        </record>
+      
+      <menuitem id="menu_product_move_line"
+            name="PML"
+            parent="product_move_root"
+            sequence="5"/>
+      
+      <record id="tree_product_move_line" model="ir.ui.view">
+            <field name="name">product_move.line.tree</field>
+            <field name="model">product_move.line</field>
+            <field name="arch" type="xml">
+                <tree create="true" edit="true" delete="true">
+                    <field name="product" modifiers="{'readonly':true}"/>
+                    <field name="io_code" modifiers="{'readonly':true}"/>
+                    <field name="trans_code" modifiers="{'readonly':true}"/>
+                    <field name="quantity" modifiers="{'readonly':true}"/>
+                </tree>
+            </field>
+        </record>
+      
+      
+      <record id="form_product_move_line" model="ir.ui.view">
+            <field name="name">product_move.line.form</field>
+            <field name="model">product_move.line</field>
+            <field name="arch" type="xml">
+                <form string="Product Move Line">
+                    <sheet>
+                        <group string="PML">
+                            <group colspan="1">
+                                <field name="pm" />
+                                <field name="product" />
+                                <field name="io_code" />
+                                <field name="trans_code" />
+                                <field name="quantity" />
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+      
+      <record id="pivot_product_move_line" model="ir.ui.view">
+            <field name="name">product_move.line.pivot</field>
+            <field name="model">product_move.line</field>
+            <field name="arch" type="xml">
+                <pivot string="Pivot">
+                    <field name="product" />
+                    <field name="io_code" />
+                    <field name="trans_code" />
+                    <field name="quantity" />
+                </pivot>
+            </field>
+        </record>
+      
+      <record id="search_product_move_line" model="ir.ui.view">
+            <field name="name">product_move.line.search</field>
+            <field name="model">product_move.line</field>
+            <field name="arch" type="xml">
+                <search string="Product Move">
+<!--                     <field name="name"/>
+                    <filter
+                        name="state_draft"
+                        domain="[('active','=','false')]"
+                        string="Draft"
+                    />
+                    <filter
+                        name="state_active"
+                        domain="[('active','=','true')]"
+                        string="Active"
+                    /> -->
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter
+                            name="group_by_product"
+                            string="Product"
+                            domain="[]"
+                            context="{'group_by':'product'}"
+                        />
+                    </group>
+                </search>
+            </field>
+        </record>
+      
+        <menuitem id="menu_product_move_line_list"
+        name="PML"
+        parent="menu_product_move_line"
+        action="action_product_move_line"
+        sequence="1"/>
+      
+        <menuitem id="menu_product_move_calculate_quantity"
+        name="Calculate Quantity"
+        parent="menu_product_move_line"
+        action="product_move_calculate_quantity_action"
+        sequence="2"/>
+  </data>
+</odoo>

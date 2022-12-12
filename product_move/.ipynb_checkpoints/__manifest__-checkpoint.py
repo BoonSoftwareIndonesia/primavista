@@ -25,11 +25,13 @@
     'data': [
         'security/ir.model.access.csv',
         'wizard/calculate_onhold_view.xml',
+        'wizard/calculate_quantity_view.xml',
         'views/views.xml',
         'views/product_move_view.xml',
         'views/product_move_record_view.xml',
         'views/product_move_record2_view.xml',
         'views/product_move_record3_view.xml',
+        'views/product_move_line_view.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
