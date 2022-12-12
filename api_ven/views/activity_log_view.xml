@@ -1,0 +1,120 @@
+<odoo>
+      <record id="action_activity_log" model="ir.actions.act_window">
+            <field name="name">Activity Logs</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">api_ven.activity_log</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{"search_default_today":1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first activity log
+                </p>
+            </field>
+        </record>
+      
+        <menuitem id="activity_log_menu_logs"
+            name="Activity Logs"
+            parent="api_menu_root"
+            action="action_activity_log"
+            sequence="20"/>
+      
+      <record id="activity_log_tree" model="ir.ui.view">
+            <field name="name">api_ven.activity_log.tree</field>
+            <field name="model">api_ven.activity_log</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false" delete="true">
+                    <field name="user_name" modifiers="{'readonly':true}"/>
+                    <field name="method" modifiers="{'readonly':true}"/>
+                    <field name="model_id" modifiers="{'readonly':true}"/>
+                    <field name="time_logged" modifiers="{'readonly':true}"/>
+                    <field name="resource_id" modifiers="{'readonly':true}"/>
+                    <field name="resource_name" modifiers="{'readonly':true}"/>
+                </tree>
+            </field>
+        </record>
+
+<!--       form -->
+      <record id="activity_log_form" model="ir.ui.view">
+            <field name="name">api_ven.activity_log.form</field>
+            <field name="model">api_ven.activity_log</field>
+            <field name="arch" type="xml">
+                <form create="false" edit="false">
+                    <sheet>
+                        <group string="Log">
+                            <group colspan="1">
+                                <field name="time_logged" readonly="1" />
+                                <field name="user_name" readonly="1" />
+                                <field name="method" readonly="1" />
+                            </group>
+                            <group colspan="1">
+                                <field name="model_id" readonly="1" />
+<!--                                 <field
+                                    name="model"
+                                    attrs="{'invisible': [('model_id', '!=', False)]}"
+                                    readonly="1"
+                                />
+                                <field
+                                    name="model_model"
+                                    attrs="{'invisible': [('model_id', '!=', False)]}"
+                                    readonly="1"
+                                /> -->
+                                <field name="resource_id" readonly="1" />
+                                <field name="resource_name" readonly="1" />
+                            </group>
+                            <group colspan="2">
+                                <field name="activity_log_line_ids" readonly="1">
+                                    <tree>    
+                                            <field name="field_label"/>
+                                            <field name="field_technical_name"/>
+                                            <field name="old_value"/>
+                                            <field name="new_value"/>
+                                     </tree>
+                                </field>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+      
+      <record id="activity_log_search" model="ir.ui.view">
+            <field name="name">api_ven.activity_log.search</field>
+            <field name="model">api_ven.activity_log</field>
+            <field name="arch" type="xml">
+                <search string="Logs">
+<!--                     <field name="name"/> -->
+                    <field name="model_id"/>
+                    <field name="resource_id"/>
+                    <field name="user_name"/>
+<!--                     <filter string="Today" name="today" domain="[('created_date','&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59))),('created_date','&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/> -->
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter
+                            name="group_by_user"
+                            string="User"
+                            domain="[]"
+                            context="{'group_by':'user'}"
+                        />
+                        <filter
+                            name="group_by_model"
+                            string="Model"
+                            domain="[]"
+                            context="{'group_by':'model_id'}"
+                        />
+                        <filter
+                            name="group_by_resource_id"
+                            string="Resource ID"
+                            domain="[]"
+                            context="{'group_by':'resource_id'}"
+                        />
+                        <filter
+                            name="group_by_time_logged"
+                            string="Date"
+                            domain="[]"
+                            context="{'group_by':'time_logged'}"
+                        />
+                    </group>
+                </search>
+            </field>
+        </record>
+</odoo>
