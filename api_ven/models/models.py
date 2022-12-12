@@ -94,7 +94,7 @@ class ApiController(models.Model):
     def api_dw_po(self, record):
             
         # PROSES KIRIM API
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
         
         # PO_LINES: Contains every product in the PO
         line_no = 1
@@ -126,7 +126,7 @@ class ApiController(models.Model):
         
         
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
@@ -236,7 +236,7 @@ class ApiControllerSO(models.Model):
     _inherit = "sale.order"
     
     def api_dw_so(self, record):
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
         
         line_no = 1
         so_lines = []
@@ -261,7 +261,7 @@ class ApiControllerSO(models.Model):
         
         
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -370,7 +370,7 @@ class ApiControllerStockPicking(models.Model):
     
     # Returning a PO (receive item -> return to vendor) using SO format =======================================
     def api_return_po(self, record):
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
         
         wms_no = ""
         line_no = 1
@@ -411,7 +411,7 @@ class ApiControllerStockPicking(models.Model):
                 po_record = po
             partner_shipping = po_record.partner_id
         
-        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -506,7 +506,7 @@ class ApiControllerStockPicking(models.Model):
     # Returning a SO (sell item -> return to us) using PO format =======================================
     def api_return_so(self, record):
         # PROSES KIRIM API
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
         
         # PO_LINES: Contains every product in the PO
 #         line_no = 1
@@ -541,7 +541,7 @@ class ApiControllerStockPicking(models.Model):
         
         
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
@@ -651,10 +651,10 @@ class ApiControllerPartner(models.Model):
     def api_dw_customer(self, record):
             
 #       PROSES KIRIM API 
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createcustomer"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createcustomer"
         
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "customer": [
                 {
@@ -751,10 +751,10 @@ class ApiControllerProduct(models.Model):
     
     def api_dw_product(self, record):
         # PROSES KIRIM API 
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createproduct"
         
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "product": [
                 {

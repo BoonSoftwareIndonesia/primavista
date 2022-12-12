@@ -36,7 +36,7 @@ class ProductTemplateExt(models.Model):
     # create
     @api.model_create_multi
     def create(self, vals_list):
-#         raise UserError((vals_list))
+        # raise UserError((vals_list[0].keys()))
         if not self._context.get('copy_context'):
             if vals_list[0]['default_code'] is False:
                 raise UserError(('Internal reference cannot be null (product template-create)'))

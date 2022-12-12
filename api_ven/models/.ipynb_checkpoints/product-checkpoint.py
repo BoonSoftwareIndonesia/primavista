@@ -36,7 +36,7 @@ class ProductTemplateExt(models.Model):
     # create
     @api.model_create_multi
     def create(self, vals_list):
-#         raise UserError((vals_list))
+        # raise UserError((vals_list[0].keys()))
         if not self._context.get('copy_context'):
             if vals_list[0]['default_code'] is False:
                 raise UserError(('Internal reference cannot be null (product template-create)'))
@@ -59,6 +59,7 @@ class ProductTemplateExt(models.Model):
         return products
             
         
+    # write
     def write(self, vals):
         # get the old vals
         old_vals = {
@@ -143,12 +144,15 @@ class ProductTemplateExt(models.Model):
         
         return None
     
+    
 # PRODUCT =======================================================
 class ProductExt(models.Model):
     _inherit = 'product.product'
     
+    # override field(s)
     default_code = fields.Char('Internal Reference', index=True, required=True)
     
+    # default code constraint
     @api.constrains('default_code')
     def _check_default_code(self):
         for product_tmpl in self:
