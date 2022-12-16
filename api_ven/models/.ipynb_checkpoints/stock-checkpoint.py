@@ -30,10 +30,11 @@ class StockReturnPickingExt(models.TransientModel):
     # this prevents multiple api logs from being sent to the wms when there is a partial case
     # and this triggers the api return po and so function that sends the original return receipt to wms
     def create_returns(self):
+        
         new_picking = super(StockReturnPickingExt, self).create_returns()
         
         curr_picking = request.env['stock.picking'].search([('id','=',int(new_picking['res_id']))])
-        
+                    
         if "IN" in curr_picking['origin']:
             # po ret
             self.env['stock.picking'].api_return_po(curr_picking)
@@ -49,6 +50,21 @@ class StockReturnPickingExt(models.TransientModel):
         
         # Search for the new picking
         curr_pick = request.env['stock.picking'].search([('id', '=', int(new_picking))], limit=1)
+        
+        
+        
+        ret = request.env['stock.return.picking'].search([('id','=',int(self['id']))])
+        for line in ret['product_return_moves']:
+            line.write({'x_studio_opt_char_1': line['move_id']['x_studio_opt_char_1']})
+            for move in curr_pick['move_ids_without_package']:
+                if move['x_studio_opt_char_1'] == line['x_studio_opt_char_1']:
+                    # move.write({'x_studio_stock_product_code': line['x_studio_stock_product_code']})
+                    if line['x_studio_stock_product_code'] is False:
+                        move.write({'x_studio_stock_product_code': 'NM'})
+                    else:
+                        move.write({'x_studio_stock_product_code': line['x_studio_stock_product_code']})
+    
+    
     
         # Get the stock.picking source name
         trans_code = ""
@@ -62,8 +78,8 @@ class StockReturnPickingExt(models.TransientModel):
         # Get the source stock.picking (origin)
         source = request.env['stock.picking'].search([('name', '=', in_num)], limit=1)
         
-        # Set current stock.picking x_wms_rec_no to source stock.picking's (loop is mandatory as search returns ResultSet not one 
-        # record)
+        # Set current stock.picking x_wms_rec_no to source stock.picking's 
+        # (loop is mandatory as search returns ResultSet not one record)
         wms_no = 0
         
         for pick in source:
@@ -74,3 +90,10 @@ class StockReturnPickingExt(models.TransientModel):
         curr_pick.move_lines.write({'x_wms_rec_no': wms_no})
         curr_pick.move_lines.move_line_ids.write({'x_wms_rec_no': wms_no})
         return new_picking, pick_type_id
+    
+# class StockReturnPickingLineExt(models.TransientModel):
+#     _inherit = 'stock.return.picking.line'
+#     x_studio_opt_char_1 = fields.Selection([
+#                                 ('NM', 'NM'),
+#                                 ('DM', 'DM')
+#                                 ])

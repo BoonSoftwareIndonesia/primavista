@@ -1,0 +1,110 @@
+<odoo>
+  <data>
+      <record id="action_product_move" model="ir.actions.act_window">
+            <field name="name">Product Moves</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product_move.product_move</field>
+            <field name="view_mode">tree,form,pivot</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first activity log rule
+                </p>
+            </field>
+        </record>
+      
+      <menuitem id="menu_product_move"
+            name="Product Move"
+            parent="product_move_root"
+            action="action_product_move"
+            sequence="1"/>
+      
+      <record id="tree_product_move" model="ir.ui.view">
+            <field name="name">product_move.product_move.tree</field>
+            <field name="model">product_move.product_move</field>
+            <field name="arch" type="xml">
+                <tree create="true" edit="true" delete="true">
+                    <field name="start_date" modifiers="{'readonly':true}"/>
+                    <field name="product" modifiers="{'readonly':true}"/>
+                    <field name="quantity" modifiers="{'readonly':true}"/>
+                </tree>
+            </field>
+        </record>
+      
+      <record id="pivot_product_move" model="ir.ui.view">
+            <field name="name">product_move.product_move.pivot</field>
+            <field name="model">product_move.product_move</field>
+            <field name="arch" type="xml">
+                <pivot string="Pivot">
+                    <field name="start_date" />
+                    <field name="product" />
+                    <field name="quantity" />
+                </pivot>
+            </field>
+        </record>
+
+      <record id="form_product_move" model="ir.ui.view">
+            <field name="name">product_move.product_move.form</field>
+            <field name="model">product_move.product_move</field>
+            <field name="arch" type="xml">
+                <form string="Product Move">
+                    <sheet>
+                        <group string="Rule">
+                            <group colspan="1">
+                                <field name="start_date" />
+                                <field name="product" />
+                                <field name="quantity" />
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+      
+      <record id="search_product_move" model="ir.ui.view">
+            <field name="name">product_move.product_move.search</field>
+            <field name="model">product_move.product_move</field>
+            <field name="arch" type="xml">
+                <search string="Product Move">
+<!--                     <field name="name"/>
+                    <filter
+                        name="state_draft"
+                        domain="[('active','=','false')]"
+                        string="Draft"
+                    />
+                    <filter
+                        name="state_active"
+                        domain="[('active','=','true')]"
+                        string="Active"
+                    /> -->
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter
+                            name="group_by_product"
+                            string="Product"
+                            domain="[]"
+                            context="{'group_by':'product'}"
+                        />
+                        <filter
+                            name="group_by_start_date"
+                            string="Start Date"
+                            domain="[]"
+                            context="{'group_by':'start_date'}"
+                        />
+                    </group>
+                </search>
+            </field>
+        </record>
+      
+            <menuitem id="menu_product_move_list"
+            name="Product Moves"
+            parent="menu_product_move"
+            action="action_product_move"
+            sequence="1"/>
+      
+            <menuitem id="product_move_calculate_onhold_menu"
+            name="Calculate Onhold"
+            parent="menu_product_move"
+            action="product_move_calculate_onhold_action"
+            sequence="2"/>
+  </data>
+</odoo>

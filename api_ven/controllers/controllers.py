@@ -3,6 +3,7 @@ from odoo.http import request, Response
 import json, datetime, requests, base64, unicodedata
 from datetime import datetime
 from odoo import http
+from odoo.exceptions import UserError
 
 class ApiVen(http.Controller):
     # @http.route('/api_sbt_inv/api_sbt_inv/', auth='user')
@@ -265,6 +266,14 @@ class ApiVen(http.Controller):
             
                     receipt_header['date_done'] = receipt_date
                     receipt_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
+                    
+                    
+                    # if the number of details is less than the list of products in the stock picking
+                    # then it is a partial case
+                    moves = receipt_header['move_ids_without_package'].search([('state', '=', 'assigned')])
+                    if len(rec['details']) < len(moves):
+                        is_partial = True
+                    
 
                     # receipt Validate
                     self.validate_receipt(receipt_header, is_partial)
@@ -514,6 +523,14 @@ class ApiVen(http.Controller):
 
                 receipt_header['date_done'] = receipt_date
                 receipt_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
+                
+                
+                # if the number of details is less than the list of products in the stock picking
+                # then it is a partial case
+                moves = receipt_header['move_ids_without_package'].search([('state', '=', 'assigned')])
+                if len(rec['details']) < len(moves):
+                    is_partial = True
+                
 
                 # Validate receipt
                 self.validate_receipt(receipt_header, is_partial)
@@ -607,6 +624,7 @@ class ApiVen(http.Controller):
                     break
                     
                 do_header = self.validate_obj_header(rec, error, "soNo", 2)
+                # raise UserError((len(do_header['move_ids_without_package'])))
                 if do_header == -1:
                     is_error = True
                     break
@@ -617,6 +635,7 @@ class ApiVen(http.Controller):
                     break
 
                 # do Line
+                # raise UserError((len(rec['details'])))
                 for line in rec['details']:
                     line_details = []
                     temp_product = 0
@@ -712,6 +731,14 @@ class ApiVen(http.Controller):
                 
                 do_header['x_studio_dispatch_date'] = dispatch_date
                 do_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
+                
+                
+                # if the number of details is less than the list of products in the stock picking
+                # then it is a partial case
+                moves = do_header['move_ids_without_package'].search([('state', '=', 'assigned')])
+                if len(rec['details']) < len(moves):
+                     is_partial = True
+                
 
                 # Delivery Order Validate
                 self.validate_delivery(do_header, sos, is_partial)
@@ -907,6 +934,14 @@ class ApiVen(http.Controller):
                 
                 do_header['x_studio_dispatch_date'] = dispatch_date
                 do_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
+                
+                
+                # if the number of details is less than the list of products in the stock picking
+                # then it is a partial case
+                moves = do_header['move_ids_without_package'].search([('state', '=', 'assigned')])
+                if len(rec['details']) < len(moves):
+                    is_partial = True
+                
 
                 # Delivery Order Validate
                 self.validate_delivery(do_header, sos, is_partial)
