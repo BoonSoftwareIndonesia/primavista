@@ -13,6 +13,7 @@ class ProductMove(models.Model):
     trans_code = fields.Char(string="Trans Code",readonly=True)
     product = fields.Many2one('product.product', string="Product",readonly=True)
     quantity = fields.Float(string="Quantity",readonly=True)
+    value = fields.Float(string="Value",readonly=True)
     
     
     

@@ -5,4 +5,5 @@ access_product_move_calculate_quantity_wizard,access.product_move.calculate_quan
 access_product_move_record,access.product_move.record,model_product_move_record,base.group_user,1,1,1,1
 access_product_move_record2,access.product_move.record2,model_product_move_record2,base.group_user,1,1,1,1
 access_product_move_record3,access.product_move.record3,model_product_move_record3,base.group_user,1,1,1,1
+access_product_move_record4,access.product_move.record4,model_product_move_record4,base.group_user,1,1,1,1
 access_product_move_line,access.product_move.line,model_product_move_line,base.group_user,1,1,1,1

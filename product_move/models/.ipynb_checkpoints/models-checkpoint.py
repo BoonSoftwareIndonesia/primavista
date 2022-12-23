@@ -10,6 +10,7 @@ class ProductMove(models.Model):
     start_date = fields.Datetime(string="Start Date")
     product = fields.Many2one('product.product', string="Product")
     quantity = fields.Float(string="Quantity")
+    value = fields.Float(string="Value")
     
     
 

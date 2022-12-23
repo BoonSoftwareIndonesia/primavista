@@ -31,6 +31,7 @@
         'views/product_move_record_view.xml',
         'views/product_move_record2_view.xml',
         'views/product_move_record3_view.xml',
+        'views/product_move_record4_view.xml',
         'views/product_move_line_view.xml',
     ],
     # only loaded in demonstration mode

@@ -47,8 +47,9 @@ class CalculateOnholdWizard(models.TransientModel):
                     pm_model.create({
                         'start_date': dt,
                         'product': product.id,
-                        'quantity': product.with_context({'to_date': dt}).qty_available
+                        'quantity': product.with_context({'to_date': dt}).qty_available,
+                        'value': product.standard_price * product.with_context({'to_date': dt}).qty_available
                     })
-                except e:
+                except Exception as e:
                     raise UserError(str(e))
                 

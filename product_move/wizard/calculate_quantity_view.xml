@@ -6,7 +6,13 @@
             <field name="arch" type="xml">
                 <form string="Calculate Quantity">
                     <group>
+                        <field name="contract_template_name"/>
+                        <field name="contract_template" filename="contract_template_name" />
+                    </group>
+                    <group>
                         <button name="calculate_quantity" string="Calculate" type="object" class="btn-primary"/>
+                        <button name="calculate_quantity_2" string="Calculate2" type="object" class="btn-primary"/>
+                        <button name="testing_func" string="Test" type="object" class="btn-primary"/>
                     </group>
                     <footer>
                         <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z"/>

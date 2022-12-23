@@ -25,24 +25,7 @@ class ProductMove(models.Model):
                 pm_out.product as product,
                 pm_out.quantity as start_quantity,
                 x_studio_doc_trans_code as trans_code,
-                COALESCE(
-                (
-            SELECT 
-                'Outgoing' AS io_code
-            FROM 
-                stock_move sm LEFT JOIN stock_picking sp on sm.picking_id = sp.id 
-            WHERE 
-                sm.product_id = pm_out.product AND
-                sm.state in ('done') AND
-                sm.location_id = 8 AND
-                to_char(sm.date, 'YYYY-MM') = to_char(pm_out.start_date, 'YYYY-MM') AND
-                ((sp.x_studio_doc_trans_code = sp_out.x_studio_doc_trans_code) OR
-                (sp.x_studio_doc_trans_code IS NULL AND sp_out.x_studio_doc_trans_code IS NULL))
-            GROUP BY
-                sm.product_id,  
-                x_studio_doc_trans_code,
-                to_char(sm.date, 'YYYY-MM')
-            ), 'No Data') AS io_code,
+                'Outgoing' AS io_code,
                 COALESCE(
                 (
             SELECT 
@@ -69,24 +52,7 @@ class ProductMove(models.Model):
                 pm_out.product as product,
                 pm_out.quantity as start_quantity,
                 x_studio_doc_trans_code as trans_code,
-                COALESCE(
-                (
-            SELECT 
-                'Ingoing' AS io_code
-            FROM 
-                stock_move sm LEFT JOIN stock_picking sp on sm.picking_id = sp.id 
-            WHERE 
-                sm.product_id = pm_out.product AND
-                sm.state in ('done') AND
-                sm.location_dest_id = 8 AND
-                to_char(sm.date, 'YYYY-MM') = to_char(pm_out.start_date, 'YYYY-MM') AND
-                ((sp.x_studio_doc_trans_code = sp_out.x_studio_doc_trans_code) OR
-                (sp.x_studio_doc_trans_code IS NULL AND sp_out.x_studio_doc_trans_code IS NULL))
-            GROUP BY
-                sm.product_id,  
-                x_studio_doc_trans_code,
-                to_char(sm.date, 'YYYY-MM')
-            ), 'No Data') AS io_code,
+                'Ingoing' AS io_code,
                 COALESCE(
                 (
             SELECT 
