@@ -169,9 +169,8 @@ class ProductExt(models.Model):
     
     @api.model_create_multi
     def create(self, vals_list):
-        # raise UserError(str(vals_list))
+        # Send default_code and standard_price info to product.template create for on the fly product
         context_content = str(vals_list[0]["default_code"]) + "-" + str(vals_list[0]["standard_price"])
-        # raise UserError((context_content))
         res = super(ProductExt, self.with_context(on_the_fly_context = context_content, create_product_product=True)).create(vals_list)
             
         return res

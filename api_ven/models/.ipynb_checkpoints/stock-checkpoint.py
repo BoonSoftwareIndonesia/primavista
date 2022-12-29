@@ -51,7 +51,7 @@ class StockReturnPickingExt(models.TransientModel):
         # Search for the new picking
         curr_pick = request.env['stock.picking'].search([('id', '=', int(new_picking))], limit=1)
         
-        
+#         to set each stock status code of each line from stock.return.picking
         
         ret = request.env['stock.return.picking'].search([('id','=',int(self['id']))])
         for line in ret['product_return_moves']:
