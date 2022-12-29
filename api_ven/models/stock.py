@@ -58,7 +58,6 @@ class StockReturnPickingExt(models.TransientModel):
             line.write({'x_studio_opt_char_1': line['move_id']['x_studio_opt_char_1']})
             for move in curr_pick['move_ids_without_package']:
                 if move['x_studio_opt_char_1'] == line['x_studio_opt_char_1']:
-                    # move.write({'x_studio_stock_product_code': line['x_studio_stock_product_code']})
                     if line['x_studio_stock_product_code'] is False:
                         move.write({'x_studio_stock_product_code': 'NM'})
                     else:
@@ -91,9 +90,3 @@ class StockReturnPickingExt(models.TransientModel):
         curr_pick.move_lines.move_line_ids.write({'x_wms_rec_no': wms_no})
         return new_picking, pick_type_id
     
-# class StockReturnPickingLineExt(models.TransientModel):
-#     _inherit = 'stock.return.picking.line'
-#     x_studio_opt_char_1 = fields.Selection([
-#                                 ('NM', 'NM'),
-#                                 ('DM', 'DM')
-#                                 ])
