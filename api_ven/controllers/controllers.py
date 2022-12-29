@@ -942,7 +942,6 @@ class ApiVen(http.Controller):
                 if len(rec['details']) < len(moves):
                     is_partial = True
                 
-
                 # Delivery Order Validate
                 self.validate_delivery(do_header, sos, is_partial)
                 

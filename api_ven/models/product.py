@@ -38,6 +38,11 @@ class ProductTemplateExt(models.Model):
     def create(self, vals_list):
         # raise UserError((vals_list[0].keys()))
         if not self._context.get('copy_context'):
+            otf_context = self._context.get('on_the_fly_context')
+            if otf_context:
+                otf_context = otf_context.split("-")
+                vals_list[0]['default_code'] = otf_context[0]
+                vals_list[0]['standard_price'] = otf_context[1]
             if vals_list[0]['default_code'] is False:
                 raise UserError(('Internal reference cannot be null (product template-create)'))
             if vals_list[0]['standard_price'] is False:
@@ -161,3 +166,12 @@ class ProductExt(models.Model):
                 is_duplicate = request.env['product.product'].search([('id','!=',product_tmpl.id),('default_code', '=', product_tmpl.default_code)])
                 if is_duplicate:
                     raise UserError(('Duplicate exists: ' + product_tmpl.default_code))
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        # raise UserError(str(vals_list))
+        context_content = str(vals_list[0]["default_code"]) + "-" + str(vals_list[0]["standard_price"])
+        # raise UserError((context_content))
+        res = super(ProductExt, self.with_context(on_the_fly_context = context_content, create_product_product=True)).create(vals_list)
+            
+        return res

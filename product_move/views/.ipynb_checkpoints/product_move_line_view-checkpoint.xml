@@ -64,17 +64,7 @@
             <field name="model">product_move.line</field>
             <field name="arch" type="xml">
                 <search string="Product Move">
-<!--                     <field name="name"/>
-                    <filter
-                        name="state_draft"
-                        domain="[('active','=','false')]"
-                        string="Draft"
-                    />
-                    <filter
-                        name="state_active"
-                        domain="[('active','=','true')]"
-                        string="Active"
-                    /> -->
+                <field name="product" string="Product Name"/>
                     <separator/>
                     <group expand="0" string="Group By">
                         <filter

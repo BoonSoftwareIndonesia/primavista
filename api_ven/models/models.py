@@ -109,6 +109,9 @@ class ApiController(models.Model):
         
         
         for line in record['order_line']:
+            if line['product_id'] is False:
+                continue
+                
             line['x_studio_opt_char_1'] = str(line_no)
             
             po_line = {
@@ -243,6 +246,9 @@ class ApiControllerSO(models.Model):
         
         # so_lines = every items in the SO
         for line in record['order_line']:
+            if line['product_id'] is False:
+                continue
+                
             line['x_studio_line_no'] = str(line_no)
             
             so_line = {
@@ -380,6 +386,9 @@ class ApiControllerStockPicking(models.Model):
         
         # Return PO lines from stock.picking.move_ids_without_package
         for line in record.move_ids_without_package:
+            if line['product_id'] is False:
+                continue
+                
             item_line = {
                 "soLineOptChar1": line['x_studio_opt_char_1'],
                 "product": line['product_id']["product_tmpl_id"]["default_code"],
@@ -518,7 +527,8 @@ class ApiControllerStockPicking(models.Model):
         doc_trans_code = ""
         
         for line in record['move_ids_without_package']:
-            # line['x_studio_opt_char_1'] = str(line_no)
+            if line['product_id'] is False:
+                continue
             
             po_line = {
                 "inwardLineOptChar1": line['x_studio_opt_char_1'],

@@ -65,17 +65,8 @@
             <field name="model">product_move.product_move</field>
             <field name="arch" type="xml">
                 <search string="Product Move">
-<!--                     <field name="name"/>
-                    <filter
-                        name="state_draft"
-                        domain="[('active','=','false')]"
-                        string="Draft"
-                    />
-                    <filter
-                        name="state_active"
-                        domain="[('active','=','true')]"
-                        string="Active"
-                    /> -->
+                    <field name="product" string="Product Name"/>
+                    <filter name='filter_non_zero' string ='Non zero quantity' domain="[('quantity','>',0)]"/>
                     <separator/>
                     <group expand="0" string="Group By">
                         <filter
