@@ -89,7 +89,6 @@ class ApiVen(http.Controller):
                 error["Error"] = "Wrong date format on " + date_type 
                 return -1
 
-            
     # Rollback previous stock move lines
     def rollback_move(self, rec, error, lines, rec_no_type):
         if lines:
@@ -99,8 +98,6 @@ class ApiVen(http.Controller):
                 curr_move = request.env['stock.move'].search(['&', '&', ('origin','=', rec[rec_no_type]),('x_studio_opt_char_1', '=', str(line)), ('state', '=', 'assigned')])
                 
                 curr_move.move_line_nosuggest_ids.write({'qty_done': 0})
-#                 curr_move._do_unreserve()
-        
     
     # CREATE RCPT (PO) API ===================================================================================
     @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['POST'])
@@ -142,7 +139,6 @@ class ApiVen(http.Controller):
                 error['Error'] = str(e)
                 is_error = True
 
-#             new_rcpt = json.dumps(rcpt)
             try:
                 for rec in rcpt:
                     # x_studio_opt_char containers for searching stock move line to be reversed
@@ -274,7 +270,6 @@ class ApiVen(http.Controller):
                     if len(rec['details']) < len(moves):
                         is_partial = True
                     
-
                     # receipt Validate
                     self.validate_receipt(receipt_header, is_partial)
                     
@@ -286,7 +281,6 @@ class ApiVen(http.Controller):
                 is_error = True
                     
             if is_error == True:
-    #            Response.status = "400"
                 api_log['status'] = 'error'
             else:
                 Response.status = "200"
@@ -310,7 +304,6 @@ class ApiVen(http.Controller):
             })
             return message
 
-        
     def create_immediate_transfer(self, po_name):
             po_obj = request.env['purchase.order'].search([('name', '=', po_name )])
 
@@ -337,7 +330,6 @@ class ApiVen(http.Controller):
             # When stock picking change to stock immediate, it will be picked urgently and backorder cannot be created. 
             # So, each product has to fullfil the required qty. Then, the picking status will be changed to done.
 
-            # po_name = 'P00' + str(int(po))
             po_name = receipt_header['origin']
             res = self.create_immediate_transfer(po_name)
             receipt_header.with_context(cancel_backorder=True)._action_done()
@@ -523,13 +515,11 @@ class ApiVen(http.Controller):
                 receipt_header['date_done'] = receipt_date
                 receipt_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
                 
-                
                 # if the number of details is less than the list of products in the stock picking
                 # then it is a partial case
                 moves = receipt_header['move_ids_without_package'].search([('state', '=', 'assigned')])
                 if len(rec['details']) < len(moves):
                     is_partial = True
-                
 
                 # Validate receipt
                 self.validate_receipt(receipt_header, is_partial)
@@ -542,7 +532,6 @@ class ApiVen(http.Controller):
             is_error = True
 
         if is_error == True:
-            # Response.status = "400"
             api_log['status'] = 'error'
         else:
             Response.status = "200"
@@ -621,7 +610,7 @@ class ApiVen(http.Controller):
                     break
                     
                 do_header = self.validate_obj_header(rec, error, "soNo", 2)
-                # raise UserError((len(do_header['move_ids_without_package'])))
+
                 if do_header == -1:
                     is_error = True
                     break
@@ -632,7 +621,6 @@ class ApiVen(http.Controller):
                     break
 
                 # do Line
-                # raise UserError((len(rec['details'])))
                 for line in rec['details']:
                     line_details = []
                     temp_product = 0
@@ -729,13 +717,11 @@ class ApiVen(http.Controller):
                 do_header['x_studio_dispatch_date'] = dispatch_date
                 do_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
                 
-                
                 # if the number of details is less than the list of products in the stock picking
                 # then it is a partial case
                 moves = do_header['move_ids_without_package'].search([('state', '=', 'assigned')])
                 if len(rec['details']) < len(moves):
                      is_partial = True
-                
 
                 # Delivery Order Validate
                 self.validate_delivery(do_header, sos, is_partial)
@@ -747,8 +733,6 @@ class ApiVen(http.Controller):
            is_error = True
 
         if is_error == True:
-#            Response.status = "400"
-#             pass
             api_log['status'] = 'error'
         else:
             Response.status = "200"
@@ -930,7 +914,6 @@ class ApiVen(http.Controller):
                 do_header['x_studio_dispatch_date'] = dispatch_date
                 do_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
                 
-                
                 # if the number of details is less than the list of products in the stock picking
                 # then it is a partial case
                 moves = do_header['move_ids_without_package'].search([('state', '=', 'assigned')])
@@ -947,8 +930,6 @@ class ApiVen(http.Controller):
            is_error = True
 
         if is_error == True:
-#            Response.status = "400"
-#             pass
             api_log['status'] = 'error'
         else:
             Response.status = "200"
@@ -1015,7 +996,6 @@ class ApiVen(http.Controller):
     def validate_delivery(self, do_header, sos, is_partial):
         if is_partial == False:
             do_header.action_set_quantities_to_reservation()
-#             so_name = 'S000' + str(int(sos))
             so_name = do_header['origin']
             res = self.create_immediate_transfer_so(so_name)
             do_header.with_context(cancel_backorder=True)._action_done()

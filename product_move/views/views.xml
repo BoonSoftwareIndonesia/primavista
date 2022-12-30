@@ -1,0 +1,7 @@
+<odoo>
+  <data>
+      <menuitem id="product_move_root"
+            name="Product Move"
+            sequence="0"/>
+  </data>
+</odoo>
