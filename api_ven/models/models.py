@@ -107,6 +107,9 @@ class ApiController(models.Model):
         
         
         for line in record['order_line']:
+            if line['product_id']["product_tmpl_id"]["default_code"] is False:
+                continue
+                
             line['x_studio_opt_char_1'] = str(line_no)
             
             po_line = {
@@ -237,6 +240,9 @@ class ApiControllerSO(models.Model):
         
         # so_lines = every items in the SO
         for line in record['order_line']:
+            if line['product_id']["product_tmpl_id"]["default_code"] is False:
+                continue
+                
             line['x_studio_line_no'] = str(line_no)
             
             so_line = {
@@ -374,6 +380,9 @@ class ApiControllerStockPicking(models.Model):
         
         # Return PO lines from stock.picking.move_ids_without_package
         for line in record.move_ids_without_package:
+            if line['product_id']["product_tmpl_id"]["default_code"] is False:
+                continue
+                
             item_line = {
                 "soLineOptChar1": line['x_studio_opt_char_1'],
                 "product": line['product_id']["product_tmpl_id"]["default_code"],
@@ -381,7 +390,8 @@ class ApiControllerStockPicking(models.Model):
 #                 "originalOrderUOM": line['product_uom']['name'],
                 "originalOrderUOM": "PCS",
                 "lotNo": "LOT", 
-                "filterTransactionCode": "NM",
+                # "filterTransactionCode": "NM",
+                "filterTransactionCode": str(line['x_studio_stock_product_code']),
                 "soLineOptChar2": ""
             }
             line_no += 1
@@ -405,7 +415,7 @@ class ApiControllerStockPicking(models.Model):
                 po_record = po
             partner_shipping = po_record.partner_id
         
-        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+        payload = {"accessToken": "yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -511,7 +521,8 @@ class ApiControllerStockPicking(models.Model):
         doc_trans_code = ""
         
         for line in record['move_ids_without_package']:
-            # line['x_studio_opt_char_1'] = str(line_no)
+            if line['product_id']["product_tmpl_id"]["default_code"] is False:
+                continue
             
             po_line = {
                 "inwardLineOptChar1": line['x_studio_opt_char_1'],
@@ -520,7 +531,8 @@ class ApiControllerStockPicking(models.Model):
                 "quantityOrdered": str(line['product_qty']),
 #                 "uomCode": line['product_uom']['name'],
                 "uomCode": "PCS",
-                "stockStatusCode": "NM"
+                # "stockStatusCode": "NM"
+                "stockStatusCode": str(line['x_studio_stock_product_code'])
             }
             # line_no += 1
             po_lines.append(po_line)

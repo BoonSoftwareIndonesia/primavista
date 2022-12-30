@@ -129,24 +129,24 @@
 
 
       <record id="action_api" model="ir.actions.act_window">
-            <field name="name">API Logs</field>
+            <field name="name">Logs</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">api_ven.api_ven</field>
             <field name="view_mode">tree,form</field>
             <field name="context">{"search_default_today":1}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
-                    API Logs
+                    Create your first log
                 </p>
             </field>
         </record>
 
       <menuitem id="api_menu_root"
-            name="API LOG"
+            name="Logs"
             sequence="10"/>
 
       <menuitem id="api_log_root"
-            name="Logs"
+            name="API Logs"
             parent="api_menu_root"
             action="action_api"
             sequence="10"/>
