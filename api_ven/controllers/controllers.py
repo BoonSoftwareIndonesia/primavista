@@ -346,7 +346,6 @@ class ApiVen(http.Controller):
             # So, we get the stock.picking, and process while also create a backorder.
             receipt_header.with_context(cancel_backorder=False)._action_done()
 
-
      # stock picking validation for returns (search based on wms rec no)
     def validate_return_obj_header(self, rec, error, pick_type_id, rec_no_type):
         # obj_header validation for po and so return api
@@ -568,8 +567,6 @@ class ApiVen(http.Controller):
 
         return message
     
-    
-    
 #   POST DO ===================================================================================
     @http.route('/web/api/downloaddo', type='json', auth='user', methods=['POST'])
     def post_do(self, do):
@@ -775,9 +772,7 @@ class ApiVen(http.Controller):
         })
         
         return message
-
-    
-    
+        
     # Return DO ===================================================================================    
     @http.route('/web/api/return_do', type='json', auth='user', methods=['POST'])
     def return_do(self, rcpt):
@@ -998,8 +993,6 @@ class ApiVen(http.Controller):
 
         return res
     
-    
-    
     def create_immediate_transfer_so(self, so_name):
         so_obj = request.env['sale.order'].search([('name', '=', so_name )])
         
@@ -1017,7 +1010,6 @@ class ApiVen(http.Controller):
             'show_transfers': False,
             'immediate_transfer_line_ids': immediate_transfer_line_ids
         })
-
         return res
 
     def validate_delivery(self, do_header, sos, is_partial):

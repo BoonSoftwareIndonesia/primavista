@@ -46,7 +46,4 @@
     'demo': [
         'demo/demo.xml',
     ],
-#     'js':[
-#         'static/src/js/checkin_button.js'
-#     ]
 }

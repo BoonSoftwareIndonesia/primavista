@@ -347,6 +347,7 @@ class ApiVen(http.Controller):
             receipt_header.with_context(cancel_backorder=False)._action_done()
 
 
+
      # stock picking validation for returns (search based on wms rec no)
     def validate_return_obj_header(self, rec, error, pick_type_id, rec_no_type):
         # obj_header validation for po and so return api
@@ -569,6 +570,8 @@ class ApiVen(http.Controller):
         return message
     
     
+=======
+
     
 #   POST DO ===================================================================================
     @http.route('/web/api/downloaddo', type='json', auth='user', methods=['POST'])
@@ -775,8 +778,6 @@ class ApiVen(http.Controller):
         })
         
         return message
-
-    
     
     # Return DO ===================================================================================    
     @http.route('/web/api/return_do', type='json', auth='user', methods=['POST'])
@@ -978,7 +979,7 @@ class ApiVen(http.Controller):
         })
         
         return message
-    
+
     def create_immediate_transfer_so(self, so_name):
         so_obj = request.env['sale.order'].search([('name', '=', so_name )])
         
@@ -996,29 +997,6 @@ class ApiVen(http.Controller):
             'show_transfers': False,
             'immediate_transfer_line_ids': immediate_transfer_line_ids
         })
-
-        return res
-    
-    
-    
-    def create_immediate_transfer_so(self, so_name):
-        so_obj = request.env['sale.order'].search([('name', '=', so_name )])
-        
-        immediate_transfer_line_ids = []
-        
-        for picking in so_obj.picking_ids:
-            if picking['state'] == 'assigned':
-                immediate_transfer_line_ids.append([0, False, {
-                    'picking_id': picking.id,
-                    'to_immediate': True
-                }])
-
-        res = request.env['stock.immediate.transfer'].create({
-            'pick_ids': [(4, p.id) for p in so_obj.picking_ids],
-            'show_transfers': False,
-            'immediate_transfer_line_ids': immediate_transfer_line_ids
-        })
-
         return res
 
     def validate_delivery(self, do_header, sos, is_partial):
