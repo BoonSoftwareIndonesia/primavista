@@ -50,20 +50,6 @@ class StockReturnPickingExt(models.TransientModel):
         
         # Search for the new picking
         curr_pick = request.env['stock.picking'].search([('id', '=', int(new_picking))], limit=1)
-        
-#         to set each stock status code of each line from stock.return.picking
-        
-        ret = request.env['stock.return.picking'].search([('id','=',int(self['id']))])
-        for line in ret['product_return_moves']:
-            line.write({'x_studio_opt_char_1': line['move_id']['x_studio_opt_char_1']})
-            for move in curr_pick['move_ids_without_package']:
-                if move['x_studio_opt_char_1'] == line['x_studio_opt_char_1']:
-                    if line['x_studio_stock_product_code'] is False:
-                        move.write({'x_studio_stock_product_code': 'NM'})
-                    else:
-                        move.write({'x_studio_stock_product_code': line['x_studio_stock_product_code']})
-    
-    
     
         # Get the stock.picking source name
         trans_code = ""
@@ -84,7 +70,6 @@ class StockReturnPickingExt(models.TransientModel):
         for pick in source:
             wms_no = pick.x_wms_rec_no
 
-        
         curr_pick.write({'x_wms_rec_no': wms_no, 'x_studio_doc_trans_code':trans_code})
         curr_pick.move_lines.write({'x_wms_rec_no': wms_no})
         curr_pick.move_lines.move_line_ids.write({'x_wms_rec_no': wms_no})

@@ -86,9 +86,7 @@ class PartnerExt(models.Model):
         curr_user_id = self._context
         curr_user_id = curr_user_id.get('uid')
         curr_user_name = self.env['res.users'].browse(curr_user_id)
-        
-        # format_string = f"New values = {str(new_vals)} \n Old values = {str(old_vals)} \n Records = id:{str(new_records['id'])}, name:{str(new_records['name'])}"
-        
+ 
         for rec in new_records:
             new_activity_log_vals = {
                 'method': method,

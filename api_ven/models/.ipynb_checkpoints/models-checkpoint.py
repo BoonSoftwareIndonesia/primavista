@@ -227,6 +227,7 @@ class ApiController(models.Model):
             'mimetype': 'text/plain'
         })
 
+
 # SALES ORDER ==========================================================================        
 class ApiControllerSO(models.Model):
     _inherit = "sale.order"
@@ -530,8 +531,8 @@ class ApiControllerStockPicking(models.Model):
                 "quantityOrdered": str(line['product_qty']),
 #                 "uomCode": line['product_uom']['name'],
                 "uomCode": "PCS",
-                # "stockStatusCode": "NM"
-                "stockStatusCode": str(line['x_studio_stock_product_code'])
+                "stockStatusCode": "NM"
+                # "stockStatusCode": str(line['x_studio_stock_product_code'])
             }
             # line_no += 1
             po_lines.append(po_line)
