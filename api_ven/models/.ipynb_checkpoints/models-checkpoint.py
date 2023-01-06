@@ -390,8 +390,8 @@ class ApiControllerStockPicking(models.Model):
 #                 "originalOrderUOM": line['product_uom']['name'],
                 "originalOrderUOM": "PCS",
                 "lotNo": "LOT", 
-                # "filterTransactionCode": "NM",
-                "filterTransactionCode": str(line['x_studio_stock_product_code']),
+                "filterTransactionCode": "NM",
+                # "filterTransactionCode": str(line['x_studio_stock_product_code']),
                 "soLineOptChar2": ""
             }
             line_no += 1
@@ -415,7 +415,7 @@ class ApiControllerStockPicking(models.Model):
                 po_record = po
             partner_shipping = po_record.partner_id
         
-        payload = {"accessToken": "yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
