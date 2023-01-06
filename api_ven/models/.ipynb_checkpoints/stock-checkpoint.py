@@ -50,6 +50,17 @@ class StockReturnPickingExt(models.TransientModel):
         
         # Search for the new picking
         curr_pick = request.env['stock.picking'].search([('id', '=', int(new_picking))], limit=1)
+        
+        ret = request.env['stock.return.picking'].search([('id','=',int(self['id']))])
+        for line in ret['product_return_moves']:
+            line.write({'x_studio_opt_char_1': line['move_id']['x_studio_opt_char_1']})
+            for move in curr_pick['move_ids_without_package']:
+                if move['x_studio_opt_char_1'] == line['x_studio_opt_char_1']:
+                    # move.write({'x_studio_stock_product_code': line['x_studio_stock_product_code']})
+                    if line['x_studio_stock_product_code'] is False:
+                        move.write({'x_studio_stock_product_code': 'NM'})
+                    else:
+                        move.write({'x_studio_stock_product_code': line['x_studio_stock_product_code']})
     
         # Get the stock.picking source name
         trans_code = ""

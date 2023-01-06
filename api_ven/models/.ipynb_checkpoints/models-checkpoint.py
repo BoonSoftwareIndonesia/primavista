@@ -56,9 +56,6 @@ class UomExt(models.Model):
     _inherit = 'uom.uom'
     ratio = fields.Float('Combined Ratio', compute='_compute_ratio', inverse='_set_ratio', store=False, required=True)
 
-
-
-
 # API VEN MODEL ==========================================================================
 class api_ven(models.Model):
     _name = 'api_ven.api_ven'
@@ -84,7 +81,6 @@ class api_ven(models.Model):
         result = super(api_ven, self).create(vals)
         return result
 
-    
 # PURCHASE ORDER ==========================================================================
 class ApiController(models.Model):
     _inherit = "purchase.order"
@@ -92,7 +88,7 @@ class ApiController(models.Model):
     def api_dw_po(self, record):
             
         # PROSES KIRIM API
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
         
         # PO_LINES: Contains every product in the PO
         line_no = 1
@@ -127,7 +123,7 @@ class ApiController(models.Model):
         
         
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
@@ -195,14 +191,8 @@ class ApiController(models.Model):
             error['Error'] = str(e)
             is_error = True
         
-#        try:
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-#        except Exception as e:
-#            is_error = True
-#            api_log['status'] = 'error'
-            
-#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
-        
+
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
         
@@ -227,13 +217,13 @@ class ApiController(models.Model):
             'mimetype': 'text/plain'
         })
 
-
+        
 # SALES ORDER ==========================================================================        
 class ApiControllerSO(models.Model):
     _inherit = "sale.order"
     
     def api_dw_so(self, record):
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
         
         line_no = 1
         so_lines = []
@@ -261,7 +251,7 @@ class ApiControllerSO(models.Model):
         
         
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -359,10 +349,6 @@ class ApiControllerSO(models.Model):
             'mimetype': 'text/plain'
         })
         
-#         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-
-
-
 
 # STOCK PICKING FOR RETURNS ===================================================================
 class ApiControllerStockPicking(models.Model):
@@ -370,7 +356,7 @@ class ApiControllerStockPicking(models.Model):
     
     # Returning a PO (receive item -> return to vendor) using SO format =======================================
     def api_return_po(self, record):
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
         
         wms_no = ""
         line_no = 1
@@ -390,8 +376,8 @@ class ApiControllerStockPicking(models.Model):
 #                 "originalOrderUOM": line['product_uom']['name'],
                 "originalOrderUOM": "PCS",
                 "lotNo": "LOT", 
-                "filterTransactionCode": "NM",
-                # "filterTransactionCode": str(line['x_studio_stock_product_code']),
+                # "filterTransactionCode": "NM",
+                "filterTransactionCode": str(line['x_studio_stock_product_code']),
                 "soLineOptChar2": ""
             }
             line_no += 1
@@ -415,7 +401,7 @@ class ApiControllerStockPicking(models.Model):
                 po_record = po
             partner_shipping = po_record.partner_id
         
-        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -504,13 +490,10 @@ class ApiControllerStockPicking(models.Model):
             'mimetype': 'text/plain'
         })
 
-        
-        
-
     # Returning a SO (sell item -> return to us) using PO format =======================================
     def api_return_so(self, record):
         # PROSES KIRIM API
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
         
         # PO_LINES: Contains every product in the PO
 #         line_no = 1
@@ -531,8 +514,8 @@ class ApiControllerStockPicking(models.Model):
                 "quantityOrdered": str(line['product_qty']),
 #                 "uomCode": line['product_uom']['name'],
                 "uomCode": "PCS",
-                "stockStatusCode": "NM"
-                # "stockStatusCode": str(line['x_studio_stock_product_code'])
+                # "stockStatusCode": "NM"
+                "stockStatusCode": str(line['x_studio_stock_product_code'])
             }
             # line_no += 1
             po_lines.append(po_line)
@@ -547,7 +530,7 @@ class ApiControllerStockPicking(models.Model):
         
         
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
@@ -614,14 +597,8 @@ class ApiControllerStockPicking(models.Model):
         except Exception as e:
             error['Error'] = str(e)
             is_error = True
-        
-#        try:
+
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-#        except Exception as e:
-#            is_error = True
-#            api_log['status'] = 'error'
-            
-#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
         
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
@@ -646,10 +623,7 @@ class ApiControllerStockPicking(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-        
 
-        
-        
 # CUSTOMER  ==========================================================================
 class ApiControllerPartner(models.Model):
     _inherit = "res.partner"
@@ -657,10 +631,10 @@ class ApiControllerPartner(models.Model):
     def api_dw_customer(self, record):
             
 #       PROSES KIRIM API 
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createcustomer"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createcustomer"
         
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "customer": [
                 {
@@ -716,13 +690,7 @@ class ApiControllerPartner(models.Model):
             error['Error'] = str(e)
             is_error = True
         
-#        try:
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-#        except Exception as e:
-#            is_error = True
-#            api_log['status'] = 'error'
-            
-#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
         
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
@@ -747,9 +715,7 @@ class ApiControllerPartner(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-        
-        
-        
+  
         
 # PRODUCT  ==========================================================================
 class ApiControllerProduct(models.Model):
@@ -757,10 +723,10 @@ class ApiControllerProduct(models.Model):
     
     def api_dw_product(self, record):
         # PROSES KIRIM API 
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createproduct"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
         
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "product": [
                 {
@@ -831,13 +797,7 @@ class ApiControllerProduct(models.Model):
             error['Error'] = str(e)
             is_error = True
         
-#        try:
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-#        except Exception as e:
-#            is_error = True
-#            api_log['status'] = 'error'
-            
-#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
         
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
