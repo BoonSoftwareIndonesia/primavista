@@ -56,9 +56,6 @@ class UomExt(models.Model):
     _inherit = 'uom.uom'
     ratio = fields.Float('Combined Ratio', compute='_compute_ratio', inverse='_set_ratio', store=False, required=True)
 
-
-
-
 # API VEN MODEL ==========================================================================
 class api_ven(models.Model):
     _name = 'api_ven.api_ven'
@@ -84,7 +81,6 @@ class api_ven(models.Model):
         result = super(api_ven, self).create(vals)
         return result
 
-    
 # PURCHASE ORDER ==========================================================================
 class ApiController(models.Model):
     _inherit = "purchase.order"
@@ -195,14 +191,8 @@ class ApiController(models.Model):
             error['Error'] = str(e)
             is_error = True
         
-#        try:
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-#        except Exception as e:
-#            is_error = True
-#            api_log['status'] = 'error'
-            
-#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
-        
+
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
         
@@ -227,7 +217,7 @@ class ApiController(models.Model):
             'mimetype': 'text/plain'
         })
 
-
+        
 # SALES ORDER ==========================================================================        
 class ApiControllerSO(models.Model):
     _inherit = "sale.order"
@@ -359,10 +349,6 @@ class ApiControllerSO(models.Model):
             'mimetype': 'text/plain'
         })
         
-#         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-
-
-
 
 # STOCK PICKING FOR RETURNS ===================================================================
 class ApiControllerStockPicking(models.Model):
@@ -504,9 +490,6 @@ class ApiControllerStockPicking(models.Model):
             'mimetype': 'text/plain'
         })
 
-        
-        
-
     # Returning a SO (sell item -> return to us) using PO format =======================================
     def api_return_so(self, record):
         # PROSES KIRIM API
@@ -614,14 +597,8 @@ class ApiControllerStockPicking(models.Model):
         except Exception as e:
             error['Error'] = str(e)
             is_error = True
-        
-#        try:
+
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-#        except Exception as e:
-#            is_error = True
-#            api_log['status'] = 'error'
-            
-#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
         
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
@@ -646,10 +623,7 @@ class ApiControllerStockPicking(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-        
 
-        
-        
 # CUSTOMER  ==========================================================================
 class ApiControllerPartner(models.Model):
     _inherit = "res.partner"
@@ -716,13 +690,7 @@ class ApiControllerPartner(models.Model):
             error['Error'] = str(e)
             is_error = True
         
-#        try:
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-#        except Exception as e:
-#            is_error = True
-#            api_log['status'] = 'error'
-            
-#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
         
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
@@ -747,9 +715,7 @@ class ApiControllerPartner(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-        
-        
-        
+  
         
 # PRODUCT  ==========================================================================
 class ApiControllerProduct(models.Model):
@@ -831,13 +797,7 @@ class ApiControllerProduct(models.Model):
             error['Error'] = str(e)
             is_error = True
         
-#        try:
         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
-#        except Exception as e:
-#            is_error = True
-#            api_log['status'] = 'error'
-            
-#        wms_response = base64.b64encode(bytes(str(r.text), 'utf-8'))
         
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
