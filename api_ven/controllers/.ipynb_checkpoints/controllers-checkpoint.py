@@ -51,7 +51,7 @@ class ApiVen(http.Controller):
             # PO
             # set WMS rec no of stock picking
             obj_header['x_wms_rec_no'] = rec['receiptNo']
-        # Set the x_wms_rec_no of the stock picking based on doNo (for DO API)
+        # (2.3.2) Set the x_wms_rec_no of the stock picking based on doNo (for DO API)
         else:
             # SO
             # set WMS rec no of stock picking
@@ -64,18 +64,16 @@ class ApiVen(http.Controller):
         if rec[rec_no_type] == "":
             error["Error"] = "Field " + rec_no_type + " is blank"  
             return -1
-        
         # (2.2.2) Check documentTransCode is null or not
         if rec['documentTransCode'] == "":
             error["Error"] = "Field documentTransCode is blank"
             return -1
-        
         # (2.2.3) Check WMS Receipt No (for PO API) 
         if rec_no_type == 'poNo':
             if rec['receiptNo'] == "" or 'receiptNo' not in rec:
                 error["Error"] = "Field WMS Receipt Number is blank"
                 return -1
-        # Check WMS DO No (for DO API)
+        # (2.2.3) Check WMS DO No (for DO API)
         else:
             if rec['doNo'] == "" or 'doNo' not in rec:
                 error["Error"] = "Field WMS DO Number is blank"
@@ -595,6 +593,7 @@ class ApiVen(http.Controller):
         line_details = []
         is_partial = False
         
+        # Send API Log
         try:
             api_log = request.env['api_ven.api_ven'].create({
                  'status': 'new',
@@ -621,37 +620,50 @@ class ApiVen(http.Controller):
             is_error = True
             
         try:
+            # Loop through every line in "do" array
             for rec in do:
+                # (1) Array to store x_studio_opt_char / inwardLineOptChar1 values that have been successfully validated
+                # This is used for searching stock move lines that needs to be reversed
                 lines = []
                 
+                
+                # (2) Validations (start)
+                
+                # (2.1) Validate soNo
                 sos = self.getRecord(model="sale.order", field="name", wms=rec['soNo'])
                 if sos == -1:
                     error["Error"] = "soNo does not exist"
                     is_error = True
                     break
                     
+                # (2.2) Call validate_obj_json() to validate soNo, documentTransCode, and doNo (WMS DO No)  
                 json_valid = self.validate_obj_json(rec, error, "soNo")
                 if json_valid == -1:
                     is_error = True
                     break
-                    
+                
+                # (2.3) Call validate_obj_header() to validate the stock picking and set the x_wms_rec_no value
                 do_header = self.validate_obj_header(rec, error, "soNo", 2)
 
                 if do_header == -1:
                     is_error = True
                     break
                 
+                # (2.4) Call validate_obj_date() to validate the date format
                 dispatch_date = self.validate_obj_date(rec, error, "dispatchDate")
                 if dispatch_date == 1:
                     is_error = True
                     break
 
-                # do Line
+                # (2) Validations (end)
+                    
+                    
+                # (3) Loop through the “details” array
                 for line in rec['details']:
                     line_details = []
                     temp_product = 0
 
-                    #customerPO (DIISI APA DI POSTMAN?)
+                    # customerPO 
     #                 if line['customerPO'] == "":
     #                     error["Error"] = "Field customerPO is blank"
     #                     is_error = True
