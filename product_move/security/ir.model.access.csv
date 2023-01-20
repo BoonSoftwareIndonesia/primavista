@@ -1,9 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_product_move_product_move,access.product_move.product_move,model_product_move_product_move,base.group_user,1,1,1,1
-access_product_move_line,access.product_move.line,model_product_move_line,base.group_user,1,1,1,1
-access_product_move_calculate_onhold_wizard,access.product_move.calculate_onhold_wizard,model_product_move_calculate_onhold_wizard,base.group_user,1,1,1,1
-access_product_move_calculate_quantity_wizard,access.product_move.calculate_quantity_wizard,model_product_move_calculate_quantity_wizard,base.group_user,1,1,1,1
-access_product_move_record,access.product_move.record,model_product_move_record,base.group_user,1,1,1,1
-access_product_move_record2,access.product_move.record2,model_product_move_record2,base.group_user,1,1,1,1
-access_product_move_record3,access.product_move.record3,model_product_move_record3,base.group_user,1,1,1,1
-access_product_move_record4,access.product_move.record4,model_product_move_record4,base.group_user,1,1,1,1
