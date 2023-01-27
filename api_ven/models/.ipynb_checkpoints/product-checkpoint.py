@@ -36,17 +36,17 @@ class ProductTemplateExt(models.Model):
     # create
     @api.model_create_multi
     def create(self, vals_list):
-        # if not self._context.get('copy_context') and 'test_import' not in self._context:
-        #     otf_context = self._context.get('on_the_fly_context')
-        #     if otf_context:
-        #         otf_context = otf_context.split("-")
-        #         vals_list[0]['default_code'] = otf_context[0]
-        #         vals_list[0]['standard_price'] = otf_context[1]
-        #     if vals_list[0]['default_code'] is False:
-        #         raise UserError(('Internal reference cannot be null (product template-create)'))
-        #     # raise UserError(str(vals_list[0]['default_code']))
-        #     if vals_list[0]['standard_price'] is False:
-        #         raise UserError(('Cost cannot be null (product template-create)'))
+        if not self._context.get('copy_context') and 'test_import' not in self._context:
+            otf_context = self._context.get('on_the_fly_context')
+            if otf_context:
+                otf_context = otf_context.split("-")
+                vals_list[0]['default_code'] = otf_context[0]
+                vals_list[0]['standard_price'] = otf_context[1]
+            if vals_list[0]['default_code'] is False:
+                raise UserError(('Internal reference cannot be null (product template-create)'))
+            # raise UserError(str(vals_list[0]['default_code']))
+            if vals_list[0]['standard_price'] is False:
+                raise UserError(('Cost cannot be null (product template-create)'))
         # raise UserError(str(vals_list))
         products = super(ProductTemplateExt, self).create(vals_list)
         
@@ -162,11 +162,14 @@ class ProductExt(models.Model):
                 if is_duplicate:
                     raise UserError(('Duplicate exists: ' + product_tmpl.default_code))
     
-#     @api.model_create_multi
-#     def create(self, vals_list):
-#         if not self._context.get('copy_context') and 'test_import' not in self._context:
-#         # Send default_code and standard_price info to product.template create for on the fly product
-#             context_content = str(vals_list[0]["default_code"]) + "-" + str(vals_list[0]["standard_price"])
-#             res = super(ProductExt, self.with_context(on_the_fly_context = context_content, create_product_product=True)).create(vals_list)
+    @api.model_create_multi
+    def create(self, vals_list):
+        if 'default_code' in vals_list[0]:
+            # raise UserError(str(vals_list))
+            # raise UserError(("Yay"))
+            if not self._context.get('copy_context') and 'test_import' not in self._context:
+            # Send default_code and standard_price info to product.template create for on the fly product
+                context_content = str(vals_list[0]["default_code"]) + "-" + str(vals_list[0]["standard_price"])
+                res = super(ProductExt, self.with_context(on_the_fly_context = context_content, create_product_product=True)).create(vals_list)
         
-#             return res
+            return res
