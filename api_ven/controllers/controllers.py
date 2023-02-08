@@ -105,7 +105,7 @@ class ApiVen(http.Controller):
     
     
     
-    # CREATE RCPT API (PO) ===================================================================================
+    # PO (CRT_RCPT API) ===================================================================================
     @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['POST'])
     def post_rcpt(self, rcpt):
             created = 0
@@ -606,7 +606,7 @@ class ApiVen(http.Controller):
     
     
     
-#   DO API ===================================================================================
+#   DO API (CRT_DO API) ===================================================================================
     @http.route('/web/api/downloaddo', type='json', auth='user', methods=['POST'])
     def post_do(self, do):
         created = 0
@@ -785,7 +785,7 @@ class ApiVen(http.Controller):
                     self.rollback_move(rec, error, lines, "soNo")
                     break
                 
-                # (5) Set the stock picking's date_done and x_studio_doc_trans_code
+                # (5) Set the stock picking's x_studio_dispatch_date and x_studio_doc_trans_code
                 do_header['x_studio_dispatch_date'] = dispatch_date
                 do_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
                 
@@ -878,60 +878,71 @@ class ApiVen(http.Controller):
                 # (1) Declare “lines” array to store inwardLineOptChar1 or x_wms_rec_no values that have been successfully validated
                 lines = []
                 
+                # (2) Validations
+                # (2.1) Check whether po no (this field actually stores the SO no value) exists 
                 sos = self.getRecord(model="sale.order", field="name", wms=rec['poNo'])
                 if sos == -1:
                     error["Error"] = "poNo to return does not exist"
                     is_error = True
                     break
                    
+                # (2.2) Call validate_obj_json()
                 json_valid = self.validate_obj_json(rec, error, "poNo")
                 if json_valid == -1:
                     is_error = True
                     break
                 
-                # search the stock picking based on x wms rec no
+                # (2.3) Call validate_return_obj_header()
                 do_header = self.validate_return_obj_header(rec, error, 2, "doNo")
                 if do_header == -1:
                     is_error = True
                     break
                 
+                # (2.4) Call validate_obj_date()
                 dispatch_date = self.validate_obj_date(rec, error, "receiptDate")
                 if dispatch_date == 1:
                     is_error = True
                     break
 
-                # do Line
+                # (3) Loop through the “details” array
                 for line in rec['details']:
                     line_details = []
                     temp_product = 0
 
-                    #customerPO (DIISI APA DI POSTMAN?)
+                    #customerPO 
     #                 if line['customerPO'] == "":
     #                     error["Error"] = "Field customerPO is blank"
     #                     is_error = True
     #                     break
 
-                    # LINE VALIDATION =================================
+    
+                    # (3.1) Line validations (start) =========================================================
+                    # (3.1.1) Check product
                     if line['product'] == "":
                         error["Error"] = "Field product is blank"
                         is_error = True
                         break
-                        
+                    
+                    # (3.1.1) Check inwardLineOptChar1
                     if line['inwardLineOptChar1'] == "":
                         error["Error"] = "Field inwardLineOptChar1 is blank"
                         is_error = True
                         break
                     
+                    # (3.1.1) Check quantityReceived
                     if line['quantityReceived'] == "":
                         error["Error"] = "Field quantityReceived is blank"
                         is_error = True
                         break
-                        
+                    
+                    # (3.1.1) Check stockStatusCode
                     if line['stockStatusCode'] == "":
                         error["Error"] = "Field stockStatusCode is blank"
                         is_error = True
                         break
-                        
+                    
+                    # (3.1.2) Try to search the corresponding stock move based on origin (poNo), x_studio_opt_char_1 
+                    # (inwardLineOptChar1 ), and state
                     try:    
                         dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
                     except Exception as e:
@@ -943,9 +954,8 @@ class ApiVen(http.Controller):
                         error["Error"] = "Stock Move not found"
                         is_error = True
                         break
-                    # LINE VALIDATION END =================================
                         
-                    # check if product exists
+                    # (3.1.4) Try to search for the product
                     try:
                         temp_product = self.getRecord(model="product.product", field="default_code", wms=line['product'])
                     except Exception as e:
@@ -958,12 +968,16 @@ class ApiVen(http.Controller):
                         is_error = True
                         break
                     
-                    # check whether quantityReceived exceeds the demand
+                    # (3.1.5) Check whether quantityReceived exceeds demand because this is not allowed
                     if dispatch_line["product_uom_qty"] < int(line["quantityReceived"]):
                         error["Error"] = "Quantity received exceeds demand"
                         is_error = True
                         break
                     
+                    # (3.1) Line validations (end) =========================================================
+                    
+                    
+                    # (3.2) Use write() to create a new stock move line for this product
                     # LOCATION ID AMA DEST ID SBLMNNYA SAMA2 1, product uom id nya tadinya 1
                     dispatch_line.move_line_ids.write({
                             "product_id": temp_product,
@@ -975,31 +989,33 @@ class ApiVen(http.Controller):
     #                             "lot_id": temp_lot['id'],
                             "qty_done": line["quantityReceived"],
                             "company_id": 1,
-#                             "state": "done",
+    #                             "state": "done",
                             "x_wms_rec_no": rec['doNo']
                     })
             
+                    # (3.3) Append the inwardLineOptChar1 / x_studio_opt_char1 (current line number) to the lines array
                     lines.append(line["inwardLineOptChar1"])
                     
-                    # Check partial receipt
+                    # (3.4) Check if quantity done is partial or not
                     if dispatch_line['product_uom_qty'] > dispatch_line['quantity_done']:
                         is_partial = True
-                    
-    #           INDENT===============
+                
+                # (4) If there is any error, rollback previous stock moves and move lines by calling rollback_move()
                 if is_error == True:
                     self.rollback_move(rec, error, lines, "poNo")
                     break
-                
+                    
+                # (5) Set the stock picking's x_studio_dispatch_date and x_studio_doc_trans_code
                 do_header['x_studio_dispatch_date'] = dispatch_date
                 do_header['x_studio_doc_trans_code'] = rec["documentTransCode"]
                 
-                # if the number of details is less than the list of products in the stock picking
+                # (6) If the contents of "details" array is less than the number of products/stock moves in the stock picking 
                 # then it is a partial case
                 moves = do_header['move_ids_without_package'].search([('state', '=', 'assigned')])
                 if len(rec['details']) < len(moves):
                     is_partial = True
                 
-                # Validate do
+                # Call validate_delivery()
                 self.validate_delivery(do_header, sos, is_partial)
                 
                 response_msg = "DO updated successfully"
@@ -1079,6 +1095,7 @@ class ApiVen(http.Controller):
         if is_partial == False:
             do_header.action_set_quantities_to_reservation()
             so_name = do_header['origin']
+            # (7.1.1) If there are no partial cases, create immediate transfer
             res = self.create_immediate_transfer_so(so_name)
             do_header.with_context(cancel_backorder=True)._action_done()
         # (7.2) If there is a partial case
@@ -1089,8 +1106,3 @@ class ApiVen(http.Controller):
             
             for pick in ret_partial:
                 pick.write({'x_wms_rec_no': do_header.x_wms_rec_no, 'x_studio_doc_trans_code': do_header.x_studio_doc_trans_code})
-        
-        
-            
-        
-            

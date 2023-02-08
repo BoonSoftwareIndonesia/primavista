@@ -6,6 +6,7 @@ class ActivityLogLine(models.Model):
     _name = 'api_ven.activity_log_line'
     _description = 'Activity Log Line'
 
+    # Activity log line fields
     id = fields.Integer()
     field_label = fields.Char('Field')
     field_technical_name = fields.Char('Technical Name')
