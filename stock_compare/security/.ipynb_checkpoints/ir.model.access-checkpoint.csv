@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_stock_compare_wms_stock,stock_compare.wms_stock,model_stock_compare_wms_stock,base.group_user,1,1,1,1
+access_stock_compare_wms_stock_line,stock_compare.wms_stock_line,model_stock_compare_wms_stock_line,base.group_user,1,1,1,1
+access_stock_compare_stock_compare,stock_compare.stock_compare,model_stock_compare_stock_compare,base.group_user,1,1,1,1
+access_stock_compare_generate_stock_compare_wizard,stock_compare.generate_stock_compare_wizard,model_stock_compare_generate_stock_compare_wizard,base.group_user,1,1,1,1

@@ -1,0 +1,59 @@
+<odoo>
+  <data>
+      
+         
+<!-- Declare the action to open the menu item -->
+      <record id="action_curr_wms_stock" model="ir.actions.act_window">
+            <field name="name">Current WMS Stock</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock_compare.wms_stock_line</field>
+            <field name="view_mode">tree</field>
+<!--             <field name="context">{"search_default_today":1}</field> -->
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No data
+                </p>
+            </field>
+        </record>
+
+<!-- Declare the menu item -->
+      
+        <menuitem id="curr_wms_stock"
+            name="Current WMS Stock"
+            action="action_curr_wms_stock"
+            parent="stock_compare_root"
+            sequence="3"/>
+
+<!-- Declare the tree view (Display the table with columns and rows of activity log data) -->
+      <record id="curr_wms_stock_tree" model="ir.ui.view">
+            <field name="name">stock_compare.wms_stock_line.tree</field>
+            <field name="model">stock_compare.wms_stock_line</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false" delete="true">
+                    <field name="product"/>
+                    <field name="wms_quantity"/>
+                    <field name="lot_id"/>
+                    <field name="expiry_date"/>
+                    <field name="warehouse"/>
+                </tree>
+            </field>
+        </record>
+
+
+<!-- To specify the search and group by filters -->
+      <record id="curr_wms_stock_search" model="ir.ui.view">
+            <field name="name">stock_compare.wms_stock_line.search</field>
+            <field name="model">stock_compare.wms_stock_line</field>
+            <field name="arch" type="xml">
+                <search string="Stock Compare">
+                    <field name="product"/>
+                    <field name="wms_quantity"/>
+                    <field name="lot_id"/>
+                    <field name="expiry_date"/>
+                    <field name="warehouse"/>
+                </search>
+            </field>
+        </record>
+      
+  </data>
+</odoo>

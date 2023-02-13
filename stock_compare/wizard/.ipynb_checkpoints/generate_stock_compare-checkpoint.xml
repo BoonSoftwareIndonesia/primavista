@@ -1,0 +1,25 @@
+<odoo>
+        <record id="generate_stock_compare_form" model="ir.ui.view">
+            <field name="name">stock_compare.generate_stock_compare.wizard.form</field>
+            <field name="model">stock_compare.generate_stock_compare.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Generate Stock Compare Report">
+                    <group>
+                        <button name="generate_stock_compare" string="Generate Report" type="object" class="btn-primary"/>
+                    </group>
+                    <footer>
+                        <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="generate_stock_compare_action" model="ir.actions.act_window">
+            <field name="name">Generate Stock Compare Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock_compare.generate_stock_compare.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="generate_stock_compare_form"/>
+            <field name="target">new</field>
+        </record>
+</odoo>
