@@ -14,6 +14,7 @@ class WmsStockLine(models.Model):
     wms_quantity = fields.Float('WMS Quantity')
     lot_id = fields.Char('Lot Number')
     expiry_date = fields.Datetime('Expiry Date')
+    location = fields.Char('Location')
     warehouse = fields.Char('Warehouse')
     remarks = fields.Char('Remarks')
     diff_quantity = fields.Float('Qty Difference')
