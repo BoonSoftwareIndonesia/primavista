@@ -3,10 +3,10 @@
       
          
 <!-- Declare the action to open the menu item -->
-      <record id="action_curr_wms_stock" model="ir.actions.act_window">
-            <field name="name">Current WMS Stock</field>
+      <record id="action_stock_report" model="ir.actions.act_window">
+            <field name="name">Stock Compare Report</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="res_model">stock_compare.wms_stock_line</field>
+            <field name="res_model">stock_compare.stock_report_line</field>
             <field name="view_mode">tree</field>
 <!--             <field name="context">{"search_default_today":1}</field> -->
             <field name="help" type="html">
@@ -18,16 +18,16 @@
 
 <!-- Declare the menu item -->
       
-        <menuitem id="curr_wms_stock"
-            name="Current WMS Stock"
-            action="action_curr_wms_stock"
+        <menuitem id="stock_report_lines"
+            name="Stock Compare Report"
+            action="action_stock_report"
             parent="stock_compare_root"
-            sequence="3"/>
+            sequence="4"/>
 
 <!-- Declare the tree view (Display the table with columns and rows of activity log data) -->
-      <record id="curr_wms_stock_tree" model="ir.ui.view">
-            <field name="name">stock_compare.wms_stock_line.tree</field>
-            <field name="model">stock_compare.wms_stock_line</field>
+      <record id="stock_report_tree" model="ir.ui.view">
+            <field name="name">stock_compare.stock_report_line.tree</field>
+            <field name="model">stock_compare.stock_report_line</field>
             <field name="arch" type="xml">
                 <tree create="false" edit="false" delete="true">
                     <field name="product"/>
@@ -43,15 +43,15 @@
 
 
 <!-- To specify the search and group by filters -->
-      <record id="curr_wms_stock_search" model="ir.ui.view">
-            <field name="name">stock_compare.wms_stock_line.search</field>
-            <field name="model">stock_compare.wms_stock_line</field>
+      <record id="stock_report_search" model="ir.ui.view">
+            <field name="name">stock_compare.stock_report_line.search</field>
+            <field name="model">stock_compare.stock_report_line</field>
             <field name="arch" type="xml">
                 <search string="Stock Compare">
                     <field name="product"/>
                     <field name="wms_quantity"/>
-<!--                     <field name="odoo_quantity"/>
-                    <field name="diff_quantity"/> -->
+                    <field name="odoo_quantity"/>
+                    <field name="diff_quantity"/>
                     <field name="lot_id"/>
                     <field name="expiry_date"/>
                     <field name="warehouse"/>

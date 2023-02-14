@@ -32,6 +32,8 @@
                 <tree create="false" edit="false" delete="true">
                     <field name="product"/>
                     <field name="wms_quantity"/>
+                    <field name="odoo_quantity"/>
+                    <field name="diff_quantity"/>
                     <field name="lot_id"/>
                     <field name="expiry_date"/>
                     <field name="warehouse"/>
@@ -48,6 +50,8 @@
                 <search string="Stock Compare">
                     <field name="product"/>
                     <field name="wms_quantity"/>
+<!--                     <field name="odoo_quantity"/>
+                    <field name="diff_quantity"/> -->
                     <field name="lot_id"/>
                     <field name="expiry_date"/>
                     <field name="warehouse"/>
