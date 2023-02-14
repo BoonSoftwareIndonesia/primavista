@@ -29,6 +29,7 @@
         'views/templates.xml',
         'wizard/generate_stock_compare.xml',
         'views/wms_stock.xml',
+        'views/stock_report.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

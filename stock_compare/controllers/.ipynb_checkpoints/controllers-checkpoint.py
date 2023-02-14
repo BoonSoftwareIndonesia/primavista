@@ -120,7 +120,7 @@ class StockCompare(http.Controller):
                             'wms_stock_id': wms_stock.id,
                             'product': line['product'],
                             'wms_quantity': line['quantity'],
-                            'lot_id': line['lotNo'],
+                            'lot_id': False if line['lotNo'] == "NULL" else line['lotNo'],
                             'expiry_date': line['expiryDate'],
                             'warehouse': line['warehouse']
                         }
