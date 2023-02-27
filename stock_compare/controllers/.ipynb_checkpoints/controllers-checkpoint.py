@@ -28,14 +28,13 @@ class StockCompare(http.Controller):
             response_msg = "Failed to receive WMS stock data"
             message = {}
             line_details = []
-            is_partial = False
 
-            # Create wms stock
+            # Create API Log
             try:
                 api_log = request.env['api_ven.api_ven'].create({
                     'status': 'new',
                     'created_date': datetime.now(),
-                    'incoming_msg': stock,
+                    'incoming_msg': ivdList,
                     'message_type': 'STOCK'
                 })
 
@@ -59,42 +58,95 @@ class StockCompare(http.Controller):
                 is_error = True
 
             try:
-                # Loop through every line inside the stock array
-                for rec in stock:
-                    # Array to store x_studio_opt_char / inwardLineOptChar1 values that have been successfully validated
-                    # This is used for searching stock move lines that needs to be reversed
-                    lines = []
+                # Loop through every line inside the ivdList array
+                for rec in ivdList:
+                    # lines = []
                     
+                    # Assign the wms_stock model to a variable called "prev_wms_stock"
                     prev_wms_stock = request.env['stock_compare.wms_stock']
                     
+                    # Try to get all existing wms stock
                     try:
                         prev_wms_stock = request.env['stock_compare.wms_stock'].search_read([])
                     except Exception as e:
                         error['Error'] = "Error creating wms stock"
                         is_error = True
                 
-                    
+                    # If a WMS stock already exist, unlink the wms stock and all stock lines 
+                    # because everytime we receive the inventory data from WMS, the previous data needs to be deleted
+                    # and replaced with the new data
                     if prev_wms_stock:
                         request.env['stock_compare.wms_stock'].search([]).unlink()
                         request.env['stock_compare.wms_stock_line'].search([]).unlink()
                     
+                    # Check if ownerCode is null
+                    if line['ownerCode'] == "":
+                            error["Error"] = "Field owner code is blank"
+                            is_error = True
+                            break
+                    
+                    # Check if documentType is null
+                    if line['documentType'] == "":
+                        error["Error"] = "Field document type is blank"
+                        is_error = True
+                        break
+
+                    # Create a new wms stock
                     wms_stock = request.env['stock_compare.wms_stock'].create({})
                     
-                    
+                    # Assign the wms_stock_line model to a variable called "wms_stock_line_model"
                     wms_stock_line_model = request.env['stock_compare.wms_stock_line']
                     
-                    
-                    # (3) Receipt Lines
-                    # (3) Loop through the “details” array
-                    for line in rec['details']:
-
+                    # Loop through the "ivd" array. This contains every product in WMS
+                    for line in rec['ivd']:
+                        # Line validations (start) =========================================================
+#                         if line['warehouseCode'] == "":
+#                             error["Error"] = "Field warehouse code is blank"
+#                             is_error = True
+#                             break
                         
-                        # (3.1) Line validations (start) =========================================================
+#                         if line['ownerCode'] == "":
+#                             error["Error"] = "Field owner code is blank"
+#                             is_error = True
+#                             break
+                            
+#                         if line['product'] == "":
+#                             error["Error"] = "Field product is blank"
+#                             is_error = True
+#                             break
+                            
+#                         if line['lotNumber'] == "":
+#                             error["Error"] = "Field lot number is blank"
+#                             is_error = True
+#                             break
+                            
+#                         if line['serialNumber'] == "":
+#                             error["Error"] = "Field serial number is blank"
+#                             is_error = True
+#                             break
                         
+#                         if line['expiryDate'] == "":
+#                             error["Error"] = "Field expiry date is blank"
+#                             is_error = True
+#                             break
+                        
+#                         if line['qtyOnHand'] == "":
+#                             error["Error"] = "Field quantity on hand is blank"
+#                             is_error = True
+#                             break
+                        
+#                         if line['stockStatusCode'] == "":
+#                             error["Error"] = "Field stock status code is blank"
+#                             is_error = True
+#                             break
+                            
+                            
+                            
+                            
                         if line['product'] == "":
                             error["Error"] = "Field product is blank"
                             is_error = True
-                            break
+                            break   
                             
                         if line['quantity'] == "":
                             error["Error"] = "Field lot id is blank"
@@ -116,28 +168,50 @@ class StockCompare(http.Controller):
                             is_error = True
                             break
                         
+                        # Assign the values for a new stock line for this product
+                        
+                        # new_stock_line_value = {
+                        #     'wms_stock_id': wms_stock.id,
+                        #     'product': line['product'],
+                        #     'wms_quantity': line['qtyOnHand'],
+                        #     'lot_id': False if line['lotNumber'] == "NULL" else line['lotNumber'],
+                        #     'expiry_date': line['expiryDate'],
+                        #     'location': line['warehouseCode'],
+                        #     'warehouse': line['warehouseCode']
+                        # }
+                        
+                        # new_stock_line_value = {
+                        #     'wms_stock_id': wms_stock.id,
+                        #     'product': line['product'],
+                        #     'wms_quantity': line['quantity'],
+                        #     'lot_id': False if line['lotNo'] == "NULL" else line['lotNo'],
+                        #     'expiry_date': line['expiryDate'],
+                        #     'location': line['warehouse'],
+                        #     'warehouse': line['warehouse']
+                        # }
+                        
                         new_stock_line_value = {
                             'wms_stock_id': wms_stock.id,
                             'product': line['product'],
                             'wms_quantity': line['quantity'],
                             'lot_id': False if line['lotNo'] == "NULL" else line['lotNo'],
+                            'lot_name': False if line['lotNo'] == "NULL" else line['lotNo'],
                             'expiry_date': line['expiryDate'],
                             'location': line['warehouse'],
                             'warehouse': line['warehouse']
                         }
 
-                        # Create activity log line
+                        # Create a new stock line for this product
                         new_stock_line = wms_stock_line_model.create(new_stock_line_value)
                         
 
-                    # (4) If there is any error, rollback previous stock moves and move lines by calling rollback_move()
+                    # If there is any error
                     if is_error == True:
                         # self.rollback_move(rec, error, lines, "poNo")
                         break
             
                     
                     response_msg = "Stock updated successfully"
-                    # INDENT ===========================
                         
             except Exception as e:
                 error["Error"] = str(e)
