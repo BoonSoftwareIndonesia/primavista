@@ -17,14 +17,13 @@
         </record>
 
 <!-- Declare the menu item -->
-      
         <menuitem id="curr_wms_stock"
             name="Current WMS Stock"
             action="action_curr_wms_stock"
             parent="stock_compare_root"
             sequence="3"/>
 
-<!-- Declare the tree view (Display the table with columns and rows of activity log data) -->
+<!-- Declare the tree view (Display the table with columns and rows of wms_stock_line data) -->
       <record id="curr_wms_stock_tree" model="ir.ui.view">
             <field name="name">stock_compare.wms_stock_line.tree</field>
             <field name="model">stock_compare.wms_stock_line</field>
@@ -35,6 +34,7 @@
                     <field name="odoo_quantity"/>
                     <field name="diff_quantity"/>
                     <field name="lot_id"/>
+                    <field name="lot_name"/>
                     <field name="expiry_date"/>
                     <field name="location"/>
                     <field name="warehouse"/>
@@ -54,6 +54,7 @@
                     <field name="odoo_quantity"/>
                     <field name="diff_quantity"/>
                     <field name="lot_id"/>
+                    <field name="lot_name"/>
                     <field name="expiry_date"/>
                     <field name="location"/>
                     <field name="warehouse"/>

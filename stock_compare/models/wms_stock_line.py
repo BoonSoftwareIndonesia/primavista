@@ -13,6 +13,7 @@ class WmsStockLine(models.Model):
     odoo_quantity = fields.Float('Odoo Quantity')
     wms_quantity = fields.Float('WMS Quantity')
     lot_id = fields.Char('Lot Number')
+    lot_name = fields.Char('Lot Name')
     expiry_date = fields.Datetime('Expiry Date')
     location = fields.Char('Location')
     warehouse = fields.Char('Warehouse')

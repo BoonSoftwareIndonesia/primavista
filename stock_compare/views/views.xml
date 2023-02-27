@@ -27,7 +27,7 @@
             parent="stock_compare_root"
             sequence="1"/>
 
-<!-- Declare the tree view (Display the table with columns and rows of activity log data) -->
+<!-- Declare the tree view (Display the table with columns and rows of stock_compare data) -->
       <record id="stock_compare_tree" model="ir.ui.view">
             <field name="name">stock_compare.stock_compare.tree</field>
             <field name="model">stock_compare.stock_compare</field>
@@ -40,7 +40,7 @@
             </field>
         </record>
 
-<!-- The view for activity log line / detail of each activity log when an activity log is clicked -->
+<!-- The form view for stock_compare  -->
       <record id="stock_compare_form" model="ir.ui.view">
             <field name="name">stock_compare.stock_compare.form</field>
             <field name="model">stock_compare.stock_compare</field>
@@ -93,7 +93,8 @@
             </field>
         </record>
       
-      
+
+<!--  Declare the menu item for the generate stock compare wizard -->
       <menuitem id="generate_stock_compare_menu"
             name="Generate Stock Compare"
             parent="stock_compare_root"
