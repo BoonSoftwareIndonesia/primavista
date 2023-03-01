@@ -212,7 +212,7 @@ class StockCompare(http.Controller):
                             'expiry_date': line['expiryDate'],
                             'location': line['warehouseCode'], 
                             'warehouse': line['warehouseCode'],
-                            'serialNumber': line['serialNumber']
+                            'x_serial_number': line['serialNumber']
                         }
 
                         # Create a new stock line for this product
