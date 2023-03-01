@@ -48,7 +48,7 @@ class StockCompare(http.Controller):
                 api_log['incoming_txt'] = request.env['ir.attachment'].create({
                     'name': str(api_log['name']) + '_in.txt',
                     'type': 'binary',
-                    'datas': base64.b64encode(bytes(str(stock), 'utf-8')),
+                    'datas': base64.b64encode(bytes(str(ivdList), 'utf-8')),
                     'res_model': 'api_ven.api_ven',
                     'res_id': api_log['id'],
                     'mimetype': 'text/plain'
