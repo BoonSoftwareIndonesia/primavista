@@ -20,7 +20,7 @@ class StockCompare(http.Controller):
 #     #             return -1
     
     @http.route('/web/api/stock_compare', type='json', auth='user', methods=['POST'])
-    def create_wms_stock(self, stock):
+    def create_wms_stock(self, ivdList):
             created = 0
             error = {}
             warn_cnt = 1
