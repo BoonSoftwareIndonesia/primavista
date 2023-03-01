@@ -19,7 +19,6 @@ class WmsStockLine(models.Model):
     warehouse = fields.Char('Warehouse')
     remarks = fields.Char('Remarks')
     diff_quantity = fields.Float('Qty Difference')
-    serialNumber = fields.Char('Serial Number')
     
     # id = fields.Integer()
     # wms_stock_id = fields.Many2one('stock_compare.wms_stock')
