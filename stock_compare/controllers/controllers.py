@@ -79,14 +79,14 @@ class StockCompare(http.Controller):
                         request.env['stock_compare.wms_stock'].search([]).unlink()
                         request.env['stock_compare.wms_stock_line'].search([]).unlink()
                     
-                    # Check if ownerCode is null
-                    if line['ownerCode'] == "":
+                    # Check if ownerCode is null --
+                    if rec['ownerCode'] == "":
                             error["Error"] = "Field owner code is blank"
                             is_error = True
                             break
                     
-                    # Check if documentType is null
-                    if line['documentType'] == "":
+                    # Check if documentType is null --
+                    if rec['documentType'] == "":
                         error["Error"] = "Field document type is blank"
                         is_error = True
                         break
@@ -140,33 +140,46 @@ class StockCompare(http.Controller):
 #                             is_error = True
 #                             break
                             
-                            
-                            
+                        if line['warehouseCode'] == "":
+                            error["Error"] = "Field warehouse is blank"
+                            is_error = True
+                            break
+                        
+                        if line['ownerCode'] == "" && line['ownerCode'] != rec['ownerCode']:
+                            error["Error"] = "Field warehouse is blank"
+                            is_error = True
+                            break
                             
                         if line['product'] == "":
                             error["Error"] = "Field product is blank"
                             is_error = True
-                            break   
+                            break
                             
-                        if line['quantity'] == "":
-                            error["Error"] = "Field lot id is blank"
-                            is_error = True
-                            break
+                        # if line['lotNumber'] == "":
+                        #     error["Error"] = "Field lot id is blank"
+                        #     is_error = True
+                        #     break
                         
-                        if line['lotNo'] == "":
-                            error["Error"] = "Field lot id is blank"
-                            is_error = True
-                            break
+                        # if line['serialNumber'] == "":
+                        #     error["Error"] = "Field lot id is blank"
+                        #     is_error = True
+                        #     break
                             
                         if line['expiryDate'] == "":
                             error["Error"] = "Field expiry_date is blank"
                             is_error = True
                             break
-                    
-                        if line['warehouse'] == "":
-                            error["Error"] = "Field warehouse is blank"
+                            
+                        if line['qtyOnHand'] == "":
+                            error["Error"] = "Field lot id is blank"
                             is_error = True
                             break
+                        
+                        if line['stockStatusCode'] == "":
+                            error["Error"] = "Field lot id is blank"
+                            is_error = True
+                            break
+                            
                         
                         # Assign the values for a new stock line for this product
                         
@@ -193,12 +206,13 @@ class StockCompare(http.Controller):
                         new_stock_line_value = {
                             'wms_stock_id': wms_stock.id,
                             'product': line['product'],
-                            'wms_quantity': line['quantity'],
-                            'lot_id': False if line['lotNo'] == "NULL" else line['lotNo'],
-                            'lot_name': False if line['lotNo'] == "NULL" else line['lotNo'],
+                            'wms_quantity': line['qtyOnHand'],
+                            'lot_id': False if line['lotNumber'] == "NULL" else line['lotNumber'],
+                            'lot_name': False if line['lotNumber'] == "NULL" else line['lotNumber'],
                             'expiry_date': line['expiryDate'],
-                            'location': line['warehouse'],
-                            'warehouse': line['warehouse']
+                            'location': line['warehouseCode'], 
+                            'warehouse': line['warehouseCode'],
+                            'serialNumber': line['serialNumber']
                         }
 
                         # Create a new stock line for this product
