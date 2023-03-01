@@ -105,7 +105,7 @@ class StockCompare(http.Controller):
                             is_error = True
                             break
                         
-                        if line['ownerCode'] == "":
+                        if (line['ownerCode'] == "" and line['ownerCode'] != rec['ownerCode']):
                             error["Error"] = "Field owner code is blank"
                             is_error = True
                             break
