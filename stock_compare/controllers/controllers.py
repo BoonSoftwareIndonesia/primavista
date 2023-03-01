@@ -100,53 +100,13 @@ class StockCompare(http.Controller):
                     # Loop through the "ivd" array. This contains every product in WMS
                     for line in rec['ivd']:
                         # Line validations (start) =========================================================
-#                         if line['warehouseCode'] == "":
-#                             error["Error"] = "Field warehouse code is blank"
-#                             is_error = True
-#                             break
-                        
-#                         if line['ownerCode'] == "":
-#                             error["Error"] = "Field owner code is blank"
-#                             is_error = True
-#                             break
-                            
-#                         if line['product'] == "":
-#                             error["Error"] = "Field product is blank"
-#                             is_error = True
-#                             break
-                            
-#                         if line['lotNumber'] == "":
-#                             error["Error"] = "Field lot number is blank"
-#                             is_error = True
-#                             break
-                            
-#                         if line['serialNumber'] == "":
-#                             error["Error"] = "Field serial number is blank"
-#                             is_error = True
-#                             break
-                        
-#                         if line['expiryDate'] == "":
-#                             error["Error"] = "Field expiry date is blank"
-#                             is_error = True
-#                             break
-                        
-#                         if line['qtyOnHand'] == "":
-#                             error["Error"] = "Field quantity on hand is blank"
-#                             is_error = True
-#                             break
-                        
-#                         if line['stockStatusCode'] == "":
-#                             error["Error"] = "Field stock status code is blank"
-#                             is_error = True
-#                             break
-                            
                         if line['warehouseCode'] == "":
-                            error["Error"] = "Field warehouse is blank"
+                            error["Error"] = "Field warehouse code is blank"
                             is_error = True
                             break
                         
-                        if line['ownerCode'] == "" && line['ownerCode'] != rec['ownerCode']:
-                            error["Error"] = "Field warehouse is blank"
+                        if line['ownerCode'] == "":
+                            error["Error"] = "Field owner code is blank"
                             is_error = True
                             break
                             
@@ -154,6 +114,46 @@ class StockCompare(http.Controller):
                             error["Error"] = "Field product is blank"
                             is_error = True
                             break
+                            
+                        if line['lotNumber'] == "":
+                            error["Error"] = "Field lot number is blank"
+                            is_error = True
+                            break
+                            
+                        if line['serialNumber'] == "":
+                            error["Error"] = "Field serial number is blank"
+                            is_error = True
+                            break
+                        
+                        if line['expiryDate'] == "":
+                            error["Error"] = "Field expiry date is blank"
+                            is_error = True
+                            break
+                        
+                        if line['qtyOnHand'] == "":
+                            error["Error"] = "Field quantity on hand is blank"
+                            is_error = True
+                            break
+                        
+                        if line['stockStatusCode'] == "":
+                            error["Error"] = "Field stock status code is blank"
+                            is_error = True
+                            break
+                            
+#                         if line['warehouseCode'] == "":
+#                             error["Error"] = "Field warehouse is blank"
+#                             is_error = True
+#                             break
+                        
+#                         if line['ownerCode'] == "":
+#                             error["Error"] = "Field warehouse is blank"
+#                             is_error = True
+#                             break
+                            
+#                         if line['product'] == "":
+#                             error["Error"] = "Field product is blank"
+#                             is_error = True
+#                             break
                             
                         # if line['lotNumber'] == "":
                         #     error["Error"] = "Field lot id is blank"
@@ -165,20 +165,20 @@ class StockCompare(http.Controller):
                         #     is_error = True
                         #     break
                             
-                        if line['expiryDate'] == "":
-                            error["Error"] = "Field expiry_date is blank"
-                            is_error = True
-                            break
+#                         if line['expiryDate'] == "":
+#                             error["Error"] = "Field expiry_date is blank"
+#                             is_error = True
+#                             break
                             
-                        if line['qtyOnHand'] == "":
-                            error["Error"] = "Field lot id is blank"
-                            is_error = True
-                            break
+#                         if line['qtyOnHand'] == "":
+#                             error["Error"] = "Field lot id is blank"
+#                             is_error = True
+#                             break
                         
-                        if line['stockStatusCode'] == "":
-                            error["Error"] = "Field lot id is blank"
-                            is_error = True
-                            break
+#                         if line['stockStatusCode'] == "":
+#                             error["Error"] = "Field lot id is blank"
+#                             is_error = True
+#                             break
                             
                         
                         # Assign the values for a new stock line for this product
