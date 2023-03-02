@@ -11,8 +11,8 @@ class CalculateOnholdWizard(models.TransientModel):
     def generate_stock_compare(self):
         self.env['stock_compare.wms_stock'].search([]).unlink()
         self.env['stock_compare.wms_stock_line'].search([]).unlink()
-        # self._calculate_wms_stock()
-        # self._calculate_odoo_stock()
+        self._calculate_wms_stock()
+        self._calculate_odoo_stock()
         # self.test()
         return {
             'type': 'ir.actions.client',
@@ -27,8 +27,10 @@ class CalculateOnholdWizard(models.TransientModel):
         for line in wms_stock_lines:
             stock_quants = False
             
+            # Get the id from location name
             loc_id = self.env['stock.location'].search([('complete_name','=',line.location)]).id
             
+            # Find the stock quant based on loc_id or loc_id + lot_id
             if line.lot_id == "NULL":
                 stock_quants = self.env['stock.quant'].search_read([('product_id','=',line.product),('location_id','=',loc_id)])
             else:
@@ -36,11 +38,13 @@ class CalculateOnholdWizard(models.TransientModel):
 
             new_odoo_quantity = 0
             new_diff_quantity = line.wms_quantity
-
+            
+            # If stock_quants are available, sum the available_quantity in Odoo
             if stock_quants is not False:
                 for s in stock_quants:
                     new_odoo_quantity += s['available_quantity']
-                    new_diff_quantity = line.wms_quantity - new_odoo_quantity
+                # Calculate the difference by using the formula wms_quantity - odoo_quantity
+                new_diff_quantity = line.wms_quantity - new_odoo_quantity
                 
             line.write({
                 'odoo_quantity': new_odoo_quantity,

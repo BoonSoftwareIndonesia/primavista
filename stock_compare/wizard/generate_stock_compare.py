@@ -11,8 +11,8 @@ class CalculateOnholdWizard(models.TransientModel):
     def generate_stock_compare(self):
         self.env['stock_compare.wms_stock'].search([]).unlink()
         self.env['stock_compare.wms_stock_line'].search([]).unlink()
-        # self._calculate_wms_stock()
-        # self._calculate_odoo_stock()
+        self._calculate_wms_stock()
+        self._calculate_odoo_stock()
         # self.test()
         return {
             'type': 'ir.actions.client',
