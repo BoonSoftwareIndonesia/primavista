@@ -75,7 +75,7 @@ class CalculateOnholdWizard(models.TransientModel):
 
             for idx,stock_quant in enumerate(stock_quants):
                 
-                new_lot_id = stock_quant.lot_id
+                new_lot_id = stock_quant['lot_id']
                 raise UserError(new_lot_id)
 #                 if new_lot_id is False:
 #                     new_lot_id = -2
