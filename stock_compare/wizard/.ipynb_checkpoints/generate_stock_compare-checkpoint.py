@@ -60,19 +60,19 @@ class CalculateOnholdWizard(models.TransientModel):
         # Odoo Stock Lines
         odoo_products = self.env['product.product'].search([])
         curr_wms_stock_id = self.env['stock_compare.wms_stock'].search([]).id
-        raise UserError(curr_wms_stock_id)
 
-#         for product in odoo_products:
-#             # stock_quants_dict = {}
+        for product in odoo_products:
+            # stock_quants_dict = {}
 
-#             lot_done = -1
-#             loc_done = -1
+            lot_done = -1
+            loc_done = -1
 
-#             curr_sum = 0
-#             curr_lot = -1
-#             curr_loc = -1
+            curr_sum = 0
+            curr_lot = -1
+            curr_loc = -1
 
-#             stock_quants = self.env['stock.quant'].search([('product_id','=',product.id)],order="location_id desc,lot_id desc")
+            stock_quants = self.env['stock.quant'].search([('product_id','=',product.id)],order="location_id desc,lot_id desc")
+            raise UserError(stock_quants)
 
 #             for idx,stock_quant in enumerate(stock_quants):
                 
