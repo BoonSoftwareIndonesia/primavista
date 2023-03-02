@@ -56,10 +56,10 @@ class CalculateOnholdWizard(models.TransientModel):
         raise UserError(str(test))
         
     def _calculate_odoo_stock(self):
-        raise UserError("hey")
+        # raise UserError("hey")
         # Odoo Stock Lines
-#         odoo_products = self.env['product.product'].search([])
-#         curr_wms_stock_id = self.env['stock_compare.wms_stock'].search([]).id
+        odoo_products = self.env['product.product'].search([])
+        curr_wms_stock_id = self.env['stock_compare.wms_stock'].search([]).id
 
 #         for product in odoo_products:
 #             # stock_quants_dict = {}
