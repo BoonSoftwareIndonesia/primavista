@@ -72,11 +72,11 @@ class CalculateOnholdWizard(models.TransientModel):
             curr_loc = -1
 
             stock_quants = self.env['stock.quant'].search([('product_id','=',product.id)],order="location_id desc,lot_id desc")
-            raise UserError(stock_quants)
 
-#             for idx,stock_quant in enumerate(stock_quants):
+            for idx,stock_quant in enumerate(stock_quants):
                 
-#                 new_lot_id = stock_quant.lot_id
+                new_lot_id = stock_quant.lot_id
+                raise UserError(new_lot_id)
 #                 if new_lot_id is False:
 #                     new_lot_id = -2
 
