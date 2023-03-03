@@ -11,7 +11,7 @@ class CalculateOnholdWizard(models.TransientModel):
     def generate_stock_compare(self):
         # self.env['stock_compare.wms_stock'].search([]).unlink()
         # self.env['stock_compare.wms_stock_line'].search([]).unlink()
-        # self._calculate_wms_stock()
+        self._calculate_wms_stock()
         self._calculate_odoo_stock()
         # self.test()
         return {
@@ -50,10 +50,11 @@ class CalculateOnholdWizard(models.TransientModel):
                 'odoo_quantity': new_odoo_quantity,
                 'diff_quantity': new_diff_quantity
             })
+            
     
-    def test(self):
-        test = self.env['stock.quant'].search_read([('product_id','=',207)])
-        raise UserError(str(test))
+    # def test(self):
+    #     test = self.env['stock.quant'].search_read([('product_id','=','2103063')])
+    #     raise UserError(str(test))
         
     def _calculate_odoo_stock(self):
         # raise UserError("hey")
@@ -75,45 +76,48 @@ class CalculateOnholdWizard(models.TransientModel):
 
             for idx , stock_quant in enumerate(stock_quants):
                 
-                new_lot_id = stock_quant['lot_id']
-                raise UserError(stock_quant.lot_id.id)
-#                 if new_lot_id is False:
-#                     new_lot_id = -2
+                new_lot_id = stock_quant.lot_id.id
 
-#                 # Check if stock_quant is from different lot or wh
-#                 if (new_lot_id != curr_lot) or (stock_quant.location_id != curr_loc):
-#                     # Check to create new stock line or not using prev stock quant
-#                     if (curr_lot != lot_done) and (curr_loc != loc_done):
-#                         self._create_odoo_stock_line(product, curr_wms_stock_id, stock_quants[idx-1], curr_sum)
+                if new_lot_id is False:
+                    new_lot_id = -2
 
-#                     # Check new stock_quant exists in wms stock line or not
-#                     self._check_existing_wms_stock_line(lot_done, loc_done, product, stock_quant)
+                # Check if stock_quant is from different lot or wh
+                if (new_lot_id != curr_lot) or (stock_quant.location_id.id != curr_loc):
+                    # Check to create new stock line or not using prev stock quant
+                    # raise UserError(stock_quant.location_id.id != curr_loc)
+                    if (curr_lot != lot_done) and (curr_loc != loc_done):
+                        self._create_odoo_stock_line(product, curr_wms_stock_id, stock_quants[idx-1], curr_sum)
 
-#                     # Reset
-#                     curr_lot = new_lot_id
-#                     curr_loc = stock_quant.location_id
-#                     curr_sum = 0
+                    # Check new stock_quant exists in wms stock line or not
+                    self._check_existing_wms_stock_line(lot_done, loc_done, product, stock_quant)
 
-#                 # If stock line already in wms stock line
-#                 if (new_lot_id == lot_done) and (stock_quant.location_id == loc_done):
-#                     continue
+                    # Reset
+                    curr_lot = new_lot_id
+                    curr_loc = stock_quant.location_id
+                    curr_sum = 0
 
-#                 #Odoo Only Stock Line
-#                 curr_sum += stock_quant.available_quantity
+                # If stock line already in wms stock line
+                if (new_lot_id == lot_done) and (stock_quant.location_id == loc_done):
+                    continue
+
+                #Odoo Only Stock Line
+                curr_sum += stock_quant.available_quantity
                 
-#                 # create for last stock quant
-#                 if idx+1 == len(stock_quants):
-#                     self._create_odoo_stock_line(product, curr_wms_stock_id, stock_quants[idx], curr_sum)
+                # create for last stock quant
+                if idx+1 == len(stock_quants):
+                    self._create_odoo_stock_line(product, curr_wms_stock_id, stock_quants[idx], curr_sum)
                     
         return
 
         
     def _check_existing_wms_stock_line(self, lot_done, loc_done, product, stock_quant):
+#         ga dipake
         # new_lot_id = stock_quant[0].lot_id.id
         # if new_lot_id is False:
         #     new_lot_id = -2
-            
+        
         # existing_wms_stock_line = self.env['stock_compare.wms_stock_line'].search([('product_id','=',product.id), ('location','=',stock_quant[0].location_id.id),('lot_id','=',new_lot_id)])
+#         ga dipake
         
         new_lot_id = stock_quant[0].lot_id.id
         new_lot_name = ""
@@ -123,10 +127,13 @@ class CalculateOnholdWizard(models.TransientModel):
         else:
             new_lot_name = "NULL"
             new_lot_id = -2
+#         harus benerin model stock wms yg product id ditambahin stored = true
+#         existing_wms_stock_line = self.env['stock_compare.wms_stock_line'].search([('product_id','=',product.id), ('warehouse','=',stock_quant[0].location_id.warehouse_id.name),('lot_name','=',new_lot_name)])
+        existing_wms_stock_line = self.env['stock_compare.wms_stock_line'].search([('x_product_id','=',product.id), ('warehouse','=',stock_quant[0].location_id.warehouse_id.name),('lot_name','=',new_lot_name)])
         
-        existing_wms_stock_line = self.env['stock_compare.wms_stock_line'].search([('product_id','=',product.id), ('warehouse','=',stock_quant[0].location_id.warehouse_id.name),('lot_name','=',new_lot_name)])
-            
+        
         if existing_wms_stock_line is not False:
+            # raise UserError(existing_wms_stock_line)
             # If exist in WMS stock line
             lot_done = new_lot_id
             loc_done = stock_quant[0].location_id.id
@@ -149,6 +156,7 @@ class CalculateOnholdWizard(models.TransientModel):
         stock_line_model = self.env['stock_compare.wms_stock_line']
         
         location = self.env['stock.location'].search([('id','=',stock_quant[0].location_id.id)]).complete_name
+        # raise UserError(location)
 
         create_params = {
             "wms_stock_id" : curr_wms_stock_id,
@@ -162,5 +170,8 @@ class CalculateOnholdWizard(models.TransientModel):
             "remarks" : "NA",
             "diff_quantity" : curr_sum * -1
         }
+        
+        # raise UserError(create_params['diff_quantity'])
+        
         stock_line_model.create(create_params)
         return

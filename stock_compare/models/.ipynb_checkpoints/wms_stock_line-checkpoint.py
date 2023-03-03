@@ -9,6 +9,7 @@ class WmsStockLine(models.Model):
     id = fields.Integer()
     wms_stock_id = fields.Many2one('stock_compare.wms_stock')
     product = fields.Char('Product')
+#     hrs tmbhin stored = true
     product_id = fields.Integer('Product ID', compute='_compute_product_id')
     odoo_quantity = fields.Float('Odoo Quantity')
     wms_quantity = fields.Float('WMS Quantity')
