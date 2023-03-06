@@ -18,6 +18,7 @@ class CalculateOnholdWizard(models.TransientModel):
             'type': 'ir.actions.client',
             'tag': 'reload',
         }
+    
         
         
     def _calculate_wms_stock(self):
