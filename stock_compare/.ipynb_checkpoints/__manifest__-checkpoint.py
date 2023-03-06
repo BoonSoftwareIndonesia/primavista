@@ -20,16 +20,16 @@
     'version': '0.3',
 
     # any module necessary for this one to work correctly
-    'depends': ['base'],
+    'depends': ['base','purchase', 'sale_management', 'stock'],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
-        'wizard/generate_stock_compare.xml',
         'views/wms_stock.xml',
         'views/stock_report.xml',
+        'wizard/generate_stock_compare.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

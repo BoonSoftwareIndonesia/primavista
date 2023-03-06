@@ -1,4 +1,5 @@
 <odoo>
+    <data>
         <record id="generate_stock_compare_form" model="ir.ui.view">
             <field name="name">stock_compare.generate_stock_compare.wizard.form</field>
             <field name="model">stock_compare.generate_stock_compare.wizard</field>
@@ -22,4 +23,5 @@
             <field name="view_id" ref="generate_stock_compare_form"/>
             <field name="target">new</field>
         </record>
+    </data>
 </odoo>
