@@ -255,3 +255,4 @@ class StockCompare(http.Controller):
                 'mimetype': 'text/plain'
             })
             return message
+        

@@ -18,6 +18,7 @@ class CalculateOnholdWizard(models.TransientModel):
             'type': 'ir.actions.client',
             'tag': 'reload',
         }
+    
         
         
     def _calculate_wms_stock(self):
@@ -174,4 +175,5 @@ class CalculateOnholdWizard(models.TransientModel):
         # raise UserError(create_params['diff_quantity'])
         
         stock_line_model.create(create_params)
+        
         return

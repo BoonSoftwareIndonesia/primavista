@@ -1106,3 +1106,70 @@ class ApiVen(http.Controller):
             
             for pick in ret_partial:
                 pick.write({'x_wms_rec_no': do_header.x_wms_rec_no, 'x_studio_doc_trans_code': do_header.x_studio_doc_trans_code})
+                
+                
+    
+    @http.route('/web/api/stock_adjustment', type='json', auth='user', methods=['POST'])
+    def stock_adjustment(self, adjust):
+            create = 0
+            error = {}
+            is_error = False
+            response_msg = "Failed to receive WMS stock adjustment data"
+            message = {}
+        
+            # Create API Log
+            try:
+                api_log = request.env['api_ven.api_ven'].create({
+                    'status': 'new',
+                    'created_date': datetime.now(),
+                    'incoming_msg': adjust,
+                    'message_type': 'ADJUST'
+                })
+
+                api_log['status'] = 'process'
+            except:
+                error['Error'] = str(e)
+                is_error = True
+
+            # Create incoming txt
+            try:
+                api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                    'name': str(api_log['name']) + '_in.txt',
+                    'type': 'binary',
+                    'datas': base64.b64encode(bytes(str(adjust), 'utf-8')),
+                    'res_model': 'api_ven.api_ven',
+                    'res_id': api_log['id'],
+                    'mimetype': 'text/plain'
+                })
+            except Exception as e:
+                error['Error'] = str(e)
+                is_error = True
+#          ==================================================
+            
+                
+#          ==================================================
+            if is_error == True:
+                api_log['status'] = 'error'
+            else:
+                Response.status = "200"
+                api_log['status'] = 'success'
+                
+            message = {
+                'response': response_msg, 
+                'message': error
+            } 
+            
+            api_log['response_msg'] = message
+            api_log['response_date'] = datetime.now()
+
+            # Create response txt
+            api_log['response_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_out.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(message), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        
+            return message
