@@ -23,5 +23,11 @@
             <field name="view_id" ref="generate_stock_compare_form"/>
             <field name="target">new</field>
         </record>
+        
+        <menuitem id="generate_stock_compare_menu"
+            name="Generate Stock Compare"
+            parent="stock_compare_root"
+            action="generate_stock_compare_action"
+            sequence="10"/>
     </data>
 </odoo>
