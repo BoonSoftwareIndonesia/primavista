@@ -1110,7 +1110,7 @@ class ApiVen(http.Controller):
                 
     
     @http.route('/web/api/stock_adjustment', type='json', auth='user', methods=['POST'])
-    def stock_adjustment(self, adjust):
+    def stock_adjustment(self, adjustList):
             create = 0
             error = {}
             is_error = False
@@ -1122,7 +1122,7 @@ class ApiVen(http.Controller):
                 api_log = request.env['api_ven.api_ven'].create({
                     'status': 'new',
                     'created_date': datetime.now(),
-                    'incoming_msg': adjust,
+                    'incoming_msg': adjustList,
                     'message_type': 'ADJUST'
                 })
 
@@ -1136,7 +1136,7 @@ class ApiVen(http.Controller):
                 api_log['incoming_txt'] = request.env['ir.attachment'].create({
                     'name': str(api_log['name']) + '_in.txt',
                     'type': 'binary',
-                    'datas': base64.b64encode(bytes(str(adjust), 'utf-8')),
+                    'datas': base64.b64encode(bytes(str(adjustList), 'utf-8')),
                     'res_model': 'api_ven.api_ven',
                     'res_id': api_log['id'],
                     'mimetype': 'text/plain'
@@ -1145,7 +1145,57 @@ class ApiVen(http.Controller):
                 error['Error'] = str(e)
                 is_error = True
 #          ==================================================
+            try:
+                for rec in adjustList:
+                    if rec['ownerCode'] == "":
+                        error["Error"] = "Field owner code is blank"
+                        is_error = True
+                        break
+                        
+                    if rec['documentType'] == "":
+                        error["Error"] = "Field document type is blank"
+                        is_error = True
+                        break
+                        
+                    for line in rec['adj']:
+                        if line['warehouseCode'] == "":
+                            error["Error"] = "Field warehouse code is blank"
+                            is_error = True
+                            break
+                            
+                        if (line['ownerCode'] == "" or (line['ownerCode'] != "" and line['ownerCode'] != rec['ownerCode'])):
+                            error["Error"] = "Field owner code is blank"
+                            is_error = True
+                            break
+                            
+                        if line['product'] == "":
+                            error["Error"] = "Field product is blank"
+                            is_error = True
+                            break
+                            
+                        if line['expiryDate'] == "":
+                            error["Error"] = "Field expiry date is blank"
+                            is_error = True
+                            break
+                            
+                        if line['qtyOnHand'] == "":
+                            error["Error"] = "Field quantity on hand is blank"
+                            is_error = True
+                            break
+                            
+                    if is_error == True:
+                        break
+                        
+#                     mulai coding disini utk checking and adjustment
+
+                    response_msg = "Stocks adjusted!!"
+                        
+            except Exception as e:
+                error["Error"] = str(e)
+                is_error = True
             
+                            
+                        
                 
 #          ==================================================
             if is_error == True:
