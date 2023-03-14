@@ -1183,17 +1183,19 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
                         
+                        # loc_id = request.env['stock.location'].search([('complete_name', '=', line['warehouseCode'])]).id
                         loc_id = request.env['stock.location'].search([('complete_name', '=', line['warehouseCode'])]).id
                         
-                        product_id = request.env['product.product'].search([('default_code', '=', line['product']), ('location_id', '=', loc_id)]).id
+                        # product_id = request.env['product.product'].search([('default_code', '=', line['product']), ('location_id', '=', loc_id)]).id
+                        product_id = request.env['product.product'].search([('id', '=', line['product'])]).id
                         
+                        # warehouse = request.env['stock.warehouse'].search([('display_name', '=', line['warehouseCode'])],limit=1).lot_stock_id.id
                         warehouse = request.env['stock.warehouse'].search([('display_name', '=', line['warehouseCode'])],limit=1).lot_stock_id.id
                         
                         product_qty = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)])
                         qty_final = product_qty.available_quantity + float(line['qtyOnHand'])
-                        # raise UserError(qty_final)
                         
-                        lot_id = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).lot_id.id
+                        # lot_id = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).lot_id.id
                         # lot = lot_id.lot_id.id
                         # for lot in lot_id:
                         #     curr_lot = lot.lot_id.id
@@ -1202,7 +1204,25 @@ class ApiVen(http.Controller):
                         # tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
                         # raise UserError(tracking)
                         
-                        is_tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
+                        # is_tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
+                        is_tracking = request.env['product.product'].search([('id', '=', line['product'])]).tracking
+                        
+                        if is_tracking:
+                            
+                            # Load the model
+                            lot_model = request.env['stock.quant'].search([('lot_id', '=', line['lotNo'])]).lot_id
+
+                            # Get the lot id
+                            lot_id = lot_model.id
+
+                            # Process moving the model
+                            lot_quantity = lot_model.product_qty + float(line['qtyOnHand'])
+
+                            # Checking the last quantity:
+                            if lot_quantity >= 0:
+                                qty_final = lot_quantity
+                            else:
+                                break
                         
                         # raise UserError(is_tracking)
                         if is_tracking == 'none':
