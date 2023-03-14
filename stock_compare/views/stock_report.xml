@@ -1,7 +1,7 @@
 <odoo>
   <data>
       
-         
+<!-- This view is not being used -->
 <!-- Declare the action to open the menu item -->
       <record id="action_stock_report" model="ir.actions.act_window">
             <field name="name">Stock Compare Report</field>

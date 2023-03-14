@@ -1182,6 +1182,57 @@ class ApiVen(http.Controller):
                             error["Error"] = "Field quantity on hand is blank"
                             is_error = True
                             break
+                        
+                        loc_id = request.env['stock.location'].search([('complete_name', '=', line['warehouseCode'])]).id
+                        
+                        product_id = request.env['product.product'].search([('default_code', '=', line['product']), ('location_id', '=', loc_id)]).id
+                        
+                        warehouse = request.env['stock.warehouse'].search([('display_name', '=', line['warehouseCode'])],limit=1).lot_stock_id.id
+                        
+                        product_qty = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)])
+                        qty_final = product_qty.available_quantity + float(line['qtyOnHand'])
+                        # raise UserError(qty_final)
+                        
+                        lot_id = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).lot_id.id
+                        # lot = lot_id.lot_id.id
+                        # for lot in lot_id:
+                        #     curr_lot = lot.lot_id.id
+                        # raise UserError(lot_id)
+                        
+                        # tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
+                        # raise UserError(tracking)
+                        
+                        is_tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
+                        
+                        # raise UserError(is_tracking)
+                        if is_tracking == 'none':
+                            if lot_id is False:
+                                request.env['stock.quant'].with_context(inventory_mode=True).create({
+                                    'product_id': product_id,
+                                    'inventory_quantity': qty_final,
+                                    'location_id': warehouse,
+                                }).action_apply_inventory()
+                            else:
+                                request.env['stock.quant'].with_context(inventory_mode=True).create({
+                                    'product_id': product_id,
+                                    'inventory_quantity': qty_final,
+                                    'location_id': warehouse,
+                                    'lot_id': lot_id,
+                                }).action_apply_inventory()
+                        else:
+                            request.env['stock.quant'].with_context(inventory_mode=True).create({
+                                    'product_id': product_id,
+                                    'inventory_quantity': qty_final,
+                                    'location_id': warehouse,
+                                    'lot_id': lot_id,
+                                }).action_apply_inventory()
+                    
+
+                            # request.env['stock.quant'].with_context(inventory_mode=True).create({
+                            #     'product_id': product_id,
+                            #     'inventory_quantity': qty_final,
+                            #     'location_id': warehouse,
+                            # }).action_apply_inventory()
                             
                     if is_error == True:
                         break
