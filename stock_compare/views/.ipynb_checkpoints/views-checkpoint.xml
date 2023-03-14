@@ -21,11 +21,11 @@
             name="Stock Compare"
             sequence="1"/>
       
-        <menuitem id="stock_compare_reports"
+<!--         <menuitem id="stock_compare_reports"
             name="Stock Compare Reports"
             action="action_stock_compare"
             parent="stock_compare_root"
-            sequence="1"/>
+            sequence="1"/> -->
 
 <!-- Declare the tree view (Display the table with columns and rows of stock_compare data) -->
       <record id="stock_compare_tree" model="ir.ui.view">
