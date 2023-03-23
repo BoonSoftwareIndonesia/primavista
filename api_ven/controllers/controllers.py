@@ -1201,6 +1201,12 @@ class ApiVen(http.Controller):
                         #     curr_lot = lot.lot_id.id
                         # raise UserError(lot_id)
                         
+                        # New code
+                        # lot_id = ""
+                        
+                        # expiration_date = ""
+                        
+                        
                         # tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
                         # raise UserError(tracking)
                         
@@ -1223,6 +1229,18 @@ class ApiVen(http.Controller):
                                 qty_final = lot_quantity
                             else:
                                 break
+                                
+#                             ================ Stock Adjustment for Expired_date =====================
+#                             alert_time = request.env['product.product'].search([('id', '=', line['product'])]).alert_time
+#                             use_time = request.env['product.product'].search([('id', '=', line['product'])]).use_time
+#                             removal_time = request.env['product.product'].search([('id', '=', line['product'])]).removal_time
+                            
+#                             expiration_date = datetime.strptime(line['expiryDate'], '%m/%d/%Y %H:%M:%S').date()
+                            
+#                             alert_date = expiration_date - timedelta(days=alert_time)
+#                             use_date = expiration_date - timedelta(days=use_time)
+#                             removal_date = expiration_date - timedelta(days=removal_time)
+#                             =========================================================================
                         
                         # raise UserError(is_tracking)
                         if is_tracking == 'none':
@@ -1240,6 +1258,25 @@ class ApiVen(http.Controller):
                                     'lot_id': lot_id,
                                 }).action_apply_inventory()
                         else:
+#                             ================ Stock Adjustment for Expired_date =====================
+#                             stock_production_lot = request.env['stock.production.lot'].search([('name', '=', line['lotNo'])])
+                            
+#                             if line['expiryDate'] != "" and stock_production_lot.use_expiration_date:
+#                                 stock_production_lot.write({
+#                                     'expiration_date': expiration_date,
+#                                     'use_date': use_date,
+#                                     'alert_date': alert_date,
+#                                     'removal_date': removal_date,    
+#                                 })
+#                             else: 
+#                                 request.env['stock.quant'].with_context(inventory_mode=True).create({
+#                                         'product_id': product_id,
+#                                         'inventory_quantity': qty_final,
+#                                         'location_id': warehouse,
+#                                         'lot_id': lot_id,
+#                                     }).action_apply_inventory()
+#                             =========================================================================
+                            
                             request.env['stock.quant'].with_context(inventory_mode=True).create({
                                     'product_id': product_id,
                                     'inventory_quantity': qty_final,
