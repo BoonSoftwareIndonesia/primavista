@@ -99,7 +99,7 @@ class api_ven(models.Model):
 
 # PURCHASE ORDER (DW_PO API) (Odoo to WMS) ==========================================================================
 class ApiController(models.Model):
-    _inherit = "purchase.order"
+    _inherit = ['purchase.order']
     
     def api_dw_po(self, record):
             
@@ -147,6 +147,9 @@ class ApiController(models.Model):
             line_no += 1
             # Append the current po_line to the po_lines array
             po_lines.append(po_line)
+        
+        # Catch the DO field
+        # stock_picking_name = self.stock_picking.name
         
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
@@ -410,6 +413,9 @@ class ApiControllerStockPicking(models.Model):
             if line['product_id']["product_tmpl_id"]["default_code"] is False:
                 continue
             
+            #validasi partial apa engga
+            
+            
             # Create order line
             item_line = {
                 "soLineOptChar1": line['x_studio_opt_char_1'],
@@ -457,6 +463,8 @@ class ApiControllerStockPicking(models.Model):
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
+        # reference -> origin name ganti ke yg wh/out karena ini outbound
+        # tambahin payload baru otherRemarks untuk simpen si origin_name
         payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
@@ -550,7 +558,7 @@ class ApiControllerStockPicking(models.Model):
         })
 
     
-    
+    # bikin return ini dlu aja
     # SO RETURN (DW_SO_RET) (sell item to customer -> return to us) using DW_SO API JSON format =================================
     def api_return_so(self, record):
         
@@ -575,7 +583,9 @@ class ApiControllerStockPicking(models.Model):
             # If there is a line whose default code is empty, continue, don't send to WMS
             if line['product_id']["product_tmpl_id"]["default_code"] is False:
                 continue
-                
+            
+            #check partial
+            
             # Create order line
             po_line = {
                 "inwardLineOptChar1": line['x_studio_opt_char_1'],
@@ -606,7 +616,7 @@ class ApiControllerStockPicking(models.Model):
                 # Assign the value of the origin stock picking’s x_wms_rec_no to the “wms_no” variable
                 wms_no = pick.x_wms_rec_no # WH/IN/00009.x_wms_rec_no = wms rec no utk diassign ke doNo
         
-        # Create payload
+        # Create payload --di payload sini, no po nya diganti sm wh/in hrsnya karena inbound trus yang origin_name itu no po -> masukin ke other remarks
         payload = {
             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
