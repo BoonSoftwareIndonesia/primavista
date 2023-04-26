@@ -1,7 +1,7 @@
 from odoo import models, fields, api
 from odoo.http import request, Response
 import json, datetime, requests, base64, unicodedata
-from datetime import datetime
+from datetime import datetime, timedelta
 from odoo import http
 from odoo.exceptions import UserError
 
@@ -215,6 +215,12 @@ class ApiVen(http.Controller):
                             error["Error"] = "Field quantityReceived is blank"
                             is_error = True
                             break
+                            
+                        # ======================================== (lot no)
+                        
+                        # lotNo = request.env[].search(['lotNo', '=', line["lotNo"]).id
+                        
+                        # ========================================
                         
                         # (3.1.2) Search the corresponding stock move based on origin (poNo), x_studio_opt_char_1, and state
                         try:
@@ -1173,116 +1179,172 @@ class ApiVen(http.Controller):
                             is_error = True
                             break
                             
-                        if line['expiryDate'] == "":
-                            error["Error"] = "Field expiry date is blank"
-                            is_error = True
-                            break
-                            
-                        if line['qtyOnHand'] == "":
-                            error["Error"] = "Field quantity on hand is blank"
-                            is_error = True
-                            break
+                        # if line['expiryDate'] == "":
+                        #     error["Error"] = "Field expiry date is blank"
+                        #     is_error = True
+                        #     break
                         
-                        # loc_id = request.env['stock.location'].search([('complete_name', '=', line['warehouseCode'])]).id
+                        # if line['lotNo'] == "":
+                        #     error["Error"] = "Field Lot Number is blank"
+                        #     is_error = True
+                        #     break
+                            
+                        # if line['qtyOnHand'] == "":
+                        #     error["Error"] = "Field quantity on hand is blank"
+                        #     is_error = True
+                        #     break
+                        
                         loc_id = request.env['stock.location'].search([('complete_name', '=', line['warehouseCode'])]).id
                         
-                        # product_id = request.env['product.product'].search([('default_code', '=', line['product']), ('location_id', '=', loc_id)]).id
-                        product_id = request.env['product.product'].search([('id', '=', line['product'])]).id
+                        product_id = request.env['product.product'].search([('default_code', '=', line['product']), ('location_id', '=', loc_id)]).id
                         
-                        # warehouse = request.env['stock.warehouse'].search([('display_name', '=', line['warehouseCode'])],limit=1).lot_stock_id.id
                         warehouse = request.env['stock.warehouse'].search([('display_name', '=', line['warehouseCode'])],limit=1).lot_stock_id.id
                         
                         product_qty = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)])
                         qty_final = product_qty.available_quantity + float(line['qtyOnHand'])
+                        # raise UserError(qty_final)
+#                         cek qty_final minus or not, if yes, break and send msg that the qty is not enough, if not minus, then inventory_qty = qty_final
                         
-                        # lot_id = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).lot_id.id
+#                         lot hrs selalu dicari setiap mau adjust something, kalau hasilnya false, break and send msg klo lot hrs selalu diinput
+                        lot_id = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).lot_id.id
                         # lot = lot_id.lot_id.id
                         # for lot in lot_id:
                         #     curr_lot = lot.lot_id.id
                         # raise UserError(lot_id)
                         
-                        # New code
-                        # lot_id = ""
-                        
-                        # expiration_date = ""
-                        
-                        
                         # tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
                         # raise UserError(tracking)
                         
-                        # is_tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
-                        is_tracking = request.env['product.product'].search([('id', '=', line['product'])]).tracking
                         
-                        if is_tracking:
+                        # =========================New Code=========================
+                        # # Create the support variabel
+                        # is_tracking = request.env['product.product'].search([('id', '=', line['product'])]).tracking   
+                        # qty_final = 0
+                        # lot_id = ""
+                        # expiration_date = ""
+                        # alert_date = ""
+                        # use_date = ""
+                        # removal_date = ""
+                        # ==========================================================
+                        
+                        
+                        
+                        is_tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
+                        
+                        # =========================New Code=========================
+#                         # Validated if the product has tracking by lot or not
+#                         if is_tracking == "lot":
                             
-                            # Load the model
-                            lot_model = request.env['stock.quant'].search([('lot_id', '=', line['lotNo'])]).lot_id
+#                             # Searching and create the model first (it will return empty object if not found)
+#                             stock_production_lot_model = request.env['stock.production.lot'].search([('name', '=', line['lotNo'])])
+#                             # Handle if the product has a lot tracking but the request don't 
+#                             # have a lotNo and if the lotNo not found
+#                             if not stock_production_lot_model:
+#                                 error["Error"] = "Please check your lotNo!"
+#                                 is_error = True
+#                                 break
+                            
+#                             else:
+#                                 lot_id = stock_production_lot_model.id
 
-                            # Get the lot id
-                            lot_id = lot_model.id
-
-                            # Process moving the model
-                            lot_quantity = lot_model.product_qty + float(line['qtyOnHand'])
-
-                            # Checking the last quantity:
-                            if lot_quantity >= 0:
-                                qty_final = lot_quantity
-                            else:
-                                break
+#                                 # Process calculated the result
+#                                 lot_quantity = stock_production_lot_model.product_qty + float(line['qtyOnHand'])
                                 
-#                             ================ Stock Adjustment for Expired_date =====================
-#                             alert_time = request.env['product.product'].search([('id', '=', line['product'])]).alert_time
-#                             use_time = request.env['product.product'].search([('id', '=', line['product'])]).use_time
-#                             removal_time = request.env['product.product'].search([('id', '=', line['product'])]).removal_time
+#                                 # Checking the last quantity:
+#                                 if lot_quantity >= 0:
+#                                     qty_final = lot_quantity
+#                                 else:
+#                                     error["Error"] = "Final quantity must bigger than 0"
+#                                     is_error = True
+#                                     break
+                                
+#                             # Get the expiration_date validation
+#                             is_expiration_date = stock_production_lot_model.use_expiration_date
                             
-#                             expiration_date = datetime.strptime(line['expiryDate'], '%m/%d/%Y %H:%M:%S').date()
+#                             # Checking if the product have a expired date tracking. if true update the date. If false, don't do anything
+#                             if is_expiration_date:
+                                
+#                                 # Checking if the expiryDate has been input by user or not. If user didn't
+#                                 # input, the expiry date will be set as default.
+#                                 if line['expiryDate'] != "":
+#                                     expiration_date = datetime.strptime(line['expiryDate'], '%m/%d/%Y %H:%M:%S').date()
+#                                 else:
+#                                     expiration_date = stock_production_lot_model.expiration_date
+                                    
+#                                 alert_time = request.env['product.product'].search([('id', '=', line['product'])]).alert_time
+#                                 use_time = request.env['product.product'].search([('id', '=', line['product'])]).use_time
+#                                 removal_time = request.env['product.product'].search([('id', '=', line['product'])]).removal_time
                             
-#                             alert_date = expiration_date - timedelta(days=alert_time)
-#                             use_date = expiration_date - timedelta(days=use_time)
-#                             removal_date = expiration_date - timedelta(days=removal_time)
-#                             =========================================================================
+#                                 alert_date = expiration_date - timedelta(days=alert_time)
+#                                 use_date = expiration_date - timedelta(days=use_time)
+#                                 removal_date = expiration_date - timedelta(days=removal_time)
+#                         else:
+#                             stock_quant_model = request.env['stock.quant'].search([('product_id', '=', line['product'])])
+#                             qty_final = stock_quant_model.quantity + float(line['qtyOnHand'])
+#                             if qty_final < 0:
+#                     `            error["Error"] = "Final quantity must bigger than 0"
+#                                 is_error = True
+#                                 break
+                        # ==========================================================
                         
                         # raise UserError(is_tracking)
-                        if is_tracking == 'none':
-                            if lot_id is False:
-                                request.env['stock.quant'].with_context(inventory_mode=True).create({
+                        if is_tracking == False:
+                            request.env['stock.quant'].with_context(inventory_mode=True).create({
                                     'product_id': product_id,
                                     'inventory_quantity': qty_final,
                                     'location_id': warehouse,
-                                }).action_apply_inventory()
-                            else:
-                                request.env['stock.quant'].with_context(inventory_mode=True).create({
-                                    'product_id': product_id,
-                                    'inventory_quantity': qty_final,
-                                    'location_id': warehouse,
-                                    'lot_id': lot_id,
-                                }).action_apply_inventory()
-                        else:
-#                             ================ Stock Adjustment for Expired_date =====================
-#                             stock_production_lot = request.env['stock.production.lot'].search([('name', '=', line['lotNo'])])
-                            
-#                             if line['expiryDate'] != "" and stock_production_lot.use_expiration_date:
-#                                 stock_production_lot.write({
+                            }).action_apply_inventory()
+#                         masukin else, trus if lagi, mulai validasi si is_tracking (none, lot, serial)
+#                         check lg lot yg dr line wms payload ada ga lot di inventory
+
+#                             stock_production_lot = request.env['stock.quant'].search([('name', '=', line['lotNo'])])
+#                              stock_production_lot.write({
 #                                     'expiration_date': expiration_date,
 #                                     'use_date': use_date,
 #                                     'alert_date': alert_date,
 #                                     'removal_date': removal_date,    
 #                                 })
-#                             else: 
-#                                 request.env['stock.quant'].with_context(inventory_mode=True).create({
-#                                         'product_id': product_id,
-#                                         'inventory_quantity': qty_final,
-#                                         'location_id': warehouse,
-#                                         'lot_id': lot_id,
-#                                     }).action_apply_inventory()
-#                             =========================================================================
                             
-                            request.env['stock.quant'].with_context(inventory_mode=True).create({
-                                    'product_id': product_id,
-                                    'inventory_quantity': qty_final,
-                                    'location_id': warehouse,
-                                    'lot_id': lot_id,
-                                }).action_apply_inventory()
+#                             if lot_id is False:
+#                                 request.env['stock.quant'].search([('product_id', '=', line['product'])]).write({
+#                                     'product_id': product_id,
+#                                     'inventory_quantity': qty_final,
+#                                     'location_id': warehouse,
+#                                 })
+#                             else:
+#                                 request.env['stock.quant'].search([('product_id', '=', line['product'])]).write({
+#                                     'product_id': product_id,
+#                                     'inventory_quantity': qty_final,
+#                                     'location_id': warehouse,
+#                                     'lot_id': lot_id,
+#                                 })
+#                         else:
+#                             request.env['stock.quant'].search([('product_id', '=', line['product'])]).write({
+#                                     'product_id': product_id,
+#                                     'inventory_quantity': qty_final,
+#                                     'location_id': warehouse,
+#                                     'lot_id': lot_id,
+#                             })
+                            # if lot_id is False:
+                            #     request.env['stock.quant'].with_context(inventory_mode=True).create({
+                            #         'product_id': product_id,
+                            #         'inventory_quantity': qty_final,
+                            #         'location_id': warehouse,
+                            #     }).action_apply_inventory()
+                            # else:
+                            #     request.env['stock.quant'].with_context(inventory_mode=True).create({
+                            #         'product_id': product_id,
+                            #         'inventory_quantity': qty_final,
+                            #         'location_id': warehouse,
+                            #         'lot_id': lot_id,
+                            #     }).action_apply_inventory()
+                        # else:
+                        #     request.env['stock.quant'].with_context(inventory_mode=True).create({
+                        #             'product_id': product_id,
+                        #             'inventory_quantity': qty_final,
+                        #             'location_id': warehouse,
+                        #             'lot_id': lot_id,
+                        #         }).action_apply_inventory()
                     
 
                             # request.env['stock.quant'].with_context(inventory_mode=True).create({
@@ -1290,7 +1352,39 @@ class ApiVen(http.Controller):
                             #     'inventory_quantity': qty_final,
                             #     'location_id': warehouse,
                             # }).action_apply_inventory()
+                        
+                           # =========================New Code=========================
+                        # if is_tracking == 'none':
+                        #     request.env['stock.quant'].with_context(inventory_mode=True).create({
+                        #         'product_id': product_id,
+                        #         'inventory_quantity': qty_final,
+                        #         'location_id': warehouse,
+                        #     }).action_apply_inventory()
+                        # else:
+                        #     stock_production_lot = request.env['stock.production.lot'].search([('name', '=', line['lotNo'])])
+                        #     if line['expiryDate'] != "" and stock_production_lot.use_expiration_date:
+                        #         stock_production_lot.write({
+                        #             'expiration_date': expiration_date,
+                        #             'use_date': use_date,
+                        #             'alert_date': alert_date,
+                        #             'removal_date': removal_date,    
+                        #         })
+                        #         request.env['stock.quant'].with_context(inventory_mode=True).create({
+                        #             'product_id': product_id,
+                        #             'inventory_quantity': qty_final,
+                        #             'location_id': warehouse,
+                        #             'lot_id': lot_id,
+                        #         }).action_apply_inventory()
+                        #     else:
+                        #         request.env['stock.quant'].with_context(inventory_mode=True).create({
+                        #             'product_id': product_id,
+                        #             'inventory_quantity': qty_final,
+                        #             'location_id': warehouse,
+                        #             'lot_id': lot_id,
+                        #         }).action_apply_inventory()
                             
+                           # ==========================================================
+                        
                     if is_error == True:
                         break
                         
