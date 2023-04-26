@@ -415,6 +415,9 @@ class ApiControllerStockPicking(models.Model):
             
             #validasi partial apa engga
             
+            #Checking where the return is partial or not
+            
+            is_partial_return = False
             
             # Create order line
             item_line = {
