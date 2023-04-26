@@ -42,7 +42,7 @@ class StockReturnPickingExt(models.TransientModel):
         
         # Call the super() method
         # The create_returns() function will call the _create_returns() function which will create a new stock picking 
-        # (PO return receipt) for the returned products.
+        # (PO/SO return receipt) for the returned products.
         # create_returns() will return res_id, which is obtained from the value of new_picking.id 
         # that is returned from calling _create_returns()
         new_picking = super(StockReturnPickingExt, self).create_returns()
