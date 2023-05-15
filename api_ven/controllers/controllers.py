@@ -1,7 +1,7 @@
 from odoo import models, fields, api
 from odoo.http import request, Response
-import json, datetime, requests, base64, unicodedata
-from datetime import datetime, timedelta
+import json, requests, base64, unicodedata
+import datetime as dt
 from odoo import http
 from odoo.exceptions import UserError
 
@@ -86,7 +86,7 @@ class ApiVen(http.Controller):
             return ""
         else:
             try:
-                obj_date = datetime.strptime(rec[date_type], '%d/%m/%Y').date()
+                obj_date = dt.datetime.strptime(rec[date_type], '%d/%m/%Y').date()
                 return obj_date
             except ValueError:
                 error["Error"] = "Wrong date format on " + date_type 
@@ -106,7 +106,7 @@ class ApiVen(http.Controller):
     
     
     # PO (CRT_RCPT API) ===================================================================================
-    @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['POST'])
+    @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['GET'])
     def post_rcpt(self, rcpt):
             created = 0
             error = {}
@@ -122,7 +122,7 @@ class ApiVen(http.Controller):
             try:
                 api_log = request.env['api_ven.api_ven'].create({
                     'status': 'new',
-                    'created_date': datetime.now(),
+                    'created_date': dt.datetime.now(),
                     'incoming_msg': rcpt,
                     'message_type': 'RCPT'
                 })
@@ -237,6 +237,7 @@ class ApiVen(http.Controller):
                         
                         # (3.1.3) Set the x_wms_rec_no of the stock move based on receiptNo
                         receipt_line['x_wms_rec_no'] = rec['receiptNo']
+                        receipt_line['x_stock_status_code'] = line['stockStatusCode']
                             
                         # (3.1.4) Check whether the product exists or not
                         try:
@@ -258,7 +259,6 @@ class ApiVen(http.Controller):
                             break
                         
                         # (3.1) Line validations (end) =========================================================
-
                         
                         # (3.2) Create a new move stock line 
                         receipt_line.move_line_ids.write({
@@ -272,8 +272,11 @@ class ApiVen(http.Controller):
                             "qty_done": line["quantityReceived"],
                             "company_id": 1,
 #                             "state": "done",
-                            "x_wms_rec_no": rec['receiptNo']
+                            "x_wms_rec_no": rec['receiptNo'],
+                            "x_stock_status_code": line["stockStatusCode"]
                         })
+                        
+                        
                         
                         # (3.3) Append the inwardLineOptChar1 / x_studio_opt_char1 (current line number) to the lines array
                         lines.append(line["inwardLineOptChar1"])
@@ -320,7 +323,7 @@ class ApiVen(http.Controller):
             } 
             
             api_log['response_msg'] = message
-            api_log['response_date'] = datetime.now()
+            api_log['response_date'] = dt.datetime.now()
 
             # Create response txt
             api_log['response_txt'] = request.env['ir.attachment'].create({
@@ -415,7 +418,7 @@ class ApiVen(http.Controller):
         try:
             api_log = request.env['api_ven.api_ven'].create({
                 'status': 'new',
-                'created_date': datetime.now(),
+                'created_date': dt.datetime.now(),
                 'incoming_msg': do,
                 'message_type': 'RCPT_RET'
             })
@@ -501,13 +504,15 @@ class ApiVen(http.Controller):
                     # (3.1.2) Search the corresponding stock move based on origin (soNo), 
                     # x_studio_opt_char_1 (soLineOptChar1), and state
                     try:
-                        receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['soNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
+                        receipt_line = request.env['stock.move'].search(['&', '&', ('reference','=',rec['soNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
                     except Exception as e:
                         error["Error"] = "Error in searching stock move " + str(e)
                         is_error = True
                         break
+                    
+                    # raise UserError(receipt_line)
 
-                    if receipt_line['origin'] != rec['soNo']:
+                    if receipt_line['reference'] != rec['soNo']:
                         error["Error"] = "Stock Move not found"
                         is_error = True
                         break
@@ -549,7 +554,8 @@ class ApiVen(http.Controller):
                             "qty_done": line["quantityShipped"],
                             "company_id": 1,
 #                             "state": "done",
-                            "x_wms_rec_no": rec['receiptNo']
+                            "x_wms_rec_no": rec['receiptNo'],
+                            "x_stock_status_code": line["stockStatusCode"]
                     })
                     
                     # (3.3) Append the soLineOptChar1 / x_studio_opt_char1 (current line number) to the lines array
@@ -596,7 +602,7 @@ class ApiVen(http.Controller):
         } 
 
         api_log['response_msg'] = message
-        api_log['response_date'] = datetime.now()
+        api_log['response_date'] = dt.datetime.now()
 
         # Create response txt
         api_log['response_txt'] = request.env['ir.attachment'].create({
@@ -629,7 +635,7 @@ class ApiVen(http.Controller):
         try:
             api_log = request.env['api_ven.api_ven'].create({
                  'status': 'new',
-                 'created_date': datetime.now(),
+                 'created_date': dt.datetime.now(),
                  'incoming_msg': do,
                  'message_type': 'DO'
                })
@@ -822,7 +828,7 @@ class ApiVen(http.Controller):
         }
         
         api_log['response_msg'] = message
-        api_log['response_date'] = datetime.now()
+        api_log['response_date'] = dt.datetime.now()
 
         # Create response txt
         api_log['response_txt'] = request.env['ir.attachment'].create({
@@ -855,7 +861,7 @@ class ApiVen(http.Controller):
         try:
             api_log = request.env['api_ven.api_ven'].create({
                  'status': 'new',
-                 'created_date': datetime.now(),
+                 'created_date': dt.datetime.now(),
                  'incoming_msg': rcpt,
                  'message_type': 'DO_RET'
                })
@@ -950,13 +956,13 @@ class ApiVen(http.Controller):
                     # (3.1.2) Try to search the corresponding stock move based on origin (poNo), x_studio_opt_char_1 
                     # (inwardLineOptChar1 ), and state
                     try:    
-                        dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
+                        dispatch_line = request.env['stock.move'].search(['&', '&',('reference','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
                     except Exception as e:
                         error["Error"] = 'Error in searching stock move ' + str(e)
                         is_error = True
                         break
         
-                    if dispatch_line['origin'] != rec['poNo']:
+                    if dispatch_line['reference'] != rec['poNo']:
                         error["Error"] = "Stock Move not found"
                         is_error = True
                         break
@@ -1027,8 +1033,8 @@ class ApiVen(http.Controller):
                 response_msg = "DO updated successfully"
             
         except Exception as e:
-           error["Error"] = str(e)
-           is_error = True
+            error["Error"] = str(e)
+            is_error = True
 
         if is_error == True:
             api_log['status'] = 'error'
@@ -1042,7 +1048,7 @@ class ApiVen(http.Controller):
         }
         
         api_log['response_msg'] = message
-        api_log['response_date'] = datetime.now()
+        api_log['response_date'] = dt.datetime.now()
 
         api_log['response_txt'] = request.env['ir.attachment'].create({
             'name': str(api_log['name']) + '_out.txt',
@@ -1127,7 +1133,7 @@ class ApiVen(http.Controller):
             try:
                 api_log = request.env['api_ven.api_ven'].create({
                     'status': 'new',
-                    'created_date': datetime.now(),
+                    'created_date': dt.datetime.now(),
                     'incoming_msg': adjustList,
                     'message_type': 'ADJUST'
                 })
@@ -1412,7 +1418,7 @@ class ApiVen(http.Controller):
             } 
             
             api_log['response_msg'] = message
-            api_log['response_date'] = datetime.now()
+            api_log['response_date'] = dt.datetime.now()
 
             # Create response txt
             api_log['response_txt'] = request.env['ir.attachment'].create({
