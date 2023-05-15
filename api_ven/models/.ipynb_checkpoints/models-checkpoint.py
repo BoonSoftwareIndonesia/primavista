@@ -4,10 +4,13 @@ from odoo import models, fields, api
 from openerp.osv import osv
 from odoo.http import request, Response
 import json, datetime, requests, base64, unicodedata
+import datetime as dt
 from datetime import datetime
 from odoo import http
 from odoo.exceptions import UserError
 from odoo.exceptions import ValidationError
+import base64
+import urllib.request
 import re
 
 
@@ -94,6 +97,10 @@ class api_ven(models.Model):
             vals['name'] = self.env['ir.sequence'].next_by_code('api.seq') or ('New')
         result = super(api_ven, self).create(vals)
         return result
+    
+    # @api.model
+    # def testing(self):
+    #     print('test');
 
     
 
@@ -383,8 +390,6 @@ class ApiControllerSO(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-        
-        
 
 # STOCK PICKING FOR RETURNS ===================================================================
 class ApiControllerStockPicking(models.Model):
@@ -562,7 +567,6 @@ class ApiControllerStockPicking(models.Model):
         })
 
     
-    # bikin return ini dlu aja
     # SO RETURN (DW_SO_RET) (sell item to customer -> return to us) using DW_SO API JSON format =================================
     def api_return_so(self, record):
         
@@ -725,8 +729,6 @@ class ApiControllerStockPicking(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-
-        
         
 # CUSTOMER  ==========================================================================
 class ApiControllerPartner(models.Model):
@@ -939,3 +941,88 @@ class ApiControllerProduct(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
+
+# Fetch Data From TokPed =============================================================
+class ApiControllerProduct(models.Model):
+    _inherit = "sale.order"
+    
+    def get_order_list_v1(self):
+        
+        cur_utc = dt.datetime.now(dt.timezone.utc)
+
+        cur_time = cur_utc
+        cur_time += dt.timedelta(hours=7)
+
+        ten_m_before = cur_utc
+        ten_m_before += dt.timedelta(hours=7, minutes=-10)
+        
+        # The header of the API request
+        headers = {
+            'Authorization': "Bearer" + ' ' + "c:3kivNHxTSVip-xzGMdsvnA",
+            "Content-Type": "application/json"
+        }
+        
+        # The params of the API request
+        params = {
+            'page': 1,
+            'per_page': 10,
+            'fs_id': 17859,
+            'from_date': int(ten_m_before.timestamp()),
+            'to_date': int(cur_time.timestamp()),
+            'shop_id': 1601955
+        }
+        
+        # Create API log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': params,
+                'message_type': 'SO'
+            })
+
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+            
+        # Create the incoming txt
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(params), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+            
+        # Post API request
+        resp = requests.get('https://fs.tokopedia.net/v2/order/list', params=params, headers=headers)
+
+        ret = json.loads(resp.content)
+        
+        api_log['response_msg'] = base64.b64encode(bytes(str(resp.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
+        
+        if resp.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
+            
+        # Create the response txt
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(resp.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+        
+        # ================================================================================
+        
+        
