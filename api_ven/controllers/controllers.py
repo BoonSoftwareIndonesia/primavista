@@ -500,13 +500,13 @@ class ApiVen(http.Controller):
                     # (3.1.2) Search the corresponding stock move based on origin (soNo), 
                     # x_studio_opt_char_1 (soLineOptChar1), and state
                     try:
-                        receipt_line = request.env['stock.move'].search(['&', '&', ('origin','=',rec['soNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
+                        receipt_line = request.env['stock.move'].search(['&', '&', ('reference','=',rec['soNo']),('x_studio_opt_char_1', '=', line["soLineOptChar1"]), ('state', '=', 'assigned')])
                     except Exception as e:
                         error["Error"] = "Error in searching stock move " + str(e)
                         is_error = True
                         break
 
-                    if receipt_line['origin'] != rec['soNo']:
+                    if receipt_line['reference'] != rec['soNo']:
                         error["Error"] = "Stock Move not found"
                         is_error = True
                         break
@@ -637,7 +637,7 @@ class ApiVen(http.Controller):
         except:
             error['Error'] = str(e)
             is_error = True
-          
+        
         # Create incoming txt
         try:
             api_log['incoming_txt'] = request.env['ir.attachment'].create({
@@ -950,13 +950,13 @@ class ApiVen(http.Controller):
                     # (3.1.2) Try to search the corresponding stock move based on origin (poNo), x_studio_opt_char_1 
                     # (inwardLineOptChar1 ), and state
                     try:    
-                        dispatch_line = request.env['stock.move'].search(['&', '&',('origin','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
+                        dispatch_line = request.env['stock.move'].search(['&', '&',('reference','=',rec['poNo']),('x_studio_opt_char_1', '=', line["inwardLineOptChar1"]), ('state', '=', 'assigned')])
                     except Exception as e:
                         error["Error"] = 'Error in searching stock move ' + str(e)
                         is_error = True
                         break
         
-                    if dispatch_line['origin'] != rec['poNo']:
+                    if dispatch_line['reference'] != rec['poNo']:
                         error["Error"] = "Stock Move not found"
                         is_error = True
                         break

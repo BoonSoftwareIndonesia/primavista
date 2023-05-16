@@ -111,7 +111,7 @@ class ApiController(models.Model):
     def api_dw_po(self, record):
             
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
         
         # A variable to store the value of the current line number
         line_no = 1
@@ -254,7 +254,7 @@ class ApiControllerSO(models.Model):
     
     def api_dw_so(self, record):
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
         
         # A variable to store the value of the current line number
         line_no = 1
@@ -398,7 +398,7 @@ class ApiControllerStockPicking(models.Model):
     # PO RETURN (DW_PO_RET) (receive item -> return to vendor) using DW_SO API JSON format =======================================
     def api_return_po(self, record):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
         
         # A variable to store x_wms_rec_no value
         wms_no = ""
@@ -432,7 +432,7 @@ class ApiControllerStockPicking(models.Model):
                 # "originalOrderUOM": line['product_uom']['name'],
                 "originalOrderUOM": "PCS",
                 "lotNo": "LOT", 
-                "filterTransactionCode": "NM" if line['x_stock_status_code']  == False else line['x_stock_status_code'],
+                "filterTransactionCode": "NM",
                 # "filterTransactionCode": str(line['x_studio_stock_product_code']),
                 "soLineOptChar2": ""
             }
@@ -571,7 +571,7 @@ class ApiControllerStockPicking(models.Model):
     def api_return_so(self, record):
         
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
         
         # line_no = 1
         
@@ -737,7 +737,7 @@ class ApiControllerPartner(models.Model):
     def api_dw_customer(self, record):
             
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createcustomer"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createcustomer"
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
@@ -835,7 +835,7 @@ class ApiControllerProduct(models.Model):
     
     def api_dw_product(self, record):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createproduct"
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
@@ -948,6 +948,7 @@ class ApiControllerProduct(models.Model):
     
     def get_order_list_v1(self):
         
+        # Initialize current time first.
         cur_utc = dt.datetime.now(dt.timezone.utc)
 
         cur_time = cur_utc
