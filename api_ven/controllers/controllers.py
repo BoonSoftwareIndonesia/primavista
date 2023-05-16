@@ -273,11 +273,8 @@ class ApiVen(http.Controller):
                             "company_id": 1,
 #                             "state": "done",
                             "x_wms_rec_no": rec['receiptNo'],
-                            # "x_stock_status_code": line["stockStatusCode"]
-                        })
-                        
-                        
-                        
+                            # "x_stock_status_code": line["stockStatusCode"]               
+       
                         # (3.3) Append the inwardLineOptChar1 / x_studio_opt_char1 (current line number) to the lines array
                         lines.append(line["inwardLineOptChar1"])
         
@@ -556,7 +553,6 @@ class ApiVen(http.Controller):
 #                             "state": "done",
                             "x_wms_rec_no": rec['receiptNo'],
                             # "x_stock_status_code": line["stockStatusCode"]
-                    })
                     
                     # (3.3) Append the soLineOptChar1 / x_studio_opt_char1 (current line number) to the lines array
                     lines.append(line["soLineOptChar1"])

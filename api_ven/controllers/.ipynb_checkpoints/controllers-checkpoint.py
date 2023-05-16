@@ -273,8 +273,8 @@ class ApiVen(http.Controller):
                             "company_id": 1,
 #                             "state": "done",
                             "x_wms_rec_no": rec['receiptNo'],
+                          
                             # "x_stock_status_code": line["stockStatusCode"]
-                        })
                         
                         
                         
