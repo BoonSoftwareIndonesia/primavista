@@ -1123,10 +1123,12 @@ class ApiFetchTokPed(models.Model):
                     buyer_id = ""
 
                     buyer_information = order.get("buyer")
-                    buyer_id = buyer_information.get(id)
+                    buyer_id = buyer_information["id"]
 
                     payment_date_str = order.get("payment_date")
                     payment_date = datetime.strptime(payment_date_str, '%Y-%m-%dT%H:%M:%SZ')
+                    payment_date += dt.timedelta(hours=-7)
+                    # raise UserError(payment_date)
                     # ===============================================================================
 
                     # Create recipient_data
@@ -1145,6 +1147,22 @@ class ApiFetchTokPed(models.Model):
                     recipient_postal_code = recipient_address.get("postal_code")
                     recipient_geo = recipient_address.get("geo")
 
+                    # ===============================================================================
+
+                    # Create Logistic data
+                    logistic_data = order.get("logistics")
+
+                    shipping_agency = logistic_data.get("shipping_agency")
+                    service_type = logistic_data.get("service_type")
+                    
+                    # ===============================================================================
+
+                    # Create amt
+                    amt_data = order.get("amt")
+
+                    shipping_cost = amt_data.get("shipping_cost")
+                    insurance_cost = amt_data.get("insurance_cost")
+                    
                     # ===============================================================================
                     
                     # date_order_converter will use this server time. Which is GMT +14 (if not wrong).
@@ -1182,6 +1200,12 @@ class ApiFetchTokPed(models.Model):
                             'x_recipient_address_postal_code': recipient_postal_code,
                             'x_recipient_address_geo': recipient_geo,
                             'x_is_cod_mitra': order.get('is_cod_mitra'),
+                            'x_shipping_agency': shipping_agency,
+                            'x_service_type': service_type,
+                            'x_fulfill_by': order.get("fulfill_by"),
+                            'x_shipping_cost': shipping_cost,
+                            'x_insurance_cost': insurance_cost,
+                            'x_order_status': order.get("order_status"),
                             'order_line': []
                         })
                     else:
