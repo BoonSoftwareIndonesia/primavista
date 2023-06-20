@@ -1163,6 +1163,21 @@ class ApiFetchTokPed(models.Model):
                     shipping_cost = amt_data.get("shipping_cost")
                     insurance_cost = amt_data.get("insurance_cost")
                     
+                    total_product_price = amt_data.get("ttl_product_price")
+
+                    total_amount = shipping_cost + insurance_cost + total_product_price
+
+                    # ===============================================================================
+
+                    # Create amt
+                    promo_data = order.get("promo_order_detail")
+
+                    total_cashback = promo_data.get("total_cashback")
+                    
+                    total_discount_product = promo_data.get("total_discount_product")
+                    total_discount_shipping = promo_data.get("total_discount_shipping")
+                    total_discount = total_discount_product + total_discount_shipping
+                    
                     # ===============================================================================
                     
                     # date_order_converter will use this server time. Which is GMT +14 (if not wrong).
@@ -1187,6 +1202,7 @@ class ApiFetchTokPed(models.Model):
                             'picking_policy': "direct",
                             'pricelist_id': 1,
                             'warehouse_id': 1,
+                            'x_ecommerce_code': "TKP",
                             'x_buyer_id': buyer_id,
                             'x_shop_id': order.get("shop_id"),
                             'x_payment_date': payment_date,
@@ -1205,6 +1221,9 @@ class ApiFetchTokPed(models.Model):
                             'x_fulfill_by': order.get("fulfill_by"),
                             'x_shipping_cost': shipping_cost,
                             'x_insurance_cost': insurance_cost,
+                            'x_total_product_price': total_product_price,
+                            'x_total_discount_product': total_discount_product,
+                            'x_total_discount_shipping': total_discount_shipping,
                             'x_order_status': order.get("order_status"),
                             'order_line': []
                         })
@@ -1271,12 +1290,39 @@ class ApiFetchTokPed(models.Model):
 							'order_id': new_sale_order_m.id,
 							'product_uom' : product_detail.uom_id.id,
 							'product_uom_qty': product.get("quantity"),
+                            'tax_id': None,
 							'price_unit': product.get("price"),
 							'display_type': False,
                             'x_product_sku': product_detail.default_code,
                             'x_product_notes': product.get('notes'),
                             'x_is_wholesale': product.get('is_wholesale'),
 						})
+
+                        # ===========================================================================
+                        
+                        # tax_totals_json_str = new_sale_order_m.tax_totals_json
+                        # tax_totals_json_data = json.loads(tax_totals_json_str)
+                        # raise UserError(f'tax_totals_json (In Str): {tax_totals_json_str}')
+                        # raise UserError(f'tax_totals_json (In JSON): {tax_totals_json_data}')
+    
+                        # tax_totals_json_data["amount_total"] = total_amount - total_discount - total_cashback
+                        # tax_totals_json_data["amount_untaxed"] = tax_totals_json_data["amount_total"]
+    
+                        # new_tax_totals_json_str = json.dumps(tax_totals_json_data)
+
+                        # raise UserError(f'tax_totals_json (After update In JSON): {new_tax_totals_json_str}')
+    
+                        # raise UserError(f'total_amount = {total_amount} | total_discount={total_discount} | total_cashback = {total_cashback} | Total: {new_sale_order_m.tax_totals_json}')
+                        
+                        new_amount_total = total_amount - total_discount - total_cashback
+                        
+                        new_sale_order_m.update({
+                            'amount_total': new_amount_total
+                        })
+
+                        new_sale_order_m._compute_tax_totals_json()
+    
+                        # raise UserError(f'Json: {new_sale_order_m.tax_totals_json}')
                     
             except Exception as e:
                 raise UserError(str(e))
