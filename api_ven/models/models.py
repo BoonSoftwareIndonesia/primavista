@@ -753,7 +753,7 @@ class ApiControllerPartner(models.Model):
                     "custGroup": "" if record['x_studio_customer_group'] == False else record['x_studio_customer_group'],
                     "address1": "" if record['street'] == False else record['street'],
                     "city": "" if record['city'] == False else record['city'],
-                    "state": "" if record['state_id']['name'] == False else str(record['state_id']['name']).upper(),
+                    "state": "DKI JAKARTA" if record['state_id']['name'] == False else str(record['state_id']['name']).upper(),
                     "zipCode": "12345" if record['zip'] == False else record['zip'],
                     "country": "" if record['country_id']['name'] == False else record['country_id']['name'],
                     "route": "NA",

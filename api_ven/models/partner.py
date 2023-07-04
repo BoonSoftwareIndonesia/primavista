@@ -57,6 +57,10 @@ class PartnerExt(models.Model):
             partners.zip = "12345"
         if not partners.country_id:
             partners.country_id = 100
+        if not partners.x_studio_customer_id:
+            partners.x_studio_customer_id = "AVO1"
+        if not partners.state_id:
+            partners.state_id = 1
     
     
     # Triggers the api_dw_customer() function that sends an API log when creating new customer ======================
@@ -64,12 +68,12 @@ class PartnerExt(models.Model):
     def create(self, vals_list):
         
         # If we are not duplicating, x_studio_customer_id and state_id cannot be null
-        if not self._context.get('copy_context'):
-            if vals_list[0]['x_studio_customer_id'] is False:
-                raise UserError(('Internal reference cannot be null (partner-create)'))
+        # if not self._context.get('copy_context'):
+        #     if vals_list[0]['x_studio_customer_id'] is False:
+        #         raise UserError(('Internal reference cannot be null (partner-create)'))
                 
-            if vals_list[0]['state_id'] is False:
-                raise UserError(('State cannot be null (partner-create)'))
+        #     if vals_list[0]['state_id'] is False:
+        #         raise UserError(('State cannot be null (partner-create)'))
         
         # Call the super() method
         partners = super(PartnerExt, self).create(vals_list)
