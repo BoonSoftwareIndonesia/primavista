@@ -1023,7 +1023,8 @@ class ApiFetchTokPed(models.Model):
         cur_time += dt.timedelta(hours=+7)
 
         ten_m_before = cur_utc
-        ten_m_before += dt.timedelta(hours=+6, minutes=-10)
+        ten_m_before += dt.timedelta(hours=-23)
+        # ten_m_before += dt.timedelta(hours=+6, minutes=-10)
         # =================================================================
         
         # Prepare the header and params for consume the order list
@@ -1128,7 +1129,6 @@ class ApiFetchTokPed(models.Model):
                     payment_date_str = order.get("payment_date")
                     payment_date = datetime.strptime(payment_date_str, '%Y-%m-%dT%H:%M:%SZ')
                     payment_date += dt.timedelta(hours=-7)
-                    # raise UserError(payment_date)
                     # ===============================================================================
 
                     # Create recipient_data
@@ -1192,41 +1192,47 @@ class ApiFetchTokPed(models.Model):
                     
                     # If there not found the order in list of SO. Systems will create the SO
                     if not sale_order_m:
-                        request.env['sale.order'].create({
-                            'name': order.get("invoice_ref_num"),
-                            'partner_id': 836,
-                            'company_id': 1,
-                            'date_order': date_order_converter,
-                            'partner_invoice_id': 836,
-                            'partner_shipping_id': 836,
-                            'picking_policy': "direct",
-                            'pricelist_id': 1,
-                            'warehouse_id': 1,
-                            'x_ecommerce_code': "TKP",
-                            'x_buyer_id': buyer_id,
-                            'x_shop_id': order.get("shop_id"),
-                            'x_payment_date': payment_date,
-                            'x_recipient_name': recipient_name,
-                            'x_recipient_phone': recipient_phone,
-                            'x_recipient_full_address': recipient_address_full,
-                            'x_recipient_address_district': recipient_district,
-                            'x_recipient_address_city': recipient_city,
-                            'x_recipient_address_province': recipient_province,
-                            'x_recipient_address_country': recipient_country,
-                            'x_recipient_address_postal_code': recipient_postal_code,
-                            'x_recipient_address_geo': recipient_geo,
-                            'x_is_cod_mitra': order.get('is_cod_mitra'),
-                            'x_shipping_agency': shipping_agency,
-                            'x_service_type': service_type,
-                            'x_fulfill_by': order.get("fulfill_by"),
-                            'x_shipping_cost': shipping_cost,
-                            'x_insurance_cost': insurance_cost,
-                            'x_total_product_price': total_product_price,
-                            'x_total_discount_product': total_discount_product,
-                            'x_total_discount_shipping': total_discount_shipping,
-                            'x_order_status': order.get("order_status"),
-                            'order_line': []
-                        })
+
+                        is_ready_to_delivery = False
+
+                        if order.get("order_status") != 400:
+                            continue
+                        else:
+                            request.env['sale.order'].create({
+                                'name': order.get("invoice_ref_num"),
+                                'partner_id': 836,
+                                'company_id': 1,
+                                'date_order': date_order_converter,
+                                'partner_invoice_id': 836,
+                                'partner_shipping_id': 836,
+                                'picking_policy': "direct",
+                                'pricelist_id': 1,
+                                'warehouse_id': 1,
+                                'x_ecommerce_code': "TKP",
+                                'x_buyer_id': buyer_id,
+                                'x_shop_id': order.get("shop_id"),
+                                'x_payment_date': payment_date,
+                                'x_recipient_name': recipient_name,
+                                'x_recipient_phone': recipient_phone,
+                                'x_recipient_full_address': recipient_address_full,
+                                'x_recipient_address_district': recipient_district,
+                                'x_recipient_address_city': recipient_city,
+                                'x_recipient_address_province': recipient_province,
+                                'x_recipient_address_country': recipient_country,
+                                'x_recipient_address_postal_code': recipient_postal_code,
+                                'x_recipient_address_geo': recipient_geo,
+                                'x_is_cod_mitra': order.get('is_cod_mitra'),
+                                'x_shipping_agency': shipping_agency,
+                                'x_service_type': service_type,
+                                'x_fulfill_by': order.get("fulfill_by"),
+                                'x_shipping_cost': shipping_cost,
+                                'x_insurance_cost': insurance_cost,
+                                'x_total_product_price': total_product_price,
+                                'x_total_discount_product': total_discount_product,
+                                'x_total_discount_shipping': total_discount_shipping,
+                                'x_order_status': order.get("order_status"),
+                                'order_line': []
+                            })
                     else:
                         continue
                     
