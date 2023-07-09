@@ -661,7 +661,7 @@ class ApiControllerStockPicking(models.Model):
                     # "expectedArrivalDate":"13-07-2022",
                     # "otherReferences":"STCK TRS APL",
                     # "remark1":" Stock Transfer from APL 29 Jun'22\rSurat Jalan No: 9910278722, 9910278725, 9910278745, 9910278771, 9910278722",
-                    #"doNo":"",
+                    # "doNo":"",
                     "asnLine": po_lines
                 }
             ]
@@ -1189,6 +1189,8 @@ class ApiFetchTokPed(models.Model):
                     
                     # This variable will search for the sale order base on invoice_ref_num from TokPed.
                     sale_order_m = request.env['sale.order'].search([('name', '=', order.get("invoice_ref_num"))], limit=1)
+
+                    # raise UserError(running_code)
                     
                     # If there not found the order in list of SO. Systems will create the SO
                     if not sale_order_m:
@@ -1198,8 +1200,12 @@ class ApiFetchTokPed(models.Model):
                         if order.get("order_status") != 400:
                             continue
                         else:
+
+                            running_code = self.env['ir.sequence'].next_by_code('sale.order')
+                            
                             request.env['sale.order'].create({
-                                'name': order.get("invoice_ref_num"),
+                                'name': running_code,
+                                'origin': order.get("invoice_ref_num"),
                                 'partner_id': 836,
                                 'company_id': 1,
                                 'date_order': date_order_converter,
@@ -1241,7 +1247,10 @@ class ApiFetchTokPed(models.Model):
                     
                     # Because we need to get the new sales order (current created sales order). So we will
                     # search it first to get the value.
-                    new_sale_order_m = request.env['sale.order'].search([('name', '=', order.get("invoice_ref_num"))], limit=1)
+                    new_sale_order_m = request.env['sale.order'].search([('origin', '=', order.get("invoice_ref_num"))], limit=1)
+
+                    if not new_sale_order_m:
+                        continue
                     
                     lines = []
                     # ===============================================================================
@@ -1327,6 +1336,8 @@ class ApiFetchTokPed(models.Model):
                         })
 
                         new_sale_order_m._compute_tax_totals_json()
+
+                        new_sale_order_m.action_confirm()
     
                         # raise UserError(f'Json: {new_sale_order_m.tax_totals_json}')
                     
