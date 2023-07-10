@@ -1157,7 +1157,7 @@ class ApiFetchTokPed(models.Model):
                     
                     # ===============================================================================
 
-                    # Create amt
+                    # Create amt data
                     amt_data = order.get("amt")
 
                     shipping_cost = amt_data.get("shipping_cost")
@@ -1169,7 +1169,7 @@ class ApiFetchTokPed(models.Model):
 
                     # ===============================================================================
 
-                    # Create amt
+                    # Create promo data
                     promo_data = order.get("promo_order_detail")
 
                     total_cashback = promo_data.get("total_cashback")
@@ -1195,7 +1195,9 @@ class ApiFetchTokPed(models.Model):
                     # If there not found the order in list of SO. Systems will create the SO
                     if not sale_order_m:
 
-                        is_ready_to_delivery = False
+                        # In this logic, we will check if order_status from Tokopedia.
+                        # If the order status is 400. Systems will create the sales.order
+                        # if the order status is other that 400. Systems will pass it and looking for next list
 
                         if order.get("order_status") != 400:
                             continue
@@ -1314,20 +1316,9 @@ class ApiFetchTokPed(models.Model):
 						})
 
                         # ===========================================================================
-                        
-                        # tax_totals_json_str = new_sale_order_m.tax_totals_json
-                        # tax_totals_json_data = json.loads(tax_totals_json_str)
-                        # raise UserError(f'tax_totals_json (In Str): {tax_totals_json_str}')
-                        # raise UserError(f'tax_totals_json (In JSON): {tax_totals_json_data}')
-    
-                        # tax_totals_json_data["amount_total"] = total_amount - total_discount - total_cashback
-                        # tax_totals_json_data["amount_untaxed"] = tax_totals_json_data["amount_total"]
-    
-                        # new_tax_totals_json_str = json.dumps(tax_totals_json_data)
 
-                        # raise UserError(f'tax_totals_json (After update In JSON): {new_tax_totals_json_str}')
-    
-                        # raise UserError(f'total_amount = {total_amount} | total_discount={total_discount} | total_cashback = {total_cashback} | Total: {new_sale_order_m.tax_totals_json}')
+                        # After creating the sales order line. We need to update the price json.
+                        # In odoo 14 and 15, It's call as tax_totals_json.
                         
                         new_amount_total = total_amount - total_discount - total_cashback
                         
@@ -1340,6 +1331,7 @@ class ApiFetchTokPed(models.Model):
                         new_sale_order_m.action_confirm()
     
                         # raise UserError(f'Json: {new_sale_order_m.tax_totals_json}')
-                    
+
+                        
             except Exception as e:
                 raise UserError(str(e))
