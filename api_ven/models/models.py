@@ -947,6 +947,8 @@ class ApiFetchTokPed(models.Model):
     _inherit = "sale.order"
     
     def get_order_list_v1(self):
+
+        # raise UserError(datetime.now())
         
         # Initialize Client and shop information
         # Note: We need to change this variable if there is a changing in
@@ -1119,6 +1121,9 @@ class ApiFetchTokPed(models.Model):
         if need_updated:
             try:
                 for order in sales_order_list:
+
+                    if order.get("order_status") != 400:
+                        continue
                     
                     lines = []
                     buyer_id = ""
@@ -1187,8 +1192,9 @@ class ApiFetchTokPed(models.Model):
                     
                     # ==============================================================================
                     
-                    # This variable will search for the sale order base on invoice_ref_num from TokPed.
-                    sale_order_m = request.env['sale.order'].search([('name', '=', order.get("invoice_ref_num"))], limit=1)
+                    # This variable will search for the sale order base on invoice_ref_num from TokPed
+                    # and compare it with the reference document (origin) in Odoo.
+                    sale_order_m = request.env['sale.order'].search([('origin', '=', order.get("invoice_ref_num"))], limit=1)
 
                     # raise UserError(running_code)
                     
@@ -1289,11 +1295,13 @@ class ApiFetchTokPed(models.Model):
                                 'default_code': product.get("sku")
                             })
                         
-                        
                         #=============================================================================
                         
                         # After the product created. We will store the product information first using search feature.
                         product_detail = request.env['product.product'].search([('default_code', '=', product.get("sku"))], limit=1)
+
+                        if not product_detail:
+                            product_detail = request.env['product.product'].search([('name', '=', product.get("name"))], limit=1) 
                         
                         # This code will make sure there is no error in Odoo creating Product process
                         if not product_detail:

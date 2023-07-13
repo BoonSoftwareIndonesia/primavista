@@ -25,7 +25,7 @@ class ProductTemplateExt(models.Model):
                 is_duplicate = request.env['product.template'].search([('id','!=',product_tmpl.id),('default_code', '=', product_tmpl.default_code)])
                 # If there is a duplicate, raise user error
                 if is_duplicate:
-                    raise UserError(('Duplicate exists: ' + product_tmpl.default_code))
+                    raise UserError(('Duplicate exists product.template: ' + product_tmpl.default_code))
                     
     # Copy context =============================
     @api.returns('self', lambda value: value.id)
@@ -203,7 +203,7 @@ class ProductExt(models.Model):
                 is_duplicate = request.env['product.product'].search([('id','!=',product_tmpl.id),('default_code', '=', product_tmpl.default_code)])
                 # If a duplicate exists, raise user error
                 if is_duplicate:
-                    raise UserError(('Duplicate exists: ' + product_tmpl.default_code))
+                    raise UserError(('Duplicate exists product.product: ' + product_tmpl.default_code))
     
     
     # Override product.product's create() =============================
