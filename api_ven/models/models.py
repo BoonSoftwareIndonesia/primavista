@@ -1271,19 +1271,23 @@ class ApiFetchTokPed(models.Model):
                         
                         # If the product doesn't existing in Odoo. Systems will auto create the product
                         if not is_product:
-                            request.env['product.product'].create({
-                                'categ_id': 1,
-                                'detailed_type': "product",
-                                'default_code': "",
-                                'name': product.get("name"),
-                                'purchase_line_warn': "no-message",
-                                'sale_line_warn': "no-message",
-                                'tracking':"none",
-                                'standard_price': product.get("price"),
-                                'uom_id' : 1,
-                                'uom_po_id': 1,
-                                'weight': product.get("weight")
-                            })
+
+                            is_product = request.env['product.product'].search([('name', '=', product.get("name"))], limit=1)
+                            
+                            if not is_product:
+                                request.env['product.product'].create({
+                                    'categ_id': 1,
+                                    'detailed_type': "product",
+                                    'default_code': "",
+                                    'name': product.get("name"),
+                                    'purchase_line_warn': "no-message",
+                                    'sale_line_warn': "no-message",
+                                    'tracking':"none",
+                                    'standard_price': product.get("price"),
+                                    'uom_id' : 1,
+                                    'uom_po_id': 1,
+                                    'weight': product.get("weight")
+                                })
                             
                             # ========================================================================
                             
