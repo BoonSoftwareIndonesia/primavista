@@ -1325,6 +1325,7 @@ class ApiFetchTokPed(models.Model):
                             'x_product_sku': product_detail.default_code,
                             'x_product_notes': product.get('notes'),
                             'x_is_wholesale': product.get('is_wholesale'),
+                            'x_stock_status_code': "NM"
 						})
 
                         # ===========================================================================
