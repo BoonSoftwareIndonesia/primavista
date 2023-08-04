@@ -11,7 +11,7 @@ class PartnerExt(models.Model):
     # Name is required
     name = fields.Char(index=True, required=True)
     # No duplicate x_studio_customer_id
-    x_studio_customer_id = fields.Char(string='Customer ID',copy=False)
+    x_studio_customer_id = fields.Char(string='Customer ID', readonly=True, copy=False)
     x_studio_customer_group = fields.Char(string='Customer Group',default='IOC')
     street = fields.Char(default='NA')
     zip = fields.Char(change_default=True,default='12345')
@@ -57,8 +57,13 @@ class PartnerExt(models.Model):
             partners.zip = "12345"
         if not partners.country_id:
             partners.country_id = 100
-        # if not partners.x_studio_customer_id:
-        #     partners.x_studio_customer_id = "AVO002"
+        if not partners.company_id:
+            partners.company_id = self.env.context['allowed_company_ids'][0]
+        if not partners.x_studio_customer_id:
+            if self.env.context['allowed_company_ids'][0] == 1: 
+                partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.customer.id')
+            else:
+                partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pvs.customer.id')
         # if not partners.state_id:
         #     partners.state_id = 1
     
@@ -69,8 +74,8 @@ class PartnerExt(models.Model):
         
         # If we are not duplicating, x_studio_customer_id and state_id cannot be null
         if not self._context.get('copy_context'):
-            if vals_list[0]['x_studio_customer_id'] is False:
-                raise UserError(('Internal reference cannot be null (partner-create)'))
+            # if vals_list[0]['x_studio_customer_id'] is False:
+            #     raise UserError(('Internal reference cannot be null (partner-create)'))
                 
             if vals_list[0]['state_id'] is False:
                 raise UserError(('State cannot be null (partner-create)'))
