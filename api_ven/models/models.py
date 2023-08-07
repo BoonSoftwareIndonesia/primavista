@@ -1223,19 +1223,19 @@ class ApiFetchTokPed(models.Model):
                             continue
                         else:
 
-                            running_code = self.env['ir.sequence'].next_by_code('sale.order')
+                            running_code = self.env['ir.sequence'].next_by_code('avo.sale.order')
                             
                             request.env['sale.order'].create({
                                 'name': running_code,
                                 'origin': order.get("invoice_ref_num"),
                                 'partner_id': 836,
-                                'company_id': 1,
+                                'company_id': 2,
                                 'date_order': date_order_converter,
                                 'partner_invoice_id': 836,
                                 'partner_shipping_id': 836,
                                 'picking_policy': "direct",
                                 'pricelist_id': 1,
-                                'warehouse_id': 1,
+                                'warehouse_id': 2,
                                 'x_ecommerce_code': "TKP",
                                 'x_buyer_id': buyer_id,
                                 'x_shop_id': order.get("shop_id"),
