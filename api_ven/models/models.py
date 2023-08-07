@@ -212,6 +212,7 @@ class ApiController(models.Model):
                 'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'mimetype': 'text/plain'
             })
         except Exception as e:
@@ -243,6 +244,7 @@ class ApiController(models.Model):
             'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
 
@@ -357,6 +359,7 @@ class ApiControllerSO(models.Model):
                 'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'mimetype': 'text/plain'
             })
         except Exception as e:
@@ -388,6 +391,7 @@ class ApiControllerSO(models.Model):
             'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
 
@@ -539,6 +543,7 @@ class ApiControllerStockPicking(models.Model):
                 'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'mimetype': 'text/plain'
             })
         except Exception as e:
@@ -563,6 +568,7 @@ class ApiControllerStockPicking(models.Model):
             'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
 
@@ -696,6 +702,7 @@ class ApiControllerStockPicking(models.Model):
                 'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'mimetype': 'text/plain'
             })
         except Exception as e:
@@ -727,6 +734,7 @@ class ApiControllerStockPicking(models.Model):
             'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
         
@@ -794,6 +802,7 @@ class ApiControllerPartner(models.Model):
                 'type': 'binary',
                 'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'res_id': api_log['id'],
                 'mimetype': 'text/plain'
             })
@@ -826,6 +835,7 @@ class ApiControllerPartner(models.Model):
             'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
 
@@ -908,6 +918,7 @@ class ApiControllerProduct(models.Model):
                 'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'mimetype': 'text/plain'
             })
         except Exception as e:
@@ -939,6 +950,7 @@ class ApiControllerProduct(models.Model):
             'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
         
@@ -1069,6 +1081,7 @@ class ApiFetchTokPed(models.Model):
                 'datas': base64.b64encode(bytes(str(params), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'mimetype': 'text/plain'
             })
         except Exception as e:
@@ -1098,6 +1111,7 @@ class ApiFetchTokPed(models.Model):
             'datas': base64.b64encode(bytes(str(resp.text), 'utf-8')),
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
     
@@ -1298,6 +1312,10 @@ class ApiFetchTokPed(models.Model):
                             new_product.write({
                                 'default_code': product.get("sku")
                             })
+
+                            # new_product_template = new_product.product_tmpl_id
+
+                            # new_product_template._compute_default_code()
                         
                         #=============================================================================
                         
