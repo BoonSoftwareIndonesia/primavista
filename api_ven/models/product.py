@@ -210,6 +210,7 @@ class ProductExt(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         # If in vals_list there is default_code, then it is a product create on the fly
+        # raise UserError(f"{vals_list}")
         if 'default_code' in vals_list[0]:
             # If copy_context is False (not duplicating) and test_import has not been set (not testing import or importing)
             if not self._context.get('copy_context') and 'test_import' not in self._context:
@@ -223,3 +224,11 @@ class ProductExt(models.Model):
                 res = super(ProductExt, self.with_context(on_the_fly_context = context_content, create_product_product=True)).create(vals_list)
         
             return res
+        # addon - v
+        else:
+            for vals in vals_list:
+                self.product_tmpl_id._sanitize_vals(vals)
+            products = super(ProductExt, self.with_context(create_product_product=True)).create(vals_list)
+            # `_get_variant_id_for_combination` depends on existing variants
+            self.clear_caches()
+            return products
