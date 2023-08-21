@@ -85,7 +85,7 @@ class api_ven(models.Model):
     status = fields.Selection([('new','New'),('process','Processing'),('success','Success'),('error','Error')])
     created_date = fields.Datetime(string="Created Date")
     response_date = fields.Datetime(string="Response Date")
-    message_type = fields.Selection([('RCPT','CRT_RCPT'),('DO','CRT_DO'),('PO','DW_PO'),('SO','DW_SO'),('PO_RET','DW_PO_RET'),('SO_RET','DW_SO_RET'),('RCPT_RET','CRT_RCPT_RET'),('DO_RET','CRT_DO_RET'),('CUST','DW_CUST'),('PROD','DW_PROD'),('STOCK','STOCK_COMPARE'), ('ADJUST', 'STOCK_ADJUSTMENT')])
+    message_type = fields.Selection([('RCPT','CRT_RCPT'), ('DO','CRT_DO'), ('PO','DW_PO'), ('SO','DW_SO'), ('PO_RET','DW_PO_RET'), ('SO_RET','DW_SO_RET'), ('RCPT_RET','CRT_RCPT_RET'), ('DO_RET','CRT_DO_RET'), ('CUST','DW_CUST'), ('PROD','DW_PROD'), ('STOCK','STOCK_COMPARE'), ('ADJUST', 'STOCK_ADJUSTMENT'), ('FTKPD', 'FETCH_TOKOPEDIA')])
     incoming_txt = fields.Many2one('ir.attachment', string="Incoming txt", readonly=True)
     response_txt = fields.Many2one('ir.attachment', string="Response txt", readonly=True)
     raw_data = fields.Binary(string="Raw Data", attachment=True)
@@ -941,89 +941,3 @@ class ApiControllerProduct(models.Model):
             'res_id': api_log['id'],
             'mimetype': 'text/plain'
         })
-
-# Fetch Data From TokPed =============================================================
-class ApiControllerProduct(models.Model):
-    _inherit = "sale.order"
-    
-    def get_order_list_v1(self):
-        
-        # Initialize current time first.
-        cur_utc = dt.datetime.now(dt.timezone.utc)
-
-        cur_time = cur_utc
-        cur_time += dt.timedelta(hours=7)
-
-        ten_m_before = cur_utc
-        ten_m_before += dt.timedelta(hours=7, minutes=-10)
-        
-        # The header of the API request
-        headers = {
-            'Authorization': "Bearer" + ' ' + "c:3kivNHxTSVip-xzGMdsvnA",
-            "Content-Type": "application/json"
-        }
-        
-        # The params of the API request
-        params = {
-            'page': 1,
-            'per_page': 10,
-            'fs_id': 17859,
-            'from_date': int(ten_m_before.timestamp()),
-            'to_date': int(cur_time.timestamp()),
-            'shop_id': 1601955
-        }
-        
-        # Create API log
-        try:
-            api_log = request.env['api_ven.api_ven'].create({
-                'status': 'new',
-                'created_date': datetime.now(),
-                'incoming_msg': params,
-                'message_type': 'SO'
-            })
-
-            api_log['status'] = 'process'
-        except Exception as e:
-            error['Error'] = str(e)
-            is_error = True
-            
-        # Create the incoming txt
-        try:
-            api_log['incoming_txt'] = request.env['ir.attachment'].create({
-                'name': str(api_log['name']) + '_in.txt',
-                'type': 'binary',
-                'datas': base64.b64encode(bytes(str(params), 'utf-8')),
-                'res_model': 'api_ven.api_ven',
-                'res_id': api_log['id'],
-                'mimetype': 'text/plain'
-            })
-        except Exception as e:
-            error['Error'] = str(e)
-            is_error = True
-            
-        # Post API request
-        resp = requests.get('https://fs.tokopedia.net/v2/order/list', params=params, headers=headers)
-
-        ret = json.loads(resp.content)
-        
-        api_log['response_msg'] = base64.b64encode(bytes(str(resp.text), 'utf-8'))
-        api_log['response_date'] = datetime.now()
-        
-        if resp.status_code == 200:
-            api_log['status'] = 'success'
-        else:
-            api_log['status'] = 'error'
-            
-        # Create the response txt
-        api_log['response_txt'] = request.env['ir.attachment'].create({
-            'name': str(api_log['name']) + '_out.txt',
-            'type': 'binary',
-            'datas': base64.b64encode(bytes(str(resp.text), 'utf-8')),
-            'res_model': 'api_ven.api_ven',
-            'res_id': api_log['id'],
-            'mimetype': 'text/plain'
-        })
-        
-        # ================================================================================
-        
-        
