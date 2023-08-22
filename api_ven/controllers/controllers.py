@@ -548,6 +548,7 @@ class ApiVen(http.Controller):
                             "qty_done": line["quantityShipped"],
                             "company_id": 1,
 #                             "state": "done",
+                        
                             "x_wms_rec_no": rec['receiptNo']
                     })
                     
@@ -730,7 +731,7 @@ class ApiVen(http.Controller):
                         is_error = True
                         break
                     
-                    if dispatch_line['reference'] != rec['soNo']:
+                    if dispatch_line['origin'] != rec['soNo']:
                         error["Error"] = "Stock Move not found"
                         is_error = True
                         break

@@ -111,7 +111,7 @@ class ApiController(models.Model):
     def api_dw_po(self, record):
             
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
         
         # A variable to store the value of the current line number
         line_no = 1
@@ -161,7 +161,7 @@ class ApiController(models.Model):
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
@@ -256,7 +256,7 @@ class ApiControllerSO(models.Model):
     
     def api_dw_so(self, record):
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
         
         # A variable to store the value of the current line number
         line_no = 1
@@ -292,7 +292,7 @@ class ApiControllerSO(models.Model):
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -402,7 +402,7 @@ class ApiControllerStockPicking(models.Model):
     # PO RETURN (DW_PO_RET) (receive item -> return to vendor) using DW_SO API JSON format =======================================
     def api_return_po(self, record):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
         
         # A variable to store x_wms_rec_no value
         wms_no = ""
@@ -477,7 +477,7 @@ class ApiControllerStockPicking(models.Model):
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         # reference -> origin name ganti ke yg wh/out karena ini outbound
         # tambahin payload baru otherRemarks untuk simpen si origin_name
-        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -577,7 +577,7 @@ class ApiControllerStockPicking(models.Model):
     def api_return_so(self, record):
         
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
         
         # line_no = 1
         
@@ -638,7 +638,7 @@ class ApiControllerStockPicking(models.Model):
         
         # Validation if the return is full or partial order
             payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
@@ -745,13 +745,13 @@ class ApiControllerPartner(models.Model):
     def api_dw_customer(self, record):
             
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createcustomer"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createcustomer"
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "customer": [
                 {
@@ -845,13 +845,13 @@ class ApiControllerProduct(models.Model):
     
     def api_dw_product(self, record):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createproduct"
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "product": [
                 {
@@ -953,3 +953,416 @@ class ApiControllerProduct(models.Model):
             'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
+        
+# Fetch Data From TokPed =============================================================
+class ApiFetchTokPed(models.Model):
+    _inherit = "sale.order"
+    
+    def get_order_list_v1(self):
+
+        # raise UserError(datetime.now())
+        
+        # Initialize Client and shop information
+        # Note: We need to change this variable if there is a changing in
+        #       client Tokopedia Data
+        client_id = "718e4748bb0d44c28f50b4da4d131d69"
+        client_secret = "18e291fcb7104c508ac80d3e1dfd20d1"
+        fs_id = 17859
+        # =================================================================
+        
+        # Encode the client id + client server and create it
+        # as auth key
+        key_message = client_id + ":" + client_secret
+        key_bytes = key_message.encode('ascii')
+        
+        base64_bytes = base64.b64encode(key_bytes)
+        auth_key = base64_bytes.decode("ascii")
+        # =================================================================
+        
+        # This section has a purpose to Request tokopedia access token,
+        # token type, and expired date. After that, load it as a variable
+        
+        # Create the header for fetch Access token API
+        headers = {
+            'Authorization': 'Basic ' + auth_key,
+            'User-Agent': 'PostmanRuntime/7.17.1',
+        }
+        
+        # Create Params for fetch Access token API
+        params = {
+            'grant_type': 'client_credentials',
+        }
+        
+        # Create request and get the data
+        resp = requests.post('https://accounts.tokopedia.com/token', params=params, headers=headers)
+        
+        # Convert the return result from token API to JSON
+        ret = json.loads(resp.content)
+        
+        # Store access token, Expires_date, and token_type
+        access_token = ret.get("access_token")
+        expires_in = ret.get("expires_in")
+        token_type = ret.get("token_type")
+        # =================================================================
+        
+        # This section has a purpose to fetch Shop Information from TokPed
+        
+        # Prepare the requirement to fetch Shop List API
+        headers = {
+            'Authorization': f'{token_type} {access_token}',
+        }
+        
+        # Create request and get the shop list      
+        resp = requests.get(f'https://fs.tokopedia.net/v1/shop/fs/{fs_id}/shop-info', headers=headers)
+        
+        # Convert the return result from token API to JSON
+        ret = json.loads(resp.content)
+        
+        # =================================================================
+        
+        # In here we need to prepare the shop list into the shop detail info        
+        # so we can get the shop ID
+        shop_list = ret.get("data")
+        
+        shop_detail_info = shop_list[0]
+        
+        shop_id = shop_detail_info.get("shop_id")
+        # =================================================================
+        
+        # This section will get the datetime from Odoo and convert it into
+        # Current Time and 10 minute before (According to the requirement).
+        cur_utc = dt.datetime.now(dt.timezone.utc)
+
+        cur_time = cur_utc
+        cur_time += dt.timedelta(hours=+7)
+
+        ten_m_before = cur_utc
+        ten_m_before += dt.timedelta(hours=-23)
+        # ten_m_before += dt.timedelta(hours=+6, minutes=-10)
+        # =================================================================
+        
+        # Prepare the header and params for consume the order list
+        
+        # The header of the API request
+        headers = {
+            'Authorization': f'{token_type} {access_token}',
+            "Content-Type": "application/json"
+        }
+        
+        # The params of the API request
+        params = {
+            'page': 1,
+            'per_page': 1000,
+            'fs_id': fs_id,
+            'from_date': int(ten_m_before.timestamp()),
+            'to_date': int(cur_time.timestamp()),
+            'shop_id': shop_id
+        }
+        
+        # Create API log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': params,
+                'message_type': 'FTKPD'
+            })
+
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+            
+        # Create the incoming txt
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(params), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+            
+        # Fetch the data for get order list
+        resp = requests.get('https://fs.tokopedia.net/v2/order/list', params=params, headers=headers)
+        
+        # Convert the response data into JSON
+        ret = json.loads(resp.content)
+        # ===================================================================
+        
+        # This section will record the response if the respon is success or not
+        api_log['response_msg'] = base64.b64encode(bytes(str(resp.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
+        
+        if resp.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
+            
+        # Create the response txt
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(resp.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
+            'mimetype': 'text/plain'
+        })
+    
+        # ================================================================================
+        
+        # After we get the data from above section. In this section, we need to
+        # consume and re-mapping all the data.
+        
+        sales_order_list = ret.get("data")
+        
+        # Check if there is a new order or not:
+        need_updated = False
+        
+        if sales_order_list != None:
+            need_updated = True
+            
+        # ==============================================================================================
+        
+        # After checking if there is a new data. If there is a new data, systems
+        # will create the new SO
+        if need_updated:
+            try:
+                for order in sales_order_list:
+
+                    if order.get("order_status") != 400:
+                        continue
+                    
+                    lines = []
+                    buyer_id = ""
+
+                    buyer_information = order.get("buyer")
+                    buyer_id = buyer_information["id"]
+
+                    payment_date_str = order.get("payment_date")
+                    payment_date = datetime.strptime(payment_date_str, '%Y-%m-%dT%H:%M:%SZ')
+                    payment_date += dt.timedelta(hours=-7)
+                    # ===============================================================================
+
+                    # Create recipient_data
+
+                    recipient_data = order.get("recipient")
+                    
+                    recipient_name = recipient_data.get("name")
+                    recipient_phone = recipient_data.get("phone")
+
+                    recipient_address = recipient_data.get("address")
+                    recipient_address_full = recipient_address.get("address_full")
+                    recipient_district = recipient_address.get("district")
+                    recipient_city = recipient_address.get("city")
+                    recipient_province = recipient_address.get("province")
+                    recipient_country = recipient_address.get("country")
+                    recipient_postal_code = recipient_address.get("postal_code")
+                    recipient_geo = recipient_address.get("geo")
+
+                    # ===============================================================================
+
+                    # Create Logistic data
+                    logistic_data = order.get("logistics")
+
+                    shipping_agency = logistic_data.get("shipping_agency")
+                    service_type = logistic_data.get("service_type")
+                    
+                    # ===============================================================================
+
+                    # Create amt data
+                    amt_data = order.get("amt")
+
+                    shipping_cost = amt_data.get("shipping_cost")
+                    insurance_cost = amt_data.get("insurance_cost")
+                    
+                    total_product_price = amt_data.get("ttl_product_price")
+
+                    total_amount = shipping_cost + insurance_cost + total_product_price
+
+                    # ===============================================================================
+
+                    # Create promo data
+                    promo_data = order.get("promo_order_detail")
+
+                    total_cashback = promo_data.get("total_cashback")
+                    
+                    total_discount_product = promo_data.get("total_discount_product")
+                    total_discount_shipping = promo_data.get("total_discount_shipping")
+                    total_discount = total_discount_product + total_discount_shipping
+                    
+                    # ===============================================================================
+                    
+                    # date_order_converter will use this server time. Which is GMT +14 (if not wrong).
+                    # So, we need to convert it as Indonesia (GMT +7) time first.
+                    date_order_converter = datetime.fromtimestamp(order.get("create_time"))
+                    date_order_converter += dt.timedelta(hours=-7)
+                    
+                    # ==============================================================================
+                    
+                    # This variable will search for the sale order base on invoice_ref_num from TokPed
+                    # and compare it with the reference document (origin) in Odoo.
+                    sale_order_m = request.env['sale.order'].search([('origin', '=', order.get("invoice_ref_num"))], limit=1)
+
+                    # raise UserError(running_code)
+                    
+                    # If there not found the order in list of SO. Systems will create the SO
+                    if not sale_order_m:
+
+                        # In this logic, we will check if order_status from Tokopedia.
+                        # If the order status is 400. Systems will create the sales.order
+                        # if the order status is other that 400. Systems will pass it and looking for next list
+
+                        if order.get("order_status") != 400:
+                            continue
+                        else:
+
+                            running_code = self.env['ir.sequence'].next_by_code('avo.sale.order')
+                            
+                            request.env['sale.order'].create({
+                                'name': running_code,
+                                'origin': order.get("invoice_ref_num"),
+                                'partner_id': 836,
+                                'company_id': 2,
+                                'date_order': date_order_converter,
+                                'partner_invoice_id': 836,
+                                'partner_shipping_id': 836,
+                                'picking_policy': "direct",
+                                'pricelist_id': 1,
+                                'warehouse_id': 2,
+                                'x_ecommerce_code': "TKP",
+                                'x_buyer_id': buyer_id,
+                                'x_shop_id': order.get("shop_id"),
+                                'x_payment_date': payment_date,
+                                'x_recipient_name': recipient_name,
+                                'x_recipient_phone': recipient_phone,
+                                'x_recipient_full_address': recipient_address_full,
+                                'x_recipient_address_district': recipient_district,
+                                'x_recipient_address_city': recipient_city,
+                                'x_recipient_address_province': recipient_province,
+                                'x_recipient_address_country': recipient_country,
+                                'x_recipient_address_postal_code': recipient_postal_code,
+                                'x_recipient_address_geo': recipient_geo,
+                                'x_is_cod_mitra': order.get('is_cod_mitra'),
+                                'x_shipping_agency': shipping_agency,
+                                'x_service_type': service_type,
+                                'x_fulfill_by': order.get("fulfill_by"),
+                                'x_shipping_cost': shipping_cost,
+                                'x_insurance_cost': insurance_cost,
+                                'x_total_product_price': total_product_price,
+                                'x_total_discount_product': total_discount_product,
+                                'x_total_discount_shipping': total_discount_shipping,
+                                'x_order_status': order.get("order_status"),
+                                'order_line': []
+                            })
+                    else:
+                        continue
+                    
+                    # ===============================================================================
+                    # After creating the success create the SO. Order line will created base on the product.
+                    
+                    # Because we need to get the new sales order (current created sales order). So we will
+                    # search it first to get the value.
+                    new_sale_order_m = request.env['sale.order'].search([('origin', '=', order.get("invoice_ref_num"))], limit=1)
+
+                    if not new_sale_order_m:
+                        continue
+                    
+                    lines = []
+                    # ===============================================================================
+                    
+                    # This section will handle the SO-Line
+                    for product in order.get("products"):
+                        
+                        # Checking if the product existing or not
+                        is_product = request.env['product.product'].search([('default_code', '=', product.get("sku"))], limit=1)
+                        
+                        # If the product doesn't existing in Odoo. Systems will auto create the product
+                        if not is_product:
+
+                            is_product = request.env['product.product'].search([('name', '=', product.get("name"))], limit=1)
+                            
+                            if not is_product:
+                                request.env['product.product'].create({
+                                    'categ_id': 1,
+                                    'detailed_type': "product",
+                                    'default_code': "",
+                                    'name': product.get("name"),
+                                    'purchase_line_warn': "no-message",
+                                    'sale_line_warn': "no-message",
+                                    'tracking':"none",
+                                    'standard_price': product.get("price"),
+                                    'uom_id' : 1,
+                                    'uom_po_id': 1,
+                                    'weight': product.get("weight")
+                                })
+                            
+                            # ========================================================================
+                            
+                            # Since, there is a default behavior from Odoo that can't auto generate default code
+                            # Therefore, we need to create it in different step
+                            new_product = request.env['product.product'].search([('name', '=', product.get("name"))], limit=1)
+                            
+                            new_product.write({
+                                'default_code': product.get("sku")
+                            })
+
+                            # new_product_template = new_product.product_tmpl_id
+
+                            # new_product_template._compute_default_code()
+                        
+                        #=============================================================================
+                        
+                        # After the product created. We will store the product information first using search feature.
+                        product_detail = request.env['product.product'].search([('default_code', '=', product.get("sku"))], limit=1)
+
+                        if not product_detail:
+                            product_detail = request.env['product.product'].search([('name', '=', product.get("name"))], limit=1) 
+                        
+                        # This code will make sure there is no error in Odoo creating Product process
+                        if not product_detail:
+                            raise UserError('Product not found!!')
+                        # ===========================================================================
+                        
+                        # After creating product already existing. We will create the SO Line and all the process is done
+                        new_sale_order_m.order_line.create({
+							'product_id': product_detail.id,
+							'name': product.get("name"),
+							'order_id': new_sale_order_m.id,
+							'product_uom' : product_detail.uom_id.id,
+							'product_uom_qty': product.get("quantity"),
+                            'tax_id': None,
+							'price_unit': product.get("price"),
+							'display_type': False,
+                            'x_product_sku': product_detail.default_code,
+                            'x_product_notes': product.get('notes'),
+                            'x_is_wholesale': product.get('is_wholesale'),
+                            'x_stock_status_code': "NM"
+						})
+
+                        # ===========================================================================
+
+                        # After creating the sales order line. We need to update the price json.
+                        # In odoo 14 and 15, It's call as tax_totals_json.
+                        
+                        new_amount_total = total_amount - total_discount - total_cashback
+                        
+                        new_sale_order_m.update({
+                            'amount_total': new_amount_total
+                        })
+
+                        new_sale_order_m._compute_tax_totals_json()
+
+                        new_sale_order_m.action_confirm()
+    
+                        # raise UserError(f'Json: {new_sale_order_m.tax_totals_json}')
+
+                        
+            except Exception as e:
+                raise UserError(str(e))
