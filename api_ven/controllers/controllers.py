@@ -663,7 +663,7 @@ class ApiVen(http.Controller):
                 # (2) Validations (start)
                 
                 # (2.1) Validate soNo
-                sos = self.getRecord(model="stock.move", field="reference", wms=rec['soNo'])
+                sos = self.getRecord(model="sale.order", field="name", wms=rec['soNo'])
                 if sos == -1:
                     error["Error"] = "soNo does not exist"
                     is_error = True
@@ -886,7 +886,7 @@ class ApiVen(http.Controller):
                 
                 # (2) Validations
                 # (2.1) Check whether po no (this field actually stores the SO no value) exists 
-                sos = self.getRecord(model="sale.order", field="name", wms=rec['poNo'])
+                sos = self.getRecord(model="stock.move", field="reference", wms=rec['soNo'])
                 if sos == -1:
                     error["Error"] = "poNo to return does not exist"
                     is_error = True
