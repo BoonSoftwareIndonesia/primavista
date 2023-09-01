@@ -11,7 +11,7 @@ class PartnerExt(models.Model):
     # Name is required
     name = fields.Char(index=True, required=True)
     # No duplicate x_studio_customer_id
-    x_studio_customer_id = fields.Char(string='Customer ID', readonly=True, copy=False)
+    x_studio_customer_id = fields.Char(string='Customer ID', copy=False)
     x_studio_customer_group = fields.Char(string='Customer Group',default='IOC')
     street = fields.Char(default='NA')
     zip = fields.Char(change_default=True,default='12345')
