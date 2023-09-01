@@ -111,7 +111,7 @@ class ApiController(models.Model):
     def api_dw_po(self, record):
             
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
         
         # A variable to store the value of the current line number
         line_no = 1
@@ -161,7 +161,7 @@ class ApiController(models.Model):
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
@@ -256,7 +256,7 @@ class ApiControllerSO(models.Model):
     
     def api_dw_so(self, record):
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
         
         # A variable to store the value of the current line number
         line_no = 1
@@ -292,7 +292,7 @@ class ApiControllerSO(models.Model):
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -402,7 +402,7 @@ class ApiControllerStockPicking(models.Model):
     # PO RETURN (DW_PO_RET) (receive item -> return to vendor) using DW_SO API JSON format =======================================
     def api_return_po(self, record):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
         
         # A variable to store x_wms_rec_no value
         wms_no = ""
@@ -477,7 +477,7 @@ class ApiControllerStockPicking(models.Model):
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         # reference -> origin name ganti ke yg wh/out karena ini outbound
         # tambahin payload baru otherRemarks untuk simpen si origin_name
-        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -577,7 +577,7 @@ class ApiControllerStockPicking(models.Model):
     def api_return_so(self, record):
         
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
         
         # line_no = 1
         
@@ -638,7 +638,7 @@ class ApiControllerStockPicking(models.Model):
         
         # Validation if the return is full or partial order
             payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
@@ -745,13 +745,13 @@ class ApiControllerPartner(models.Model):
     def api_dw_customer(self, record):
             
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createcustomer"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createcustomer"
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "customer": [
                 {
@@ -845,13 +845,13 @@ class ApiControllerProduct(models.Model):
     
     def api_dw_product(self, record):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createproduct"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "product": [
                 {
@@ -1287,24 +1287,10 @@ class ApiFetchTokPed(models.Model):
                             is_product = request.env['product.product'].search([('name', '=', product.get("name"))], limit=1)
                             
                             if not is_product:
-                                # request.env['product.product'].create({
-                                #     'categ_id': 1,
-                                #     'detailed_type': "product",
-                                #     'default_code': "",
-                                #     'name': product.get("name"),
-                                #     'purchase_line_warn': "no-message",
-                                #     'sale_line_warn': "no-message",
-                                #     'tracking':"none",
-                                #     'standard_price': product.get("price"),
-                                #     'uom_id' : 1,
-                                #     'uom_po_id': 1,
-                                #     'weight': product.get("weight")
-                                # })
-
-                                request.env['product.template'].create({
+                                request.env['product.product'].create({
                                     'categ_id': 1,
                                     'detailed_type': "product",
-                                    'default_code': product.get("sku"),
+                                    'default_code': "",
                                     'name': product.get("name"),
                                     'purchase_line_warn': "no-message",
                                     'sale_line_warn': "no-message",
@@ -1319,11 +1305,11 @@ class ApiFetchTokPed(models.Model):
                             
                             # Since, there is a default behavior from Odoo that can't auto generate default code
                             # Therefore, we need to create it in different step
-                            # new_product = request.env['product.product'].search([('name', '=', product.get("name"))], limit=1)
+                            new_product = request.env['product.product'].search([('name', '=', product.get("name"))], limit=1)
                             
-                            # new_product.write({
-                            #     'default_code': product.get("sku")
-                            # })
+                            new_product.write({
+                                'default_code': product.get("sku")
+                            })
 
                             # new_product_template = new_product.product_tmpl_id
 
