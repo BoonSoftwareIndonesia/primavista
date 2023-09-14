@@ -314,7 +314,7 @@ class ApiVen(http.Controller):
                 api_log['status'] = 'success'
                 
             message = {
-                'response': response_msg, 
+                'response': response_msg,
                 'message': error
             } 
             
@@ -378,7 +378,8 @@ class ApiVen(http.Controller):
         try:
             # (2.3.1) Search whether the stock picking exists based on the x_wms_rec_no (receiptNo) and state for PO return
             # (2.3.1) Search whether the stock picking exists based on the x_wms_rec_no (doNo) and state for SO return
-            obj_header = request.env["stock.picking"].search(['&', ('x_wms_rec_no', '=', rec[rec_no_type]), ('state', '=', 'assigned')])
+            obj_header = request.env["stock.picking"].search(['&', ('x_wms_rec_no', '=', rec[rec_no_type]), ('state', '=', 'assigned')])[-1]
+            
         except Exception as e:
             error["Error"] = 'Error in searching stock picking ' + str(e)
             return -1
@@ -392,7 +393,7 @@ class ApiVen(http.Controller):
                 error["Error"] = "Return delivery order does not exist"
             return -1
 
-        return obj_header   
+        return obj_header
     
     
     
@@ -886,7 +887,7 @@ class ApiVen(http.Controller):
                 
                 # (2) Validations
                 # (2.1) Check whether po no (this field actually stores the SO no value) exists 
-                sos = self.getRecord(model="stock.move", field="reference", wms=rec['soNo'])
+                sos = self.getRecord(model="stock.move", field="reference", wms=rec['poNo'])
                 if sos == -1:
                     error["Error"] = "poNo to return does not exist"
                     is_error = True
@@ -1213,7 +1214,7 @@ class ApiVen(http.Controller):
                                     'product_id': product_id,
                                     'inventory_quantity': qty_final,
                                     'location_id': warehouse,
-                            }).action_apply_inventory()S
+                            }).action_apply_inventory()
                         
                     if is_error == True:
                         break

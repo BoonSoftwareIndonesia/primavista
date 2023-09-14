@@ -11,7 +11,7 @@ class PartnerExt(models.Model):
     # Name is required
     name = fields.Char(index=True, required=True)
     # No duplicate x_studio_customer_id
-    x_studio_customer_id = fields.Char(string='Customer ID', readonly=True, copy=False)
+    x_studio_customer_id = fields.Char(string='Customer ID', copy=False)
     x_studio_customer_group = fields.Char(string='Customer Group',default='IOC')
     street = fields.Char(default='NA')
     zip = fields.Char(change_default=True,default='12345')
@@ -64,24 +64,23 @@ class PartnerExt(models.Model):
                 partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.customer.id')
             else:
                 partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pvs.customer.id')
-        if not partners.state_id:
-            partners.state_id = 1
+        # if not partners.state_id:
+        #     partners.state_id = 1
     
     
     # Triggers the api_dw_customer() function that sends an API log when creating new customer ======================
     @api.model_create_multi
     def create(self, vals_list):
-        
+
+        # ============================ Old Code ==============================================
         # If we are not duplicating, x_studio_customer_id and state_id cannot be null
-        # if not self._context.get('copy_context'):
+        if not self._context.get('copy_context'):
             # if vals_list[0]['x_studio_customer_id'] is False:
             #     raise UserError(('Internal reference cannot be null (partner-create)'))
-
-            # raise UserError("Besar")
-
-            
-            # if vals_list[0]['state_id'] is False:
-            #     raise UserError(('State cannot be null (partner-create)'))
+                
+            if vals_list[0]['state_id'] is False:
+                raise UserError(('State cannot be null (partner-create)'))
+        # ===================================================================================
         
         # Call the super() method
         partners = super(PartnerExt, self).create(vals_list)
