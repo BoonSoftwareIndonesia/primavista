@@ -888,6 +888,7 @@ class ApiVen(http.Controller):
                 # (2) Validations
                 # (2.1) Check whether po no (this field actually stores the SO no value) exists 
                 sos = self.getRecord(model="stock.move", field="reference", wms=rec['poNo'])
+
                 if sos == -1:
                     error["Error"] = "poNo to return does not exist"
                     is_error = True
