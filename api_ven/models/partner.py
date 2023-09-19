@@ -71,7 +71,8 @@ class PartnerExt(models.Model):
     # Triggers the api_dw_customer() function that sends an API log when creating new customer ======================
     @api.model_create_multi
     def create(self, vals_list):
-        
+
+        # ============================ Old Code ==============================================
         # If we are not duplicating, x_studio_customer_id and state_id cannot be null
         if not self._context.get('copy_context'):
             # if vals_list[0]['x_studio_customer_id'] is False:
@@ -79,6 +80,7 @@ class PartnerExt(models.Model):
                 
             if vals_list[0]['state_id'] is False:
                 raise UserError(('State cannot be null (partner-create)'))
+        # ===================================================================================
         
         # Call the super() method
         partners = super(PartnerExt, self).create(vals_list)
