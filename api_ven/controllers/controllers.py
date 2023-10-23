@@ -839,7 +839,7 @@ class ApiVen(http.Controller):
         
         
         
-    # Return DO (CRT_DO_RET API) ===================================================================================    
+    # Return DO (CRT_DO_RET API) ===================================================================================
     @http.route('/web/api/return_do', type='json', auth='user', methods=['POST'])
     def return_do(self, rcpt):
         created = 0
@@ -992,8 +992,8 @@ class ApiVen(http.Controller):
                             "product_uom_id": 26,
                             "location_id": 5,
                             "location_dest_id": 8,
-    #                             "lot_id": "",
-    #                             "expiration_date": ,
+                            # "lot_id": "",
+                            # "expiration_date": ,
     #                             "lot_id": temp_lot['id'],
                             "qty_done": line["quantityReceived"],
                             "company_id": 1,

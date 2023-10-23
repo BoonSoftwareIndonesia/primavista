@@ -148,7 +148,7 @@ class ApiController(models.Model):
                 "quantityOrdered": str(line['product_qty']),
 #                 "uomCode": line['product_uom']['name'],
                 "uomCode": "PCS",
-                "stockStatusCode": "NM" if line['x_stock_status_code']  == False else line['x_stock_status_code'] 
+                "stockStatusCode": "NM" if line['x_stock_status_code']  == False else line['x_stock_status_code']
             }
             # Increment the line_no
             line_no += 1
@@ -164,7 +164,7 @@ class ApiController(models.Model):
             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
-                {
+                {                    
                     "ownerReferences": "",
                     "poNo": "" if record['name'] == False else record['name'],
                     "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
@@ -1010,8 +1010,14 @@ class ApiFetchTokPed(models.Model):
             'Authorization': f'{token_type} {access_token}',
         }
         
+        params = {
+            'fs_id': fs_id,
+            'page': 1,
+            'per_page': 1
+        }
+        
         # Create request and get the shop list      
-        resp = requests.get(f'https://fs.tokopedia.net/v1/shop/fs/{fs_id}/shop-info', headers=headers)
+        resp = requests.get(f'https://fs.tokopedia.net/v1/shop/fs/{fs_id}/shop-info', headers=headers, params=params)
         
         # Convert the return result from token API to JSON
         ret = json.loads(resp.content)
