@@ -64,7 +64,7 @@ class ActivityLog(models.Model):
             # If the current field is not "id", create an activity log line
             # Since the value of id cannot change, we don't have to create an activity log line for it
             # because the new value will always be blank and would cause an error
-            if fname is not "id":
+            if fname != "id":
                 # Search for the current field's label based on its technical name and model which it belongs to
                 field_desc = field_model.search([('model_id', '=', model_id), ('name','=',fname)])
 

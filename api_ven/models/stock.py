@@ -110,4 +110,10 @@ class StockReturnPickingExt(models.TransientModel):
         curr_pick.move_lines.move_line_ids.write({'x_wms_rec_no': wms_no})
         
         return new_picking, pick_type_id
+
+
+# Adding new variable which is x_stock_status_code in stock.return.picking.line
+class StockReturnPickingLineExt(models.TransientModel):
+    _inherit = "stock.return.picking.line"
+    x_stock_status_code = fields.Selection([("NM", "Normal"),("DM", "Damage"),("ED","Expired"),("OBS","Obsolette"),("PR","Product Recall"),("RJCT","Reject"),],string="Stock Status Code")
     
