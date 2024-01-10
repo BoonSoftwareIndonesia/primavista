@@ -7,8 +7,13 @@ from datetime import datetime
 # Override product template =============================
 class ProductTemplateExt(models.Model):
     _inherit = 'product.template'
-    
+
     # Override field(s)
+    x_product_brand = fields.Selection([("NA", "NA"),("Tom Ford", "Tom Ford"),],string="Product Brand", default='NA')
+    x_product_height = fields.Float(string="Product Height")
+    x_product_length = fields.Float(string="Product Length")
+    x_product_width = fields.Float(string="Product Width")
+    
     default_code = fields.Char(
         'Internal Reference', 
         compute='_compute_default_code',
@@ -57,13 +62,24 @@ class ProductTemplateExt(models.Model):
             # If default_code is null, raise user error
             if vals_list[0]['default_code'] is False:
                 raise UserError(('Internal reference cannot be null (product template-create)'))
+            vals_list[0]['default_code'] = vals_list[0]['default_code'].upper()
+
+            
             # If standard_price is null, raise user error
             if vals_list[0]['standard_price'] is False:
                 raise UserError(('Cost cannot be null (product template-create)'))
-        # raise UserError(str(vals_list))
-        
+
+            if self.env.context['allowed_company_ids'][0] == 1:
+                vals_list[0]['company_id'] = 1
+            else:
+                vals_list[0]['company_id'] = 2
+            
         # Call the super() method
         products = super(ProductTemplateExt, self).create(vals_list)
+
+        # Checking if user access the parent category or not
+        if not products.categ_id.parent_id:
+            raise UserError(f"Can't create product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
         
         # Get the test_import context
         test_import = self._context.get('test_import')
@@ -94,6 +110,11 @@ class ProductTemplateExt(models.Model):
         
         # Call the super() method
         res = super(ProductTemplateExt, self).write(vals)
+        
+        # Checking if user access the parent category or not
+        if not self.categ_id.parent_id:
+            # raise UserError(f"parent: {self.categ_id.parent_id.name} || Child: {self.categ_id.name}")
+            raise UserError(f"Can't edit product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
         
         # If the product's write_date and create_date are different, we are doing an update, so we can proceed
         if self.write_date != self.create_date:
@@ -193,6 +214,9 @@ class ProductExt(models.Model):
     
     # Override field(s)
     default_code = fields.Char('Internal Reference', index=True, required=True)
+
+    lot_record_id = fields.One2many('lot_record.lot_record', 'product_id',
+        string = 'Lot Record ID')
     
     # Constraint for default_code, ensure no duplicate default_code =============================
     @api.constrains('default_code')
@@ -212,6 +236,9 @@ class ProductExt(models.Model):
         # If in vals_list there is default_code, then it is a product create on the fly
         # raise UserError(f"{vals_list}")
         if 'default_code' in vals_list[0]:
+
+            vals_list[0]['default_code'] = vals_list[0]['default_code'].upper()
+            
             # If copy_context is False (not duplicating) and test_import has not been set (not testing import or importing)
             if not self._context.get('copy_context') and 'test_import' not in self._context:
                 # Concatenate default code and standard price. This will be the value of the on_the_fly_context
