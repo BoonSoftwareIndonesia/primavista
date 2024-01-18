@@ -85,14 +85,10 @@ class ImportInheritExt(models.TransientModel):
             # Else, no need to set the context
             res = super(ImportInheritExt, self).execute_import(fields, columns, options, dryrun)
         return res
-
-    
     
 class UomExt(models.Model):
     _inherit = 'uom.uom'
     ratio = fields.Float('Combined Ratio', compute='_compute_ratio', inverse='_set_ratio', store=False, required=True)
-    
-    
     
 # API VEN MODEL ==========================================================================
 class api_ven(models.Model):
@@ -106,7 +102,7 @@ class api_ven(models.Model):
     status = fields.Selection([('new','New'),('process','Processing'),('success','Success'),('error','Error')])
     created_date = fields.Datetime(string="Created Date")
     response_date = fields.Datetime(string="Response Date")
-    message_type = fields.Selection([('RCPT','CRT_RCPT'), ('DO','CRT_DO'), ('PO','DW_PO'), ('SO','DW_SO'), ('PO_RET','DW_PO_RET'), ('SO_RET','DW_SO_RET'), ('RCPT_RET','CRT_RCPT_RET'), ('DO_RET','CRT_DO_RET'), ('CUST','DW_CUST'), ('PROD','DW_PROD'), ('STOCK','STOCK_COMPARE'), ('ADJUST', 'STOCK_ADJUSTMENT'), ('FTKPD', 'FETCH_TOKOPEDIA'), ('FOL_SHPE', 'FETCH_ORDERLIST_SHOPEE'), ('FSO_SHPE', 'FETCH_SALESORDER_SHOPEE'), ('GET_LOT', 'LOT Adjustment')])
+    message_type = fields.Selection([('RCPT','CRT_RCPT'), ('DO','CRT_DO'), ('PO','DW_PO'), ('SO','DW_SO'), ('PO_RET','DW_PO_RET'), ('SO_RET','DW_SO_RET'), ('RCPT_RET','CRT_RCPT_RET'), ('DO_RET','CRT_DO_RET'), ('CUST','DW_CUST'), ('PROD','DW_PROD'), ('STOCK','STOCK_COMPARE'), ('ADJUST', 'STOCK_ADJUSTMENT'), ('FTKPD', 'FETCH_TOKOPEDIA'), ('FOL_SHPE', 'FETCH_ORDERLIST_SHOPEE'), ('FSO_SHPE', 'FETCH_SALESORDER_SHOPEE'), ('GET_LOT', 'LOT Adjustment'), ('SAP_PO', 'Send_Odoo_PO_SAP')])
     incoming_txt = fields.Many2one('ir.attachment', string="Incoming txt", readonly=True)
     response_txt = fields.Many2one('ir.attachment', string="Response txt", readonly=True)
     raw_data = fields.Binary(string="Raw Data", attachment=True)
@@ -518,7 +514,7 @@ class ApiControllerStockPicking(models.Model):
                 "product": line['product_id']["product_tmpl_id"]["default_code"],
                 "quantityOrder": str(int(line['product_uom_qty'])),
                 "originalOrderUOM": "UNITS" if line['product_uom']['name'] == False else line['product_uom']['name'].upper(),
-                "lotNo": "LOT", 
+                "lotNo": "LOT" if line['move_line_ids']['x_wms_lot_records'] == False else line['move_line_ids']['x_wms_lot_records'].upper(), 
                 "filterTransactionCode": line['move_line_ids']['x_stock_status_code'],
                 "soLineOptChar2": ""
             }
@@ -970,7 +966,7 @@ class ApiControllerProduct(models.Model):
                     "leadtime2expiry": "",
                     "shelfLife": "",
                     "issueType": "1",
-                    "lotNoCtrl": "TRUE" if record['tracking'] == "lot" else "",
+                    "lotNoCtrl": "TRUE" if record['x_is_lot_tracking'] == True else "",
                     "autoSerial": "",
                     "expDateCtrl": "",
                     "palletCtrl": "",
@@ -1058,9 +1054,10 @@ class StockPickingReturnExt(models.TransientModel):
                 for return_move in return_line.move_id.returned_move_ids:
                     for move_line in return_move.move_line_ids:
                         if move_line.product_id == return_line.product_id:
-                            move_line.write({'x_stock_status_code': return_line.x_stock_status_code})
-
-
+                            move_line.write({
+                                'x_stock_status_code': return_line.x_stock_status_code,
+                                'x_wms_lot_records': return_line.x_wms_lot_records
+                            })
         return res
 
 class SaleOrderLine(models.Model):

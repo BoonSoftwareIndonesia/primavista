@@ -13,11 +13,12 @@ class ProductTemplateExt(models.Model):
     x_product_height = fields.Float(string="Product Height")
     x_product_length = fields.Float(string="Product Length")
     x_product_width = fields.Float(string="Product Width")
+    x_is_lot_tracking = fields.Boolean(string="Tracking by Lot")
     
     default_code = fields.Char(
         'Internal Reference', 
         compute='_compute_default_code',
-        inverse='_set_default_code', 
+        inverse='_set_default_code',
         store=True, 
         required=True)
     
@@ -204,9 +205,6 @@ class ProductTemplateExt(models.Model):
         self.create_activity_logs(records, "unlink" , old_vals = old_vals)
         
         return None
-  
-
-
     
 # Override product =============================
 class ProductExt(models.Model):

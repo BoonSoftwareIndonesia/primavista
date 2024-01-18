@@ -25,8 +25,7 @@
 -->
 
     <!-- server action to the one above -->
-<!--
-    <record model="ir.actions.server" id="api_ven.action_server">
+    <!-- <record model="ir.actions.server" id="api_ven.action_server">
       <field name="name">api_ven server</field>
       <field name="model_id" ref="model_api_ven_api_ven"/>
       <field name="state">code</field>
@@ -37,8 +36,7 @@
           "res_model": model._name,
         }
       </field>
-    </record>
--->
+    </record> -->
 
     <!-- Top menu item -->
 <!--
@@ -126,6 +124,23 @@
                 </search>
             </field>
         </record>
+      
+      <record id="view_lot_record_list" model="ir.ui.view"> 
+          <field name="name">lot_record.lot_record.list</field> 
+          <field name="model">lot_record.lot_record</field> 
+          <field name="arch" type="xml"> 
+              <tree string="Lot Record Form"> 
+                  <field name="name"/>
+                  <field name="company_id"/> 
+                  <field name="product_id"/> 
+                  <field name="product_uom_id"/>
+                  <field name="quantity_on_hand"/>
+                  <field name="available_quantity"/>
+                  <field name="stock_status_code"/>
+                  <field name="expired_date"/>
+              </tree> 
+          </field> 
+      </record>
 
 
       <record id="action_api" model="ir.actions.act_window">

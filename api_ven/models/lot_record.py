@@ -30,9 +30,6 @@ class ProductLotRecord(models.Model):
         'Lot Number', default=lambda self: self.env['ir.sequence'].next_by_code('stock.lot.serial'),
         required=True, help="Unique Lot Number", index=True)
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company.id)
-    # product_id = fields.Many2one(
-    #     'product.product', 'Product', index=True,
-    #     domain=lambda self: self._domain_product_id(), required=True, check_company=True)
     product_id = fields.Many2one(
         'product.product', 'Product', index=True, required=True, check_company=True)
     product_uom_id = fields.Many2one(
@@ -112,12 +109,6 @@ class ProductLotRecord(models.Model):
             "Accept": "*/*"
         }
 
-        # payload = {
-        #     "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
-        #     "ownerCode": owner_code,
-        #     "product": "TEST-AVO-001"
-        # }
-
         # Test call method from sales order line
         payload = {
             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
@@ -160,15 +151,7 @@ class ProductLotRecord(models.Model):
         api_log['response_date'] = datetime.now()
         api_log['response_msg'] = base64.b64encode(bytes(str(resp.text), 'utf-8'))
 
-        # dummy_json = '{"product": "AVO_PRD_TEST_001", "ownerCode": "AVO", "lotList":[{ "lotNo": "SKU12345", "warehouseCode": "AVI", "quantityOnHand": "7", "availableQuantity": "3", "stockStatusCode": "NM", "expiryDate": "29/11/2023"}, {"lotNo": "SKU56789", "warehouseCode": "AVI", "quantityOnHand": "5", "availableQuantity": "0", "stockStatusCode": "DM", "expiryDate": "31/12/2023"}]}'
-        # dummy_json = '{"product": "AVO_PRD_TEST_001", "ownerCode": "AVO", "lotList":[]}'
-
-        
-        # ret = json.loads(dummy_json)
         ret = json.loads(resp.text)
-        # ret = json.loads(resp, object_hook=lambda d: {int(k) if k.lstrip('-').isdigit() else k: v for k, v in d.items()})
-
-        # raise UserError(f"{ret}")
 
         # Create response txt
         api_log['response_txt'] = request.env['ir.attachment'].create({
