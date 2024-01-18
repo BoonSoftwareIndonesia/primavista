@@ -9,3 +9,4 @@ from . import stock
 from . import e_commerce
 from . import lot_record
 from . import discount_control
+from . import odoo_sap

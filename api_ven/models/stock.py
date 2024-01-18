@@ -29,8 +29,6 @@ class StockRuleExt(models.Model):
 class StockMoveExt(models.Model):
     _inherit = 'stock.move'
     x_studio_opt_char_1 = fields.Char('inwardLineOptChar1')
-
-    
     
 class StockReturnPickingExt(models.TransientModel):
     _inherit = 'stock.return.picking'
@@ -116,4 +114,5 @@ class StockReturnPickingExt(models.TransientModel):
 class StockReturnPickingLineExt(models.TransientModel):
     _inherit = "stock.return.picking.line"
     x_stock_status_code = fields.Selection([("NM", "Normal"),("DM", "Damage"),("ED","Expired"),("OBS","Obsolette"),("PR","Product Recall"),("RJCT","Reject"),],string="Stock Status Code")
+    x_wms_lot_records = fields.Char(string="Lot Number")
     

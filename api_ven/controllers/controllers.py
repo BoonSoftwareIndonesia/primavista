@@ -266,65 +266,19 @@ class ApiVen(http.Controller):
                         # Checking if the order is using LOT_Number or Serial Number
                         
                         # (3.2) Create a new move stock line
-                        is_lot = temp_product.tracking
-
-                        if is_lot == "lot":
-                            # raise UserError(f"Join Lot")
-                            # receipt_line.move_line_ids.write({
-                            #     "product_id": temp_product.id,
-                            #     "product_uom_id": receipt_line.move_line_ids.product_uom_id.id,
-                            #     "location_id": receipt_line.move_line_ids.location_id.id,
-                            #     "location_dest_id": receipt_line.move_line_ids.location_dest_id.id,
-                            #     "x_stock_status_code": line["stockStatusCode"],
-                            #     # "expiration_date": ,
-                            #     "lot_name": line['lotNo'],
-                            #     "qty_done": line["quantityReceived"],
-                            #     "company_id": curr_company_id.id,
-                            #     # "state": "done",
-                            #     "x_wms_rec_no": rec['receiptNo']
-                            # })
-                            if receipt_line.x_studio_opt_char_1 == line["inwardLineOptChar1"] and receipt_line.move_line_ids.lot_name != line['lotNo']:
-                                receipt_line.move_line_ids.create({
-                                    "product_id": temp_product.id,
-                                    "product_uom_id": receipt_line.move_line_ids.product_uom_id.id,
-                                    "location_id": receipt_line.move_line_ids.location_id.id,
-                                    "location_dest_id": receipt_line.move_line_ids.location_dest_id.id,
-                                    "x_stock_status_code": line["stockStatusCode"],
-        #                             "expiration_date": ,
-                                    "lot_name": line['lotNo'],
-                                    "qty_done": line["quantityReceived"],
-                                    "company_id": curr_company_id.id,
-        #                             "state": "done",
-                                    "x_wms_rec_no": rec['receiptNo']
-                                })
-                            else:
-                                receipt_line.move_line_ids.write({
-                                    "product_id": temp_product.id,
-                                    "product_uom_id": receipt_line.move_line_ids.product_uom_id.id,
-                                    "location_id": receipt_line.move_line_ids.location_id.id,
-                                    "location_dest_id": receipt_line.move_line_ids.location_dest_id.id,
-                                    "x_stock_status_code": line["stockStatusCode"],
-        #                             "expiration_date": ,
-                                    "lot_name": line['lotNo'],
-                                    "qty_done": line["quantityReceived"],
-                                    "company_id": curr_company_id.id,
-        #                             "state": "done",
-                                    "x_wms_rec_no": rec['receiptNo']
-                                })
-                        else:
-                            receipt_line.move_line_ids.write({
-                                "product_id": temp_product.id,
-                                "product_uom_id": receipt_line.move_line_ids.product_uom_id.id,
-                                "location_id": receipt_line.move_line_ids.location_id.id,
-                                "location_dest_id": receipt_line.move_line_ids.location_dest_id.id,
-                                "x_stock_status_code": line["stockStatusCode"],
-    #                             "expiration_date": ,
-    #                             "lot_id": temp_lot['id'],
-                                "qty_done": line["quantityReceived"],
-                                "company_id": curr_company_id.id,
-    #                             "state": "done",
-                                "x_wms_rec_no": rec['receiptNo']
-                            })
+                        receipt_line.move_line_ids.write({
+                            "product_id": temp_product.id,
+                            "product_uom_id": receipt_line.move_line_ids.product_uom_id.id,
+                            "location_id": receipt_line.move_line_ids.location_id.id,
+                            "location_dest_id": receipt_line.move_line_ids.location_dest_id.id,
+                            "x_stock_status_code": line["stockStatusCode"],
+                            "x_wms_lot_records": line['lotNo'],
+                            "qty_done": line["quantityReceived"],
+                            "company_id": curr_company_id.id,
+                            # "state": "done",
+                            "x_wms_rec_no": rec['receiptNo']
+                        })
+                            
                         # (3.3) Append the inwardLineOptChar1 / x_studio_opt_char1 (current line number) to the lines array
                         lines.append(line["inwardLineOptChar1"])
         
@@ -611,7 +565,8 @@ class ApiVen(http.Controller):
                             "company_id": curr_company_id.id,
 #                             "state": "done",
                             "x_wms_rec_no": rec['receiptNo'],
-                            "x_stock_status_code": line["stockStatusCode"]
+                            "x_stock_status_code": line["stockStatusCode"],
+                            "x_wms_lot_records": line["lotNo"]
                     })
                     
                     # (3.3) Append the soLineOptChar1 / x_studio_opt_char1 (current line number) to the lines array
@@ -837,14 +792,14 @@ class ApiVen(http.Controller):
                         "product_uom_id": dispatch_line.move_line_ids.product_uom_id.id,
                         "location_id": dispatch_line.move_line_ids.location_id.id,
                         "location_dest_id": dispatch_line.move_line_ids.location_dest_id.id,
-                        # "lot_id": "",
                         # "expiration_date": ,
-                        # "lot_id": temp_lot['id'],
+                        "x_wms_lot_records": line['lotNo'],
                         "qty_done": line["quantityShipped"],
                         "company_id": curr_company_id.id,
                         # "state": "done",
                         "x_wms_rec_no": rec['doNo'],
-                        "x_stock_status_code": line["stockStatusCode"]
+                        "x_stock_status_code": line["stockStatusCode"],
+                        "x_wms_lot_records": line["lotNo"]
                     })
             
                     # (3.3) Append the soLineOptChar1 / x_studio_opt_char1 (current line number) to the lines array
@@ -1067,7 +1022,8 @@ class ApiVen(http.Controller):
                             "company_id": curr_company_id.id,
                             # "state": "done",
                             "x_wms_rec_no": rec['doNo'],
-                            "x_stock_status_code": line["stockStatusCode"]
+                            "x_stock_status_code": line["stockStatusCode"],
+                            "x_wms_lot_records": line["lotNo"]
                     })
             
                     # (3.3) Append the inwardLineOptChar1 / x_studio_opt_char1 (current line number) to the lines array
