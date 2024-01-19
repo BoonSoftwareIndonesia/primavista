@@ -13,135 +13,84 @@ import re
 
 class PurchaseOrderLineDiscount(models.Model):
     _inherit = 'purchase.order.line'
-    
+
+    # Additional Field for Discount feature in PO
     x_regular_discount = fields.Float(string='Regular Discount (%)', digits='Discount', default=0.0)
     x_gradasi_discount = fields.Float(string='Gradasi Discount (%)', digits='Discount', default=0.0)
     x_penambahan_discount = fields.Float(string='Penambahan Discount (%)', digits='Discount', default=0.0)
 
+    """
+    Summary Brief:
+    - This discount field is a field that functions only as a record in Odoo. (Before implementing PO integration between SAP and Odoo)
+    
+    Logic:
+    Regular Discount => Regular discount is a discount obtained from the reduction between the price of the item 
+                        and the discount price (the usual calculation of discounts in general)
+
+    Gradasi Discount => Gradation discount is a discount which is the result of a discount on the price after regular 
+                        discounts are made.
+
+    Penambahan Discount => Penambahan discounts are discounts that given as additional discounts based on the item price
+    """
+
+    # Regular discount calculation.
+    # This function will return the value of the regular discount (not the final price)
     def _regular_discount_count(self, price_unit, regular_discount):
+
+        # Returns will be made using general discount calculations
         return price_unit*(regular_discount/100)
 
+    # Calculation of discount gradations.
+    # This function will return the value of the gradient discount (not the final price)
     def _gradasi_discount_count(self, price_unit, regular_discount, gradasi_discount):
-        
+
+        # The curr_regular_discount field will call the regular discount function to get the regular discount price first
         curr_regular_discount = self._regular_discount_count(price_unit, regular_discount)
 
+        # In the return process, a deduction will be made first to get the initial price (the price after deducting 
+        # the regular discount) then the discount calculation process will be carried out as usual
         return (price_unit - curr_regular_discount)*(gradasi_discount/100)
-        
-    def _regular_discount_count(self, price_unit, penambahan_discount):
-        return price_unit*(penambahan_discount/100)
 
-    def discount_count(self, vals):
-        
-        regular_discount = self._regular_discount_count(vals.price_unit, vals.x_regular_discount) * vals.product_qty
-        gradasi_discount = self._gradasi_discount_count(vals.price_unit, vals.x_regular_discount, vals.x_gradasi_discount) * vals.product_qty
-        penambahan_discount = self._regular_discount_count(vals.price_unit, vals.x_penambahan_discount) * vals.product_qty
-
-        curr_subtotal = vals.price_subtotal - regular_discount - gradasi_discount - penambahan_discount
-
-        # raise UserError(f"regular_discount: {regular_discount} | gradasi_discount: {gradasi_discount} | penambahan_discount: {penambahan_discount} | curr_subtotal: {curr_subtotal}")
-
-        curr_sales_order_line = request.env['purchase.order.line'].search([('id', '=', vals.id)], limit=1)
-
-        curr_sales_order_line.update({
-            'price_subtotal': curr_subtotal,
-        })
-
-        # raise UserError(f"Scurr_sales_order_line: {curr_sales_order_line}")
-        
+    
+    # Re-write _compute_amount Odoo Default Funtion
+    # We must re-write this function because this function is a function that handle between taxes and PO.
+    # Beside that, this function will be TRIGGERED EVERY TIME WE CREATE OR WRITE THE PO LINE
+    
     @api.depends('product_qty', 'price_unit', 'taxes_id')
     def _compute_amount(self):
         for line in self:
             taxes = line.taxes_id.compute_all(**line._prepare_compute_all_values())
 
-            # ==================================================
+            # ======================================================
+        
+            # 1. Get the current regular, gradiation, and additional discount value and then we multiple with product_qty
 
             regular_discount = self._regular_discount_count(line.price_unit, line.x_regular_discount) * line.product_qty
             gradasi_discount = self._gradasi_discount_count(line.price_unit, line.x_regular_discount, line.x_gradasi_discount) * line.product_qty
-            penambahan_discount = self._regular_discount_count(line.price_unit, line.x_penambahan_discount) * line.product_qty
+            penambahan_discount = self._penambahan_discount_count(line.price_unit, line.x_penambahan_discount) * line.product_qty
 
+            # ======================================================
+            
+            # 2. All the current discount will be calculation as curr_subtotal
             curr_subtotal = (line.price_unit*line.product_qty) - regular_discount - gradasi_discount - penambahan_discount
 
+            # ======================================================
+        
+            # Since amount field will be handle by default field. So, we will use the default field where
+            # taxes['total_excluded'] => amount that include discount value
+            # taxes['total_included'] => amount that inlude discount value and tax value
+
+            # 3. Re-calculating the taxes['total_excluded'] and taxes['total_include']  
             taxes['total_excluded'] = curr_subtotal
             taxes['total_included'] = curr_subtotal + line.price_tax
-                        
+
+            # ======================================================
+
+            # 4. Update the amount price that include price_tax, price_total, and pricec_subtotal
             line.update({
                 'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
                 'price_total': taxes['total_included'],
                 'price_subtotal': taxes['total_excluded'],
             })
 
-            # ===================================================
-            
-    # def write(self, values):
-    #     if 'display_type' in values and self.filtered(lambda line: line.display_type != values.get('display_type')):
-    #         raise UserError(_("You cannot change the type of a purchase order line. Instead you should delete the current line and create a new line of the proper type."))
-
-    #     if 'product_qty' in values:
-    #         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-    #         for line in self:
-    #             if (
-    #                 line.order_id.state == "purchase"
-    #                 and float_compare(line.product_qty, values["product_qty"], precision_digits=precision) != 0
-    #             ):
-    #                 line.order_id.message_post_with_view('purchase.track_po_line_template',
-    #                                                      values={'line': line, 'product_qty': values['product_qty']},
-    #                                                      subtype_id=self.env.ref('mail.mt_note').id)
-                    
-    #     temporary_total_discount = 0.0
-
-    #     if 'x_regular_discount' in values:
-    #         temporary_total_discount += self.price_unit*(values.get('x_regular_discount')/100)
-    #     else:
-    #         if self.x_regular_discount > 0:
-    #             temporary_total_discount += self.price_unit*(self.x_regular_discount/100)
-
-    #     if 'x_gradasi_discount' in values:
-    #         if 'x_regular_discount' in values:
-    #             temp_reg_disc = self.price_unit*(values.get('x_regular_discount')/100)
-    #             temporary_total_discount += temp_reg_disc*(values.get('x_gradasi_discount')/100)
-    #         else:
-    #             if self.x_regular_discount is None:
-    #                 raise UserError(f"[1 - self] - Regular Discount not Found. Please full the regular discount first!")
-    #             elif values.get('x_regular_discount') is None:
-    #                 raise UserError(f"[1 - Values] - Regular Discount not Found. Please full the regular discount first!")
-                
-    #             if self.x_regular_discount > 0.00:
-    #                 temp_reg_disc = self.price_unit*(self.x_regular_discount/100)
-    #                 temporary_total_discount += temp_reg_disc*(values.get('x_gradasi_discount')/100)
-    #     else:
-    #         if self.x_gradasi_discount > 0.00 and not None:
-    #             if 'x_regular_discount' in values:
-    #                 temp_reg_disc = self.price_unit*(values.get('x_regular_discount')/100)
-    #                 temporary_total_discount += temp_reg_disc*(self.x_gradasi_discount/100)
-    #             else:
-    #                 if self.x_regular_discount is None:
-    #                     raise UserError(f"[2 - self] Regular Discount not Found. Please full the regular discount first!")
-                    
-    #                 if self.x_regular_discount > 0.00:
-    #                     temp_reg_disc = self.price_unit*(self.x_regular_discount/100)
-    #                     temporary_total_discount += temp_reg_disc*(self.x_gradasi_discount/100)
-    #                 elif self.x_regular_discount == 0.00:
-    #                     raise UserError(f"[2 - self 0.00] Regular Discount not Found. Please full the regular discount first!")
-
-    #     if 'x_penambahan_discount' in values:
-    #         temporary_total_discount += self.price_unit*(values.get('x_penambahan_discount')/100)
-    #     else:
-    #         if self.x_penambahan_discount > 0.00 and not None:
-    #             temporary_total_discount += self.price_unit*(self.x_penambahan_discount/100)
-
-    #     # raise UserError(f"Final Price = {self.price_unit} - {temporary_total_discount} | {self.price_unit - temporary_total_discount}")
-
-    #     curr_price_subTotal = self.price_unit - temporary_total_discount
-
-    #     # raise UserError(f"Curr_price = {curr_price_subTotal}")
-        
-    #     # self.write({
-    #     #     'price_subtotal': curr_price_subTotal,
-    #     # })
-        
-    #     self.price_subtotal = self.price_unit - temporary_total_discount
-
-    #     if 'qty_received' in values:
-    #         for line in self:
-    #             line._track_qty_received(values['qty_received'])
-    #     return super(PurchaseOrderDiscount, self).write(values)
+            # ======================================================
