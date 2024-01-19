@@ -13,9 +13,29 @@ import re
 import hmac
 import hashlib
 
+"""
+    Summary Brief:
+    - This is lot records CUSTOM MODULE.
+    - This is not DEFULT SERIAL/LOT NUMBER MODULE. But the behavior basic algorithm is same.
+    - This models is creating because we need the lot records in ODOO JUST AS THE RECORDS
+
+    LOGIC:
+    1.   Odoo will request lot records data base on the product and the owner code.
+    2.   WMS will send the lot records
+    
+    3.   Odoo will process the lot records data
+    3.1. Odoo will validate the header that WMS send to Odoo
+    3.2. Odoo will validate the line
+    3.3. Odoo will checking with existing product and each the other
+
+    4.   If lot records already existing, Odoo will re-write the data. If not, Odoo will create new lot records
+"""
+
+# Because we need the relation to with the warehouse. There for we need the relation between warehouse and the lot records
 class StockWarehouseExt(models.Model):
     _inherit = "stock.warehouse"
 
+    # Additional relation field
     lot_stock_id = fields.Many2one(
         'stock.location', 'Location Stock',
         domain="[('usage', '=', 'internal'), ('company_id', '=', company_id)]",
@@ -26,6 +46,7 @@ class ProductLotRecord(models.Model):
     _description = 'WMS x Odoo Lot Record'
     _order = 'name, id'
 
+    # lot records field
     name = fields.Char(
         'Lot Number', default=lambda self: self.env['ir.sequence'].next_by_code('stock.lot.serial'),
         required=True, help="Unique Lot Number", index=True)
@@ -40,6 +61,9 @@ class ProductLotRecord(models.Model):
     stock_status_code = fields.Selection([("NM", "Normal"),("DM", "Damage"),("ED","Expired"),("OBS","Obsolette"),("PR","Product Recall"),("RJCT","Reject"),],string="Stock Status Code", default='NM')
     expired_date = fields.Date('Expired Date')
 
+    
+    # Checking the unique lot. It will pretend new lot name have same lot name with the previous lot
+    # This is same logic as the serial/lot Odoo default funtion
     @api.constrains('name', 'product_id', 'company_id')
     def _check_unique_lot(self):
         domain = [('product_id', 'in', self.product_id.ids),
@@ -56,30 +80,23 @@ class ProductLotRecord(models.Model):
         if error_message_lines:
             raise ValidationError(_('The combination of serial number and product must be unique across a company.\nFollowing combination contains duplicates:\n') + '\n'.join(error_message_lines))
 
-    def _domain_product_id(self):
-        domain = [
-            "('tracking', '!=', 'none')",
-            "('type', '=', 'product')",
-            "'|'",
-                "('company_id', '=', False)",
-                "('company_id', '=', company_id)"
-        ]
-        if self.env.context.get('default_product_tmpl_id'):
-            domain.insert(0,
-                ("('product_tmpl_id', '=', %s)" % self.env.context['default_product_tmpl_id'])
-            )
-        return '[' + ', '.join(domain) + ']'
-
+    # This function has the same behavior for create function in Odoo lot/serial models
+    # This function has a 2 job. First is calidate the unique name (validation) and then create the models
     @api.model_create_multi
     def create(self, vals_list):
         self._check_unique_lot()
         return super(ProductLotRecord, self.with_context(mail_create_nosubscribe=True)).create(vals_list)
 
+    # This function has the same bahavior for write function in Odoo lot/serial models.
     def write(self, vals):
+
+        # Pretend user to change company_id
         if 'company_id' in vals:
             for lot in self:
                 if lot.company_id.id != vals['company_id']:
                     raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
+
+        # Pretend the user to change product ID
         if 'product_id' in vals and any(vals['product_id'] != lot.product_id.id for lot in self):
             move_lines = self.env['stock.move.line'].search([('lot_id', 'in', self.ids), ('product_id', '!=', vals['product_id'])])
             if move_lines:
@@ -88,6 +105,8 @@ class ProductLotRecord(models.Model):
                     'if some stock moves have already been created with that number. '
                     'This would lead to inconsistencies in your stock.'
                 ))
+
+        # Re-write the lot_records
         return super(ProductLotRecord, self).write(vals)
 
     def get_lot_list(self, product_id):
@@ -109,7 +128,7 @@ class ProductLotRecord(models.Model):
             "Accept": "*/*"
         }
 
-        # Test call method from sales order line
+        # Preparate the request payload from Odoo to WMS
         payload = {
             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "ownerCode": owner_code,
@@ -148,9 +167,11 @@ class ProductLotRecord(models.Model):
         # Post the API request 
         resp = requests.get(apiurl, data=json.dumps(payload), headers=headers)
 
+        # Update the response date and response message base on the API
         api_log['response_date'] = datetime.now()
         api_log['response_msg'] = base64.b64encode(bytes(str(resp.text), 'utf-8'))
 
+        # Changing the WMS response the list in python
         ret = json.loads(resp.text)
 
         # Create response txt
@@ -210,7 +231,6 @@ class ProductLotRecord(models.Model):
         # (1.3) Lot_list not empty validation
         
         lot_list = json_return.get('lotList')
-        # raise UserError(f"{json_return}")
         
         if not lot_list:
             error["Error"] = "There is no existing lot information for this product"
@@ -241,7 +261,6 @@ class ProductLotRecord(models.Model):
                     break
 
                 # (2.1.3) Checking if the quantityOnHand is null or not
-                # raise UserError(f"quantityOnHand: {detail_lot.get('quantityOnHand')}")
                 if detail_lot['quantityOnHand'] == "":
                     error["Error"] = "Field quantityOnHand is blank"
                     is_error = True
@@ -274,8 +293,6 @@ class ProductLotRecord(models.Model):
                 
                 if not existing_lot:
                     is_newLot = True
-
-                # raise UserError(f"{detail_lot['stockStatusCode']}")
                 
                 # (2.2) Checking the relationship of some field [DONE] =========================
     

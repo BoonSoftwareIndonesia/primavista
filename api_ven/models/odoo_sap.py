@@ -12,7 +12,7 @@ import re
 
 class SAPApiController(models.Model):
     _inherit = ['purchase.order']
-
+    
     def api_sap_dw_po(self, record):
             
         # The endpoint in SAP
@@ -142,7 +142,6 @@ class SAPApiController(models.Model):
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
             'company_id': self.env.context['allowed_company_ids'][0],
-            # 'company_id': 1,
             'mimetype': 'text/plain'
         })
 
