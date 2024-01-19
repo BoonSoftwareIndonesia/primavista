@@ -10,6 +10,15 @@ import base64
 import urllib.request
 import re
 
+"""
+    Summary Brief:
+    - This is models that handle external (SAP) API
+
+    SAP API:
+    1. api_sap_dw_po => API that send when Odoo create PO. (This will be converted into SO in SAP)
+"""
+
+
 class SAPApiController(models.Model):
     _inherit = ['purchase.order']
     
