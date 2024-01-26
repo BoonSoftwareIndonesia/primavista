@@ -8,13 +8,14 @@ from datetime import datetime
 class ProductTemplateExt(models.Model):
     _inherit = 'product.template'
 
-    # Override field(s)
-    x_product_brand = fields.Selection([("NA", "NA"),("Tom Ford", "Tom Ford"),],string="Product Brand", default='NA')
+    # Adding new field(s)
+    x_product_brand = fields.Selection([("NA", "NA"),("Tom Ford", "Tom Ford"), ("3M", "3M"), ("AKMU", "AKMU"), ("ALPHA", "ALPHA"), ("APA", "APA"), ("BERNOFARM OTC", "BERNOFARM OTC"), ("DKT", "DKT"), ("ESSILOR NVG CONS", "ESSILOR NVG CONS"), ("GALENIUM PSC", "GALENIUM PSC"), ("GEO MEDICAL", "GEO MEDICAL"), ("JENNY HOUSE", "JENNY HOUSE"), ("KLARENS", "KLARENS"), ("MPS", "MPS"), ("ONEMED", "ONEMED"), ("SENSI", "SENSI"), ("TAKEDA OTC", "TAKEDA OTC"), ("THERASKIN", "THERASKIN"), ("VITAHEALTH CONS", "VITAHEALTH CONS"),],string="Product Brand", default='NA')
     x_product_height = fields.Float(string="Product Height")
     x_product_length = fields.Float(string="Product Length")
     x_product_width = fields.Float(string="Product Width")
     x_is_lot_tracking = fields.Boolean(string="Tracking by Lot")
-    
+
+    # Override field(s)
     default_code = fields.Char(
         'Internal Reference', 
         compute='_compute_default_code',
@@ -213,6 +214,7 @@ class ProductExt(models.Model):
     # Override field(s)
     default_code = fields.Char('Internal Reference', index=True, required=True)
 
+    # Adding additional field
     lot_record_id = fields.One2many('lot_record.lot_record', 'product_id',
         string = 'Lot Record ID')
     
@@ -232,7 +234,6 @@ class ProductExt(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         # If in vals_list there is default_code, then it is a product create on the fly
-        # raise UserError(f"{vals_list}")
         if 'default_code' in vals_list[0]:
 
             vals_list[0]['default_code'] = vals_list[0]['default_code'].upper()

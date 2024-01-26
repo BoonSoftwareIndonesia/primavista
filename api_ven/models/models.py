@@ -46,7 +46,7 @@ class SaleOrderLineExt(models.Model):
     _inherit = 'sale.order.line'
     x_studio_line_no = fields.Char('x_studio_line_no')
     x_stock_status_code = fields.Selection([("NM", "Normal"),("DM", "Damage"),("ED","Expired"),("OBS","Obsolette"),("PR","Product Recall"),("RJCT","Reject"),],string="Stock Status Code", default='NM')
-    lot_record_id = fields.Many2one("lot_record.lot_record", domain="[('product_id', '=', product_id)]", string="Lot Records")
+    lot_record_id = fields.Many2one("lot_record.lot_record", domain="[('product_id', '=', product_id)]", string="Lot")
     
     def _prepare_procurement_values(self, group_id=False):
         res = super(SaleOrderLineExt, self)._prepare_procurement_values(group_id)
@@ -102,7 +102,7 @@ class api_ven(models.Model):
     status = fields.Selection([('new','New'),('process','Processing'),('success','Success'),('error','Error')])
     created_date = fields.Datetime(string="Created Date")
     response_date = fields.Datetime(string="Response Date")
-    message_type = fields.Selection([('RCPT','CRT_RCPT'), ('DO','CRT_DO'), ('PO','DW_PO'), ('SO','DW_SO'), ('PO_RET','DW_PO_RET'), ('SO_RET','DW_SO_RET'), ('RCPT_RET','CRT_RCPT_RET'), ('DO_RET','CRT_DO_RET'), ('CUST','DW_CUST'), ('PROD','DW_PROD'), ('STOCK','STOCK_COMPARE'), ('ADJUST', 'STOCK_ADJUSTMENT'), ('FTKPD', 'FETCH_TOKOPEDIA'), ('FOL_SHPE', 'FETCH_ORDERLIST_SHOPEE'), ('FSO_SHPE', 'FETCH_SALESORDER_SHOPEE'), ('GET_LOT', 'LOT Adjustment'), ('SAP_PO', 'Send_Odoo_PO_SAP')])
+    message_type = fields.Selection([('RCPT','CRT_RCPT'), ('DO','CRT_DO'), ('PO','DW_PO'), ('SO','DW_SO'), ('PO_RET','DW_PO_RET'), ('SO_RET','DW_SO_RET'), ('RCPT_RET','CRT_RCPT_RET'), ('DO_RET','CRT_DO_RET'), ('CUST','DW_CUST'), ('SHIP','DW_SHIP'), ('PROD','DW_PROD'), ('STOCK','STOCK_COMPARE'), ('ADJUST', 'STOCK_ADJUSTMENT'), ('FTKPD', 'FETCH_TOKOPEDIA'), ('FOL_SHPE', 'FETCH_ORDERLIST_SHOPEE'), ('FSO_SHPE', 'FETCH_SALESORDER_SHOPEE'), ('GET_LOT', 'LOT Adjustment'), ('SAP_PO', 'Send_Odoo_PO_SAP')])
     incoming_txt = fields.Many2one('ir.attachment', string="Incoming txt", readonly=True)
     response_txt = fields.Many2one('ir.attachment', string="Response txt", readonly=True)
     raw_data = fields.Binary(string="Raw Data", attachment=True)
@@ -114,12 +114,6 @@ class api_ven(models.Model):
             vals['name'] = self.env['ir.sequence'].next_by_code('api.seq') or ('New')
         result = super(api_ven, self).create(vals)
         return result
-    
-    # @api.model
-    # def testing(self):
-    #     print('test');
-
-    
 
 # PURCHASE ORDER (DW_PO API) (Odoo to WMS) ==========================================================================
 class ApiController(models.Model):
@@ -871,6 +865,103 @@ class ApiControllerPartner(models.Model):
                 'created_date': datetime.now(),
                 'incoming_msg': payload,
                 'message_type': 'CUST'
+            })
+
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+
+        # Create the incoming txt
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        # Post the API request
+        r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+        
+        api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
+        
+        """if is_error == False:
+            api_log['status'] = 'success'
+        elif '"returnStatus":"-1"' in api_log['response_msg']:
+            api_log['status'] = 'error'
+        else:
+            api_log['status'] = 'success'"""
+        
+        if r.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
+        
+        # Create the response txt
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+
+    def api_dw_ship_no(self, record):
+        error = {}
+
+        #Checking the existing company first:
+        if self.env.context['allowed_company_ids'][0] == 1: 
+            owner_code = "PRIMAVISTA"
+        else:
+            owner_code = "AVO"
+            
+        # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createship"
+        
+        # Create payload
+        # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
+        # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
+        payload = {
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTU3NDgxODUzMywic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTU3NDkwNDkzM30.7LwXZCAEwfJuK5cKdMhkSuOVEnocUPA2vAXxBloknVE",
+            "ship": [
+                {
+                    "ownerCode": owner_code,
+                    "custCode": "" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
+		    #"shipNo": "" if record['x_ship_no'] == False else record['x_ship_no'],
+                    "name": "" if record['name'] == False else record['name'],
+                    "address1": "" if record['street'] == False else record['street'],
+                    "city": "" if record['city'] == False else record['city'],
+                    "state": "Jakarta" if record['state_id']['name'] == False else str(record['state_id']['name']).upper(),
+                    "zipCode": "12345" if record['zip'] == False else record['zip'],
+                    "country": "" if record['country_id']['name'] == False else record['country_id']['name'],
+                    "route": "NA",
+                    "zone": "NA"
+                }
+            ]
+        }
+        
+        # Create the header of the API request
+        headers = {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive",
+            "Accept": "*/*"
+        }
+        
+        # Create API log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': payload,
+                'message_type': 'SHIP'
             })
 
             api_log['status'] = 'process'
