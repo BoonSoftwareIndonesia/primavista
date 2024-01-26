@@ -21,7 +21,6 @@ class PartnerExt(models.Model):
     # Default country Indonesia
     country_id = fields.Many2one('res.country', string='Country', ondelete='restrict', default=100)
     
-    
     # Constraint to check for duplicate x_studio_customer_id ======================
     @api.constrains('x_studio_customer_id')
     def _check_x_studio_customer_id(self):
@@ -78,16 +77,6 @@ class PartnerExt(models.Model):
     # Triggers the api_dw_customer() function that sends an API log when creating new customer ======================
     @api.model_create_multi
     def create(self, vals_list):
-
-        # ============================ Old Code ==============================================
-        # If we are not duplicating, x_studio_customer_id and state_id cannot be null
-        # if not self._context.get('copy_context'):
-            # if vals_list[0]['x_studio_customer_id'] is False:
-            #     raise UserError(('Internal reference cannot be null (partner-create)'))
-                
-            # if vals_list[0]['state_id'] is False:
-            #     raise UserError(('State cannot be null (partner-create)'))
-        # ===================================================================================
         
         # Call the super() method
         partners = super(PartnerExt, self).create(vals_list)
@@ -100,8 +89,15 @@ class PartnerExt(models.Model):
         
         # If we are not testing (test_import = False), then create customer and send API
         if not test_import:
-            # Call api_dw_customer to send API to WMS
-            self.env['res.partner'].api_dw_customer(partners)
+            #if we are creating a child partner, create ship_no
+            if vals_list[0]['type'] == "delivery":
+                # raise UserError("Entry dw_ship_address")
+                self.env['res.partner'].api_dw_ship_no(partners)
+                
+            #if not a child partner, Call api_dw_customer to send API to WMS
+            else:
+                # raise UserError("Entry this is a dw_customer")
+                self.env['res.partner'].api_dw_customer(partners)
             
             # Get the new customer's fields and values
             new_vals = {}

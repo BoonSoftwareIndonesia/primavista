@@ -18,10 +18,16 @@ import re
     1. api_sap_dw_po => API that send when Odoo create PO. (This will be converted into SO in SAP)
 """
 
+class PurchaseOrderExt(models.Model):
+    _inherit = 'purchase.order'
+    x_collector = fields.Selection([("Lukman", "Lukman"), ("NA", "NA"),],string="Collector", default='NA')
+    x_sales_principal = fields.Selection([("Eko", "Eko"), ("NA", "NA"),],string="Sales Principal", default='NA')
+    x_chanord = fields.Selection([("SALES", "SALES"), ("NA", "NA"),],string="Chanord", default='NA')
 
 class SAPApiController(models.Model):
     _inherit = ['purchase.order']
-    
+
+    # Odoo (Purchase Order) to SAP (Sales Order)
     def api_sap_dw_po(self, record):
             
         # The endpoint in SAP
@@ -65,10 +71,10 @@ class SAPApiController(models.Model):
             # Create po line (Refer to the mapping documentation)
             po_line = {
                 "ItemCode": line['product_id']["product_tmpl_id"]["default_code"].upper(),
-                "Quantity": str(line['product_qty']),
-                "Price": str(line['price_subtotal']),
-                "DiscountPercent": "0" if line['x_regular_discount'] == False else line['x_regular_discount'],
-                "MeasureUnit": "UNITS" if line['product_uom']['name'] == False else line['product_uom']['name'].upper(),
+                "Quantity": line['product_qty'],
+                "Price": line['price_unit'],
+                "DiscountPercent": 0 if line['x_regular_discount'] == False else line['x_regular_discount'],
+                "MeasureUnit": "PCS" if line['product_uom']['name'] == False else line['product_uom']['name'].upper(),
                 "WarehouseCode": "HARDCODE_WH"
             }
 
@@ -82,6 +88,8 @@ class SAPApiController(models.Model):
         date_approval = raw_date_approval.strftime("%Y/%m/%d")
         raw_date_planned = record['date_planned']
         date_planned = raw_date_planned.strftime("%Y/%m/%d")
+
+        date_approval_time = raw_date_approval.time()
         
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
@@ -89,15 +97,15 @@ class SAPApiController(models.Model):
             "DocDate": date_approval,
             "DocDueDate": date_planned,
             "CardCode": "" if record['partner_id']['x_studio_customer_id'] == False else record['partner_id']['x_studio_customer_id'],
-            "NumAtCard": "",
+            "NumAtCard": "" if record['name'] == False else record['name'],
             "Comments": "" if record['notes'] == False else record['notes'],
             "TransType": "OMRON" if record['x_studio_doc_trans_code'] == False else record['x_studio_doc_trans_code'].upper(),
             "OwnerCode": owner_code,
-            "Collector": "",
-            "SalesPrincipal": "",
-            "ChanOrd": "",
-            "TransactionTime": date_approval,
-            "Shipto": "",
+            "Collector": "" if record['x_collector'] == False else record['x_collector'],
+            "SalesPrincipal": "" if record['x_sales_principal'] == False else record['x_sales_principal'],
+            "ChanOrd": "" if record['x_chanord'] == False else record['x_chanord'],
+            "TransactionTime": date_approval_time,
+            "Shipto": "Jakarta" if record['company_id']['city'] == False else record['company_id']['city'],
             "DocumentLines": po_lines
         }
 
