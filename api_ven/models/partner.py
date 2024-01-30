@@ -12,6 +12,8 @@ class PartnerExt(models.Model):
     name = fields.Char(index=True, required=True)
     # No duplicate x_studio_customer_id
     x_studio_customer_id = fields.Char(string='Customer ID', copy=False, readonly=True)
+    x_ship_no = fields.Char(string='Ship Number', copy=False, readonly=True)
+
     # x_studio_customer_group = fields.Char(string='Customer Group',default='IOC')
     x_studio_customer_group = fields.Selection([("APT", "APOTIK"),("CBG", "CABANG"),("CLC","CLC"),("ECO","ECO"),("EVT","EVT"),("HCP","HCP"),("HOS","HOS"), ("INST","INST"), ("IOC","IOC"), ("KAC","KAC"), ("MKT","MKT"), ("MTC","MTC"), ("NA","Not Applicable"), ("PBAK","PBAK"), ("PBF","PBF"), ("PCP","PRINCIPAL"), ("SUPPLIER","Suppliers"), ("SUPPLIERS","SUPPLIERS"), ("TKC","TKC"), ("TKO","TOKO OBAT"), ("TKU","TKU"),],string="Selection", default='IOC')
     street = fields.Char(default='NA')
@@ -47,6 +49,8 @@ class PartnerExt(models.Model):
     
     # Function to set default value if null ======================
     def set_default(self,partners):
+        if not partners.x_ship_no:
+            partners.x_ship_no = "NA"
         if not partners.x_studio_customer_group:
             partners.x_studio_customer_group = "IOC"
         if not partners.street:
