@@ -329,3 +329,17 @@ class ProductLotRecord(models.Model):
             
         if is_error:
             raise UserError (f"Error found with note: {error['Error']}. Please contact Boonsoftware Consultant!")
+
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    def call_lot_adjustment(self):
+        product_id = self.env.context.get('default_product_id')
+        lot_record_model = self.env['lot_record.lot_record']
+        product = self.env['product.product'].browse(product_id)
+        product_code = product.default_code
+        if product_code:
+            lot_record_model.lot_adjustment(product_code)
+
+        return True

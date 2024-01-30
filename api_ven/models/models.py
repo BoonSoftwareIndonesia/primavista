@@ -263,13 +263,6 @@ class ApiController(models.Model):
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
         
-        """if is_error == False:
-            api_log['status'] = 'success'
-        elif '"returnStatus":"-1"' in api_log['response_msg']:
-            api_log['status'] = 'error'
-        else:
-            api_log['status'] = 'success'"""
-        
         if r.status_code == 200:
             api_log['status'] = 'success'
         else:
@@ -439,13 +432,6 @@ class ApiControllerSO(models.Model):
         # raise UserError(f"{r.text}")
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
-        
-        """if is_error == False:
-            api_log['status'] = 'success'
-        elif '"returnStatus":"-1"' in api_log['response_msg']:
-            api_log['status'] = 'error'
-        else:
-            api_log['status'] = 'success'"""
         
         if r.status_code == 200:
             api_log['status'] = 'success'
@@ -784,13 +770,6 @@ class ApiControllerStockPicking(models.Model):
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
         
-        """if is_error == False:
-            api_log['status'] = 'success'
-        elif '"returnStatus":"-1"' in api_log['response_msg']:
-            api_log['status'] = 'error'
-        else:
-            api_log['status'] = 'success'"""
-        
         if r.status_code == 200:
             api_log['status'] = 'success'
         else:
@@ -930,12 +909,12 @@ class ApiControllerPartner(models.Model):
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTU3NDgxODUzMywic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTU3NDkwNDkzM30.7LwXZCAEwfJuK5cKdMhkSuOVEnocUPA2vAXxBloknVE",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "ship": [
                 {
                     "ownerCode": owner_code,
                     "custCode": "" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
-		    #"shipNo": "" if record['x_ship_no'] == False else record['x_ship_no'],
+        		    "shipNo": "" if record['x_ship_no'] == False else record['x_ship_no'],
                     "name": "" if record['name'] == False else record['name'],
                     "address1": "" if record['street'] == False else record['street'],
                     "city": "" if record['city'] == False else record['city'],
@@ -1150,24 +1129,3 @@ class StockPickingReturnExt(models.TransientModel):
                                 'x_wms_lot_records': return_line.x_wms_lot_records
                             })
         return res
-
-class SaleOrderLine(models.Model):
-    _inherit = 'sale.order.line'
-    
-    def example(self):
-        for line in self:
-            product_id = self.env.context.get('default_product_id')
-            product = self.env['product.product'].browse(product_id)
-            product_name = product.name
-            raise UserError(f"Running example for Sale Order Line {line.id} with Product ID {product_id} -> {product_name}")
-        return True
-
-    def call_lot_adjustment(self):
-        product_id = self.env.context.get('default_product_id')
-        lot_record_model = self.env['lot_record.lot_record']
-        product = self.env['product.product'].browse(product_id)
-        product_code = product.default_code
-        if product_code:
-            lot_record_model.lot_adjustment(product_code)
-
-        return True
