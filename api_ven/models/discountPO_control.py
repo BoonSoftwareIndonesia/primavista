@@ -11,6 +11,21 @@ import base64
 import urllib.request
 import re
 
+"""
+Summary Brief:
+- This discount field is a field that functions to apply discount PO feature. There are 3 type of discount in discount PO.
+    
+Logic:
+Regular Discount => Regular discount is a discount obtained from the reduction between the price of the item 
+                    and the discount price (the usual calculation of discounts in general)
+
+Gradation Discount => Gradation discount is a discount which is the result of a discount on the price after regular 
+                      discounts are made.
+
+Additional Discount => Additional discounts are discounts that given as regular discounts based on the item price
+"""
+
+
 class PurchaseOrderLineDiscount(models.Model):
     _inherit = 'purchase.order.line'
 
@@ -18,20 +33,6 @@ class PurchaseOrderLineDiscount(models.Model):
     x_regular_discount = fields.Float(string='Regular Discount (%)', digits='Discount', default=0.00)
     x_gradation_discount = fields.Float(string='Gradation Discount (%)', digits='Discount', default=0.00)
     x_additional_discount = fields.Float(string='Additional Discount (%)', digits='Discount', default=0.00)
-
-    """
-    Summary Brief:
-    - This discount field is a field that functions only as a record in Odoo. (Before implementing PO integration between SAP and Odoo)
-    
-    Logic:
-    Regular Discount => Regular discount is a discount obtained from the reduction between the price of the item 
-                        and the discount price (the usual calculation of discounts in general)
-
-    Gradation Discount => Gradation discount is a discount which is the result of a discount on the price after regular 
-                        discounts are made.
-
-    Additional Discount => Additional discounts are discounts that given as regular discounts based on the item price
-    """
 
     # Regular discount calculation.
     # This function will return the value of the regular discount (not the final price)
