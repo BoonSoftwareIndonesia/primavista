@@ -10,3 +10,5 @@ from . import e_commerce
 from . import lot_record
 from . import discountPO_control
 from . import odoo_sap
+from . import odoo_wms
+from . import running_number_logic

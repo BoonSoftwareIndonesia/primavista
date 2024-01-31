@@ -16,7 +16,7 @@ import hashlib
 """
     Summary Brief:
     - This is lot records CUSTOM MODULE.
-    - This is not DEFULT SERIAL/LOT NUMBER MODULE. But the behavior basic algorithm is same.
+    - This is not DEFULT ODOO SERIAL/LOT NUMBER MODULE. But the behavior basic algorithm is same.
     - This models is creating because we need the lot records in ODOO JUST AS THE RECORDS
 
     LOGIC:

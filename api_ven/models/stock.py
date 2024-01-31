@@ -32,6 +32,22 @@ class StockMoveExt(models.Model):
     
 class StockReturnPickingExt(models.TransientModel):
     _inherit = 'stock.return.picking'
+
+    def _create_returns(self):
+        res = super(StockPickingReturnExt, self)._create_returns()
+
+        for return_line in self.product_return_moves:
+            if return_line.move_id:
+                stock_picking = return_line.move_id.picking_id
+
+                for return_move in return_line.move_id.returned_move_ids:
+                    for move_line in return_move.move_line_ids:
+                        if move_line.product_id == return_line.product_id:
+                            move_line.write({
+                                'x_stock_status_code': return_line.x_stock_status_code,
+                                'x_wms_lot_records': return_line.x_wms_lot_records
+                            })
+        return res
     
     # We need to override create_returns() function from the stock.rule model instead of using automated actions 
     # to call the api_return_po() and api_return_so() functions to prevent multiple API logs from being sent 
@@ -115,4 +131,3 @@ class StockReturnPickingLineExt(models.TransientModel):
     _inherit = "stock.return.picking.line"
     x_stock_status_code = fields.Selection([("NM", "Normal"),("DM", "Damage"),("ED","Expired"),("OBS","Obsolette"),("PR","Product Recall"),("RJCT","Reject"),],string="Stock Status Code")
     x_wms_lot_records = fields.Char(string="Lot Number")
-    
