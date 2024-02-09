@@ -32,22 +32,6 @@ class StockMoveExt(models.Model):
     
 class StockReturnPickingExt(models.TransientModel):
     _inherit = 'stock.return.picking'
-
-    def _create_returns(self):
-        res = super(StockPickingReturnExt, self)._create_returns()
-
-        for return_line in self.product_return_moves:
-            if return_line.move_id:
-                stock_picking = return_line.move_id.picking_id
-
-                for return_move in return_line.move_id.returned_move_ids:
-                    for move_line in return_move.move_line_ids:
-                        if move_line.product_id == return_line.product_id:
-                            move_line.write({
-                                'x_stock_status_code': return_line.x_stock_status_code,
-                                'x_wms_lot_records': return_line.x_wms_lot_records
-                            })
-        return res
     
     # We need to override create_returns() function from the stock.rule model instead of using automated actions 
     # to call the api_return_po() and api_return_so() functions to prevent multiple API logs from being sent 
@@ -104,6 +88,18 @@ class StockReturnPickingExt(models.TransientModel):
             # If the origin contains the word “OUT”, then the trans code of the stock picking is GRN (Goods Received Note) 
             # as it is a SO return
             trans_code = "GRN"
+
+        for return_line in self.product_return_moves:
+            if return_line.move_id:
+                stock_picking = return_line.move_id.picking_id
+
+                for return_move in return_line.move_id.returned_move_ids:
+                    for move_line in return_move.move_line_ids:
+                        if move_line.product_id == return_line.product_id:
+                            move_line.write({
+                                'x_stock_status_code': return_line.x_stock_status_code,
+                                'x_wms_lot_records': return_line.x_wms_lot_records
+                            })
         
         # Search for the origin stock picking which is the source/origin of the return’s stock picking
         source = request.env['stock.picking'].search([('name', '=', in_num)], limit=1)

@@ -772,13 +772,6 @@ class ApiControllerPartner(models.Model):
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
         
-        """if is_error == False:
-            api_log['status'] = 'success'
-        elif '"returnStatus":"-1"' in api_log['response_msg']:
-            api_log['status'] = 'error'
-        else:
-            api_log['status'] = 'success'"""
-        
         if r.status_code == 200:
             api_log['status'] = 'success'
         else:
@@ -795,6 +788,7 @@ class ApiControllerPartner(models.Model):
         })
 
     def api_dw_ship_no(self, record):
+        
         error = {}
 
         #Checking the existing company first:
@@ -802,6 +796,9 @@ class ApiControllerPartner(models.Model):
             owner_code = "PRIMAVISTA"
         else:
             owner_code = "AVO"
+
+        if not record.parent_id.x_studio_customer_id:  
+            raise UserError("Please save customer or vendor first, or contact consultant")
             
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
         apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createship"
@@ -814,8 +811,8 @@ class ApiControllerPartner(models.Model):
             "ship": [
                 {
                     "ownerCode": owner_code,
-                    "custCode": "" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
-        		    "shipNo": "" if record['x_ship_no'] == False else record['x_ship_no'],
+                    "custCode": "" if record['parent_id']['x_studio_customer_id'] == False else record['parent_id']['x_studio_customer_id'],
+        		    "shipNo": "" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
                     "name": "" if record['name'] == False else record['name'],
                     "address1": "" if record['street'] == False else record['street'],
                     "city": "" if record['city'] == False else record['city'],
@@ -868,13 +865,6 @@ class ApiControllerPartner(models.Model):
         
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
-        
-        """if is_error == False:
-            api_log['status'] = 'success'
-        elif '"returnStatus":"-1"' in api_log['response_msg']:
-            api_log['status'] = 'error'
-        else:
-            api_log['status'] = 'success'"""
         
         if r.status_code == 200:
             api_log['status'] = 'success'
