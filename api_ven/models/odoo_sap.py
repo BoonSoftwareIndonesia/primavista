@@ -27,36 +27,48 @@ class PurchaseOrderExt(models.Model):
 class SAPApiController(models.Model):
     _inherit = ['purchase.order']
 
+    # Odoo (Request Access Token)
+    def api_sap_get_access_token(self):
+
+        # The endpoint in SAP
+        apiurl = "http://b1webconnect.beonesolution.com:2106/GetToken"
+        
+        # The header of the API request
+        headers = {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive"
+        }
+    
+        payload = {
+            "username" : "Beone123",
+            "password" : "Be0ne$123"
+        }
+
+        # Post the API request 
+        resp = requests.post(apiurl, headers=headers, data=json.dumps(payload))
+
+        # Changing the WMS response the list in python
+        ret = json.loads(resp.text)
+        
+        return ret['accesstoken']
+
     # Odoo (Purchase Order) to SAP (Sales Order)
     def api_sap_dw_po(self, record):
+
+        SAP_access_Token = self.api_sap_get_access_token()
             
         # The endpoint in SAP
-        apiurl = "https://cloud1.boonsoftware.com/trn_avi_api/getlotlist"
+        apiurl = "http://b1webconnect.beonesolution.com:2106/Orders"
 
+        # An array to store the PO lines
+        po_lines = []
+        
+        owner_code = ""
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
         else:
             owner_code = "AVO"
-
-        # A variable to store the value of the current line number
-        line_no = 1
-        # An array to store the PO lines
-        po_lines = []
-        # To store the origin of this PO (the SO(s) that generated this PO)
-        res = ""
-        unique_res = ""
-        owner_code = ""
-
-        # To get the SO No that generated this PO
-        # If this PO is generated from another SO, we also need to send the list of SO that generated this PO
-        # Use regex to get the SO no only
-        # Example: OP/00272 - SO/POV/2022/11/24/00178 -> SO/POV/2022/11/24/00178
-        # re.findall() is used to return all non-overlapping matches of pattern in string, as a list of strings
-        # The string is scanned left-to-right, and matches are returned in the order found.
-        if record['origin']:
-            res = re.findall(r'S[\w\/]*', record['origin'])
-            unique_res = str(set(res))
             
         # ==============================================
         # Loop through all purchase order lines
@@ -64,9 +76,6 @@ class SAPApiController(models.Model):
             # If there is a PO line whose default code is empty, continue, don't send to WMS
             if line['product_id']["product_tmpl_id"]["default_code"] is False:
                 continue
-
-            # Set the current line's x_studio_line_opt_char_1 as the value of the current line_no
-            line['x_studio_opt_char_1'] = str(line_no)
 
             # Create po line (Refer to the mapping documentation)
             po_line = {
@@ -78,8 +87,6 @@ class SAPApiController(models.Model):
                 "WarehouseCode": "HARDCODE_WH"
             }
 
-            # Increment the line_no
-            line_no += 1
             # Append the current po_line to the po_lines array
             po_lines.append(po_line)
         # ==============================================
@@ -93,6 +100,8 @@ class SAPApiController(models.Model):
         
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
+        # Card code akan menjadi jadi hardcode code dari AVO
+        # Owner Code akan menjadi customer_id
         payload = {
             "DocDate": date_approval,
             "DocDueDate": date_planned,
@@ -104,13 +113,14 @@ class SAPApiController(models.Model):
             "Collector": "" if record['x_collector'] == False else record['x_collector'],
             "SalesPrincipal": "" if record['x_sales_principal'] == False else record['x_sales_principal'],
             "ChanOrd": "" if record['x_chanord'] == False else record['x_chanord'],
-            "TransactionTime": date_approval_time,
+            "TransactionTime": str(date_approval_time),
             "Shipto": "Jakarta" if record['company_id']['city'] == False else record['company_id']['city'],
             "DocumentLines": po_lines
         }
 
         # The header of the API request
         headers = {
+            "HTTP-KEY": SAP_access_Token,
             "Content-Type": "application/json",
             "Connection": "keep-alive",
             "Accept": "*/*"
@@ -144,7 +154,7 @@ class SAPApiController(models.Model):
         except Exception as e:
             error['Error'] = str(e)
             is_error = True
-
+        
         # Post the API request 
         resp = requests.get(apiurl, data=json.dumps(payload), headers=headers)
 

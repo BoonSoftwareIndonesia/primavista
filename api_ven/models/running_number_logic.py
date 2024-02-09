@@ -29,7 +29,7 @@ class CreatePORunningNumber(models.Model):
                 vals['name'] = self_comp.env['ir.sequence'].next_by_code('avo.purchase.order', sequence_date=seq_date) or '/'
             
         vals, partner_vals = self._write_partner_values(vals)
-        res = super(ApiController, self_comp).create(vals)
+        res = super(CreatePORunningNumber, self_comp).create(vals)
         if partner_vals:
             res.sudo().write(partner_vals)  # Because the purchase user doesn't have write on `res.partner`
         return res
@@ -58,5 +58,5 @@ class CreateSORunningNumber(models.Model):
             vals['partner_invoice_id'] = vals.setdefault('partner_invoice_id', addr['invoice'])
             vals['partner_shipping_id'] = vals.setdefault('partner_shipping_id', addr['delivery'])
             vals['pricelist_id'] = vals.setdefault('pricelist_id', partner.property_product_pricelist.id)
-        result = super(ApiControllerSO, self).create(vals)
+        result = super(CreateSORunningNumber, self).create(vals)
         return result

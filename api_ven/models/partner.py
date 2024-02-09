@@ -12,8 +12,6 @@ class PartnerExt(models.Model):
     name = fields.Char(index=True, required=True)
     # No duplicate x_studio_customer_id
     x_studio_customer_id = fields.Char(string='Customer ID', copy=False, readonly=True)
-    x_ship_no = fields.Char(string='Ship Number', copy=False, readonly=True)
-
     # x_studio_customer_group = fields.Char(string='Customer Group',default='IOC')
     x_studio_customer_group = fields.Selection([("APT", "APOTIK"),("CBG", "CABANG"),("CLC","CLC"),("ECO","ECO"),("EVT","EVT"),("HCP","HCP"),("HOS","HOS"), ("INST","INST"), ("IOC","IOC"), ("KAC","KAC"), ("MKT","MKT"), ("MTC","MTC"), ("NA","Not Applicable"), ("PBAK","PBAK"), ("PBF","PBF"), ("PCP","PRINCIPAL"), ("SUPPLIER","Suppliers"), ("SUPPLIERS","SUPPLIERS"), ("TKC","TKC"), ("TKO","TOKO OBAT"), ("TKU","TKU"),],string="Selection", default='IOC')
     street = fields.Char(default='NA')
@@ -49,8 +47,6 @@ class PartnerExt(models.Model):
     
     # Function to set default value if null ======================
     def set_default(self,partners):
-        if not partners.x_ship_no:
-            partners.x_ship_no = "NA"
         if not partners.x_studio_customer_group:
             partners.x_studio_customer_group = "IOC"
         if not partners.street:
@@ -64,16 +60,21 @@ class PartnerExt(models.Model):
         if not partners.company_id:
             partners.company_id = self.env.context['allowed_company_ids'][0]
         if not partners.x_studio_customer_id:
-            if partners.customer_rank == 1:
-                if self.env.context['allowed_company_ids'][0] == 1: 
-                    partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.customer.id')
-                else:
-                    partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.customer.id')
+            if partners.type == "delivery" and self.env.context['allowed_company_ids'][0] == 1:
+                partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.ship.no')
+            elif partners.type == "delivery" and self.env.context['allowed_company_ids'][0] == 2:
+                partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.ship.no')
             else:
-                if self.env.context['allowed_company_ids'][0] == 1:
-                    partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.vendor.id')
+                if partners.customer_rank == 1:
+                    if self.env.context['allowed_company_ids'][0] == 1: 
+                        partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.customer.id')
+                    else:
+                        partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.customer.id')
                 else:
-                    partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.vendor.id')
+                    if self.env.context['allowed_company_ids'][0] == 1:
+                        partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.vendor.id')
+                    else:
+                        partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.vendor.id')
         # if not partners.state_id:
         #     partners.state_id = 1
     
@@ -81,7 +82,7 @@ class PartnerExt(models.Model):
     # Triggers the api_dw_customer() function that sends an API log when creating new customer ======================
     @api.model_create_multi
     def create(self, vals_list):
-        
+
         # Call the super() method
         partners = super(PartnerExt, self).create(vals_list)
         
@@ -95,12 +96,19 @@ class PartnerExt(models.Model):
         if not test_import:
             #if we are creating a child partner, create ship_no
             if vals_list[0]['type'] == "delivery":
-                # raise UserError("Entry dw_ship_address")
+
+                # curr_parent_id = vals_list[0]['parent_id']
+
+                # parent_model = request.env['res.partner'].search([('id', '=', curr_parent_id)], limit=1)
+                
+                # if not parent_model:
+                # raise UserError("Please save customer or vendor first, or contact consultant")
+            # else:
                 self.env['res.partner'].api_dw_ship_no(partners)
                 
-            #if not a child partner, Call api_dw_customer to send API to WMS
+                #if not a child partner, Call api_dw_customer to send API to WMS
             else:
-                # raise UserError("Entry this is a dw_customer")
+                    # raise UserError("Entry this is a dw_customer")
                 self.env['res.partner'].api_dw_customer(partners)
             
             # Get the new customer's fields and values
@@ -156,7 +164,7 @@ class PartnerExt(models.Model):
         return None
     
     
-    # Triggers the api_dw_customer() function that sends an API log when updating a customer/partner ======================
+    # Triggers the api_dw_customer() function that sends an API log when updating a customer/partner ========
     def write(self,vals):
         # Get the old values before update
         old_vals = {
@@ -186,8 +194,17 @@ class PartnerExt(models.Model):
                 # If want to change password. Please comment below line
                 self.create_activity_logs(self, "write", new_vals=new_vals, old_vals=old_vals)
                 
-                # Send API to WMS 
-                self.env['res.partner'].api_dw_customer(partners)
+                # Send API to WMS
+                if partners.type == "delivery":
+                    if not partners.parent_id: 
+                        raise UserError("Please save customer or vendor first, or contact consultant")
+                    else:
+                        self.env['res.partner'].api_dw_ship_no(partners)
+                #if not a child partner, Call api_dw_customer to send API to WMS
+                else:
+                    # raise UserError("Entry this is a dw_customer")
+                    self.env['res.partner'].api_dw_customer(partners)
+                    
         return res
     
     
