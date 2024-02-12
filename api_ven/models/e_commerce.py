@@ -64,15 +64,20 @@ class SaleOrderLineExt(models.Model):
 # Fetch Data From TokPed =============================================================
 class ApiFetchTokPed(models.Model):
     _inherit = "sale.order"
-    
-    def get_tokped_order_list(self):
+
+    def get_tokped_access_token(self):
+        """
+        This function has a purpose to Request tokopedia access token,
+        token type, and expired date. After that, load it as a variable
+        """
+        # =================================================================
         
-        # Initialize Client and shop information
+        # Initialize Client basic information
         # Note: We need to change this variable if there is a changing in
         #       client Tokopedia Data
         client_id = "718e4748bb0d44c28f50b4da4d131d69"
         client_secret = "18e291fcb7104c508ac80d3e1dfd20d1"
-        fs_id = 17859
+        
         # =================================================================
         
         # Encode the client id + client server and create it
@@ -82,55 +87,70 @@ class ApiFetchTokPed(models.Model):
         
         base64_bytes = base64.b64encode(key_bytes)
         auth_key = base64_bytes.decode("ascii")
+
         # =================================================================
-        
-        # This section has a purpose to Request tokopedia access token,
-        # token type, and expired date. After that, load it as a variable
-        
+
         # Create the header for fetch Access token API
         headers = {
             'Authorization': 'Basic ' + auth_key,
             'User-Agent': 'PostmanRuntime/7.17.1',
         }
-        
+
         # Create Params for fetch Access token API
         params = {
             'grant_type': 'client_credentials',
         }
-        
+
         # Create request and get the data
         resp = requests.post('https://accounts.tokopedia.com/token', params=params, headers=headers)
-        
+
+        if resp.status_code != 200:
+            raise UserError(f"Error when get generate access token from Tokopedia. Please your Boonsoftware consultant for more information!")
+
         # Convert the return result from token API to JSON
         ret = json.loads(resp.content)
-        
+
+        # =================================================================
+
         # Store access token, Expires_date, and token_type
         access_token = ret.get("access_token")
         expires_in = ret.get("expires_in")
         token_type = ret.get("token_type")
+
         # =================================================================
-        
-        # This section has a purpose to fetch Shop Information from TokPed
+
+        return access_token, expires_in, token_type
+
+    def get_tokped_shop_id(self, fs_id, access_token, token_type):
+        """
+        This section has a purpose to fetch Shop Information from TokPed
+        and return shopId
+        """
+
+        # =================================================================
         
         # Prepare the requirement to fetch Shop List API
         headers = {
             'Authorization': f'{token_type} {access_token}',
         }
-        
+
         params = {
             'fs_id': fs_id,
             'page': 1,
             'per_page': 1
         }
-        
+
         # Create request and get the shop list      
         resp = requests.get(f'https://fs.tokopedia.net/v1/shop/fs/{fs_id}/shop-info', headers=headers, params=params)
+
+        if resp.status_code != 200:
+            raise UserError(f"Error when get shop information from TokPed. Please your Boonsoftware consultant for more information!")
         
         # Convert the return result from token API to JSON
         ret = json.loads(resp.content)
-        
+
         # =================================================================
-        
+
         # In here we need to prepare the shop list into the shop detail info        
         # so we can get the shop ID
         shop_list = ret.get("data")
@@ -138,6 +158,30 @@ class ApiFetchTokPed(models.Model):
         shop_detail_info = shop_list[0]
         
         shop_id = shop_detail_info.get("shop_id")
+
+        # =================================================================
+
+        return shop_id
+    
+    def get_tokped_order_list(self):
+
+        # Initialize fs basic information
+        # Note: We need to change this variable if there is a changing in
+        #       client Tokopedia Data
+        fs_id = 17859
+
+        # =================================================================
+        
+        # Request access token, expired_date, and token type
+        # using function get_tokped_access_token
+        access_token, expires_in, token_type = self.get_tokped_access_token()
+
+        # =================================================================
+
+        # Request access token, expired_date, and token type
+        # using function get_tokped_access_token
+        
+        shop_id = self.get_tokped_shop_id(fs_id, access_token, token_type)
         # =================================================================
         
         # This section will get the datetime from Odoo and convert it into
@@ -332,9 +376,18 @@ class ApiFetchTokPed(models.Model):
                         # In this logic, we will check if order_status from Tokopedia.
                         # If the order status is 400. Systems will create the sales.order
                         # if the order status is other that 400. Systems will pass it and looking for next list
-
-
                         running_code = self.env['ir.sequence'].next_by_code('avo.sale.order')
+
+
+                        # NOTE if please re-mapping all this mapping:
+                        """
+                        - Partner Id -> Base on tokopedia customer ID
+                        - Company ID -> Must been AVO company ID
+                        - partner_invoice_id & partner_shipping_id -> Please checking if this mandatory or not
+                        - pricelist_id -> please check if this is mandatory or not
+                        - warehouse_id -> please checking if the warehouse already same as the avo needed
+                        - 
+                        """
                             
                         request.env['sale.order'].create({
                             'name': running_code,
@@ -400,6 +453,15 @@ class ApiFetchTokPed(models.Model):
                         if not is_product:
 
                             is_product = request.env['product.template'].search([('name', '=', product.get("name"))], limit=1)
+                            # NOTE if please re-mapping all this mapping:
+                            """
+                            - categ_id -> Please hardcode this into sale_able product category first
+                            - company_id -> Must been AVO company ID
+                            - detailed_type -> Please checking if this mandatory or not
+                            - pricelist_id -> please check if this is mandatory or not
+                            - warehouse_id -> please checking if the warehouse already same as the avo needed
+                            - uom_id -> checking the uom ID is already right or not. You can hardcode it into units
+                            """
                             
                             if not is_product:
                                 request.env['product.template'].create({
@@ -460,16 +522,11 @@ class ApiFetchTokPed(models.Model):
                         new_sale_order_m._compute_tax_totals_json()
 
                         new_sale_order_m.action_confirm()
-
-                        # sale_order_curr = request.env['sale.order'].search([('name', '=', "SO/AVO/2023/10/24/00024")], limit=1)
-                        # raise UserError(f"{sale_order_curr.company_id}")
-
-    
-                        # raise UserError(f'Json: {new_sale_order_m.tax_totals_json}')
-
                         
             except Exception as e:
                 raise UserError(str(e))
+
+
 
 # Fetch Data From Shopee =============================================================
 class ApiFetchShopee(models.Model):
