@@ -11,7 +11,7 @@ class PartnerExt(models.Model):
     # Name is required
     name = fields.Char(index=True, required=True)
     # No duplicate x_studio_customer_id
-    x_studio_customer_id = fields.Char(string='Customer ID', copy=False, readonly=True)
+    x_studio_customer_id = fields.Char(string='Customer ID', copy=False, readonly=False)
     # x_studio_customer_group = fields.Char(string='Customer Group',default='IOC')
     x_studio_customer_group = fields.Selection([("APT", "APOTIK"),("CBG", "CABANG"),("CLC","CLC"),("ECO","ECO"),("EVT","EVT"),("HCP","HCP"),("HOS","HOS"), ("INST","INST"), ("IOC","IOC"), ("KAC","KAC"), ("MKT","MKT"), ("MTC","MTC"), ("NA","Not Applicable"), ("PBAK","PBAK"), ("PBF","PBF"), ("PCP","PRINCIPAL"), ("SUPPLIER","Suppliers"), ("SUPPLIERS","SUPPLIERS"), ("TKC","TKC"), ("TKO","TOKO OBAT"), ("TKU","TKU"),],string="Selection", default='IOC')
     street = fields.Char(default='NA')
@@ -75,9 +75,6 @@ class PartnerExt(models.Model):
                         partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.vendor.id')
                     else:
                         partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.vendor.id')
-        # if not partners.state_id:
-        #     partners.state_id = 1
-    
     
     # Triggers the api_dw_customer() function that sends an API log when creating new customer ======================
     @api.model_create_multi
