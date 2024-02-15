@@ -103,8 +103,6 @@ class ApiVen(http.Controller):
                 
                 curr_move.move_line_nosuggest_ids.write({'qty_done': 0})
     
-    
-    
     # PO (CRT_RCPT API) ===================================================================================
     @http.route('/web/api/create_rcpt', type='json', auth='user', methods=['POST'])
     def post_rcpt(self, rcpt):
@@ -188,7 +186,6 @@ class ApiVen(http.Controller):
                         is_error = True
                         break
 
-                    
                     # (2) Validations (end)
                     
                     # (3) Receipt Lines
@@ -265,7 +262,7 @@ class ApiVen(http.Controller):
                         
                         # Checking if the order is using LOT_Number or Serial Number
                         
-                        # (3.2) Create a new move stock line
+                        # (3.2) Update a new move stock line
                         receipt_line.move_line_ids.write({
                             "product_id": temp_product.id,
                             "product_uom_id": receipt_line.move_line_ids.product_uom_id.id,
