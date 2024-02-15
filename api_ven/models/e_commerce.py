@@ -13,14 +13,6 @@ import re
 import hmac
 import hashlib
 
-class TestingClass(models.Model):
-    _inherit = "sale.order"
-
-    def testing_class(self):
-        raise UserError(f"Hello World!")
-
-
-
 class SaleOrderExt(models.Model):
     _inherit = "sale.order"
     
