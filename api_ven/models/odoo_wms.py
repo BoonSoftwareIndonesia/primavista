@@ -979,13 +979,6 @@ class ApiControllerProduct(models.Model):
         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
         api_log['response_date'] = datetime.now()
         
-        """if is_error == False:
-            api_log['status'] = 'success'
-        elif '"returnStatus":"-1"' in api_log['response_msg']:
-            api_log['status'] = 'error'
-        else:
-            api_log['status'] = 'success'"""
-        
         if r.status_code == 200:
             api_log['status'] = 'success'
         else:

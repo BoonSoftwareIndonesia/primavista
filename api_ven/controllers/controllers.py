@@ -138,6 +138,7 @@ class ApiVen(http.Controller):
                     'datas': base64.b64encode(bytes(str(rcpt), 'utf-8')),
                     'res_model': 'api_ven.api_ven',
                     'res_id': api_log['id'],
+                    'company_id': self.env.context['allowed_company_ids'][0],
                     'mimetype': 'text/plain'
                 })
             except Exception as e:
@@ -331,6 +332,7 @@ class ApiVen(http.Controller):
                 'datas': base64.b64encode(bytes(str(message), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'mimetype': 'text/plain'
             })
             return message
@@ -435,6 +437,7 @@ class ApiVen(http.Controller):
                 'datas': base64.b64encode(bytes(str(do), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'mimetype': 'text/plain'
             })
         except Exception as e:
@@ -619,6 +622,7 @@ class ApiVen(http.Controller):
             'datas': base64.b64encode(bytes(str(message), 'utf-8')),
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
         
@@ -659,6 +663,7 @@ class ApiVen(http.Controller):
                 'datas': base64.b64encode(bytes(str(do), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'mimetype': 'text/plain'
             })
         except Exception as e:
@@ -852,6 +857,7 @@ class ApiVen(http.Controller):
             'datas': base64.b64encode(bytes(str(message), 'utf-8')),
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
         
@@ -893,6 +899,7 @@ class ApiVen(http.Controller):
                 'datas': base64.b64encode(bytes(str(rcpt), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
                 'mimetype': 'text/plain'
             })
         except Exception as e:
@@ -1074,6 +1081,7 @@ class ApiVen(http.Controller):
             'datas': base64.b64encode(bytes(str(message), 'utf-8')),
             'res_model': 'api_ven.api_ven',
             'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
             'mimetype': 'text/plain'
         })
         
@@ -1136,141 +1144,33 @@ class ApiVen(http.Controller):
             
             for pick in ret_partial:
                 pick.write({'x_wms_rec_no': do_header.x_wms_rec_no, 'x_studio_doc_trans_code': do_header.x_studio_doc_trans_code})
-                
-                
     
     @http.route('/web/api/stock_adjustment', type='json', auth='user', methods=['POST'])
     def stock_adjustment(self, adjustList):
-            create = 0
-            error = {}
-            is_error = False
-            response_msg = "Failed to receive WMS stock adjustment data"
-            message = {}
+        create = 0
+        error = {}
+        is_error = False
+        response_msg = "Failed to receive WMS stock adjustment data"
+        message = {}
         
-            # Create API Log
-            try:
-                api_log = request.env['api_ven.api_ven'].create({
-                    'status': 'new',
-                    'created_date': datetime.now(),
-                    'incoming_msg': adjustList,
-                    'message_type': 'ADJUST'
-                })
+        # Create API Log
 
-                api_log['status'] = 'process'
-            except:
-                error['Error'] = str(e)
-                is_error = True
+        # Create incoming txt
 
-            # Create incoming txt
-            try:
-                api_log['incoming_txt'] = request.env['ir.attachment'].create({
-                    'name': str(api_log['name']) + '_in.txt',
-                    'type': 'binary',
-                    'datas': base64.b64encode(bytes(str(adjustList), 'utf-8')),
-                    'res_model': 'api_ven.api_ven',
-                    'res_id': api_log['id'],
-                    'mimetype': 'text/plain'
-                })
-            except Exception as e:
-                error['Error'] = str(e)
-                is_error = True
-#          ==================================================
-            try:
-                for rec in adjustList:
-                    if rec['ownerCode'] == "":
-                        error["Error"] = "Field owner code is blank"
-                        is_error = True
-                        break
-                        
-                    if rec['documentType'] == "":
-                        error["Error"] = "Field document type is blank"
-                        is_error = True
-                        break
-                        
-                    for line in rec['adj']:
-                        if line['warehouseCode'] == "":
-                            error["Error"] = "Field warehouse code is blank"
-                            is_error = True
-                            break
-                            
-                        if (line['ownerCode'] == "" or (line['ownerCode'] != "" and line['ownerCode'] != rec['ownerCode'])):
-                            error["Error"] = "Field owner code is blank"
-                            is_error = True
-                            break
-                            
-                        if line['product'] == "":
-                            error["Error"] = "Field product is blank"
-                            is_error = True
-                            break
-                            
-                        # if line['expiryDate'] == "":
-                        #     error["Error"] = "Field expiry date is blank"
-                        #     is_error = True
-                        #     break
-                        
-                        # if line['lotNo'] == "":
-                        #     error["Error"] = "Field Lot Number is blank"
-                        #     is_error = True
-                        #     break
-                            
-                        # if line['qtyOnHand'] == "":
-                        #     error["Error"] = "Field quantity on hand is blank"
-                        #     is_error = True
-                        #     break
-                        
-                        loc_id = request.env['stock.location'].search([('complete_name', '=', line['warehouseCode'])]).id
-                        
-                        product_id = request.env['product.product'].search([('default_code', '=', line['product']), ('location_id', '=', loc_id)]).id
-                        
-                        warehouse = request.env['stock.warehouse'].search([('display_name', '=', line['warehouseCode'])],limit=1).lot_stock_id.id
-                        
-                        product_qty = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)])
-                        qty_final = product_qty.available_quantity + float(line['qtyOnHand'])
+        # ==========================================
 
-                        lot_id = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).lot_id.id
-                        
-                        is_tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
-                        
-                        # raise UserError(is_tracking)
-                        if is_tracking == False:
-                            request.env['stock.quant'].with_context(inventory_mode=True).create({
-                                    'product_id': product_id,
-                                    'inventory_quantity': qty_final,
-                                    'location_id': warehouse,
-                            }).action_apply_inventory()
-                        
-                    if is_error == True:
-                        break
+        # Looping
 
-                    response_msg = "Stocks adjusted!!"
-                        
-            except Exception as e:
-                error["Error"] = str(e)
-                is_error = True  
-                
-#          ==================================================
-            if is_error == True:
-                api_log['status'] = 'error'
-            else:
-                Response.status = "200"
-                api_log['status'] = 'success'
-                
-            message = {
-                'response': response_msg, 
-                'message': error
-            } 
-            
-            api_log['response_msg'] = message
-            api_log['response_date'] = datetime.now()
+            # Validation
 
-            # Create response txt
-            api_log['response_txt'] = request.env['ir.attachment'].create({
-                'name': str(api_log['name']) + '_out.txt',
-                'type': 'binary',
-                'datas': base64.b64encode(bytes(str(message), 'utf-8')),
-                'res_model': 'api_ven.api_ven',
-                'res_id': api_log['id'],
-                'mimetype': 'text/plain'
-            })
+            # Searching existing model
+
+            # Update the stock different + apply auto confirm
+
+        # ==========================================
+
+        # Update API status
         
-            return message
+        # Create Response Date
+        
+        return message
