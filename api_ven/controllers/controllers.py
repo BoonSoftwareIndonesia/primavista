@@ -1114,141 +1114,138 @@ class ApiVen(http.Controller):
             
             for pick in ret_partial:
                 pick.write({'x_wms_rec_no': do_header.x_wms_rec_no, 'x_studio_doc_trans_code': do_header.x_studio_doc_trans_code})
-                
-                
     
     @http.route('/web/api/stock_adjustment', type='json', auth='user', methods=['POST'])
     def stock_adjustment(self, adjustList):
-            create = 0
-            error = {}
-            is_error = False
-            response_msg = "Failed to receive WMS stock adjustment data"
-            message = {}
+        # raise UserError('test')
+        create = 0
+        error = {}
+        is_error = False
+        response_msg = "Failed to receive WMS stock adjustment data"
+        message = {}
+        api_log = request.env['api_ven.api_ven']
         
-            # Create API Log
-            try:
-                api_log = request.env['api_ven.api_ven'].create({
-                    'status': 'new',
-                    'created_date': datetime.now(),
-                    'incoming_msg': adjustList,
-                    'message_type': 'ADJUST'
-                })
+        # Create api log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': adjustList,
+                'message_type': 'ADJUST'
+            })
 
-                api_log['status'] = 'process'
-            except:
-                error['Error'] = str(e)
-                is_error = True
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
 
-            # Create incoming txt
-            try:
-                api_log['incoming_txt'] = request.env['ir.attachment'].create({
-                    'name': str(api_log['name']) + '_in.txt',
-                    'type': 'binary',
-                    'datas': base64.b64encode(bytes(str(adjustList), 'utf-8')),
-                    'res_model': 'api_ven.api_ven',
-                    'res_id': api_log['id'],
-                    'mimetype': 'text/plain'
-                })
-            except Exception as e:
-                error['Error'] = str(e)
-                is_error = True
-#          ==================================================
-            try:
-                for rec in adjustList:
-                    if rec['ownerCode'] == "":
-                        error["Error"] = "Field owner code is blank"
-                        is_error = True
-                        break
-                        
-                    if rec['documentType'] == "":
-                        error["Error"] = "Field document type is blank"
-                        is_error = True
-                        break
-                        
-                    for line in rec['adj']:
-                        if line['warehouseCode'] == "":
-                            error["Error"] = "Field warehouse code is blank"
-                            is_error = True
-                            break
-                            
-                        if (line['ownerCode'] == "" or (line['ownerCode'] != "" and line['ownerCode'] != rec['ownerCode'])):
-                            error["Error"] = "Field owner code is blank"
-                            is_error = True
-                            break
-                            
-                        if line['product'] == "":
-                            error["Error"] = "Field product is blank"
-                            is_error = True
-                            break
-                            
-                        # if line['expiryDate'] == "":
-                        #     error["Error"] = "Field expiry date is blank"
-                        #     is_error = True
-                        #     break
-                        
-                        # if line['lotNo'] == "":
-                        #     error["Error"] = "Field Lot Number is blank"
-                        #     is_error = True
-                        #     break
-                            
-                        # if line['qtyOnHand'] == "":
-                        #     error["Error"] = "Field quantity on hand is blank"
-                        #     is_error = True
-                        #     break
-                        
-                        loc_id = request.env['stock.location'].search([('complete_name', '=', line['warehouseCode'])]).id
-                        
-                        product_id = request.env['product.product'].search([('default_code', '=', line['product']), ('location_id', '=', loc_id)]).id
-                        
-                        warehouse = request.env['stock.warehouse'].search([('display_name', '=', line['warehouseCode'])],limit=1).lot_stock_id.id
-                        
-                        product_qty = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)])
-                        qty_final = product_qty.available_quantity + float(line['qtyOnHand'])
-
-                        lot_id = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).lot_id.id
-                        
-                        is_tracking = request.env['stock.quant'].search([('product_id', '=', line['product']), ('location_id', '=', loc_id)]).tracking
-                        
-                        # raise UserError(is_tracking)
-                        if is_tracking == False:
-                            request.env['stock.quant'].with_context(inventory_mode=True).create({
-                                    'product_id': product_id,
-                                    'inventory_quantity': qty_final,
-                                    'location_id': warehouse,
-                            }).action_apply_inventory()
-                        
-                    if is_error == True:
-                        break
-
-                    response_msg = "Stocks adjusted!!"
-                        
-            except Exception as e:
-                error["Error"] = str(e)
-                is_error = True  
-                
-#          ==================================================
-            if is_error == True:
-                api_log['status'] = 'error'
-            else:
-                Response.status = "200"
-                api_log['status'] = 'success'
-                
-            message = {
-                'response': response_msg, 
-                'message': error
-            } 
-            
-            api_log['response_msg'] = message
-            api_log['response_date'] = datetime.now()
-
-            # Create response txt
-            api_log['response_txt'] = request.env['ir.attachment'].create({
-                'name': str(api_log['name']) + '_out.txt',
+        # Create incoming txt
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
                 'type': 'binary',
-                'datas': base64.b64encode(bytes(str(message), 'utf-8')),
+                'datas': base64.b64encode(bytes(str(adjustList), 'utf-8')),
                 'res_model': 'api_ven.api_ven',
                 'res_id': api_log['id'],
                 'mimetype': 'text/plain'
             })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
         
-            return message
+        # ==========================================
+        adjustList = adjustList[0].get('adj', [])
+        
+        # Looping        
+        try:
+            # Validation            
+            if not adjustList:                
+                error["Error"] = 'adjustList is empty'
+                is_error = True
+
+            products = request.env['stock.quant'].sudo().search([])
+        
+            # Debugging: Print all records
+            for product in products:
+                print(product)            
+        
+            # Searching existing model                                
+            for adjust_item in adjustList:
+                if is_error:
+                    break
+                        
+                product_id = adjust_item.get('product')
+                if not product_id:
+                    error["Error"] = 'Product ID is missing in adjustList'
+                    is_error = True
+                    break                                        
+                    
+                quantity = adjust_item.get('qtyOnHand')
+        
+                # Update the stock different + apply auto confirm
+                if quantity is not None:
+                    product = request.env['stock.quant'].sudo().search([('product_id', '=', product_id)], limit=1)
+                    if product:
+                        product.sudo().write({'quantity': quantity})
+                        response_msg = "Stock adjusted successfully"
+                    else:
+                        error['Error'] = f'Product not found with ID {product_id}'
+                        is_error = True
+                else:
+                    error['Error'] = 'Quantity is missing for product with ID ' + str(product_id)
+                    is_error = True
+        
+            if not is_error:
+                response_msg = "Stock adjusted successfully"
+                
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True                                
+        # ==========================================
+
+        # Print out everything in a model
+        # products = request.env['product.product'].sudo().search([])
+    
+        # # Prepare response data
+        # response_data = []
+        # for product in products:
+        #     # Convert record to dictionary
+        #     product_dict = product.read()[0]
+    
+        #     # Remove unwanted fields
+        #     fields_to_remove = ["image_1024", "image_128", "image_1920", "image_512", "image_256"]
+        #     for field in fields_to_remove:
+        #         product_dict.pop(field, None)
+    
+        #     response_data.append(product_dict)
+
+        # response = {'message': response_msg, 'data': response_data}
+
+        # Update API status
+        if is_error == True:
+            api_log['status'] = 'error'
+        else:
+            Response.status = "200"
+            api_log['status'] = 'success'
+
+        message = {
+            'response': response_msg,
+            'message': error
+        } 
+
+        # Create Response Date
+        api_log['response_msg'] = message
+        api_log['response_date'] = datetime.now()        
+        
+        
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(message), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+        
+        return message
+        # return response
