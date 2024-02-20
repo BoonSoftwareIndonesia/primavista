@@ -80,7 +80,18 @@ class PurchaseOrderLineDiscount(models.Model):
 
             # Validation that pretend user to input gradation discount and additional discount in the same line
             if line.x_gradation_discount > 0.00 and line.x_additional_discount > 0.00:
-                raise UserError(f"Gradation Discount can't be use together with additional discount!")
+                raise UserError(f"Gradation Discount can't be use together with additional discount. Please check your input!")
+
+            # Validation that pretend user to input minus discount
+            if line.x_regular_discount < 0.00:
+                raise UserError(f"Regular discount can't be less than 0. Please check your input or contact your Boonsoftware Consultant!")
+
+            if line.x_gradation_discount < 0.00:
+                raise UserError(f"Gradation discount can't be less than 0. Please check your input or contact your Boonsoftware Consultant!")
+
+            if line.x_additional_discount < 0.00:
+                raise UserError(f"Additional Discount can't be less than 0. Please check your input or contact your Boonsoftware Consultant!")
+                
 
 
             # ======================================================

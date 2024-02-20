@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "api_ven",
+    'name': "BoonSoftware WMS and Odoo Module",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+        Boonsoftware Custom WMS,SAP, and Odoo Module""",
 
     'description': """
-        Long description of module's purpose
+        This module is created by Boonsoftware for integration between WMS, SAP AVO, and Odoo
     """,
 
     'author': "BoonSoftware Jakarta",

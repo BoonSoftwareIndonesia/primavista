@@ -20,9 +20,9 @@ import re
 
 class PurchaseOrderExt(models.Model):
     _inherit = 'purchase.order'
-    x_collector = fields.Selection([("Lukman", "Lukman"), ("NA", "NA"),],string="Collector", default='NA')
-    x_sales_principal = fields.Selection([("Eko", "Eko"), ("NA", "NA"),],string="Sales Principal", default='NA')
-    x_chanord = fields.Selection([("SALES", "SALES"), ("NA", "NA"),],string="Chanord", default='NA')
+    x_collector = fields.Selection([("ECO", "ECO"), ("NA", "NA"),],string="Collector", default='NA')
+    x_sales_principal = fields.Selection([("3M", "3M"), ("ACUVUE", "ACUVUE"),  ("AKMU", "AKMU"), ("ALPHA", "ALPHA"), ("APA", "APA"), ("BAUSCH LOMB IND", "BAUSCH LOMB IND"), ("BERNOFARM OTC", "BERNOFARM OTC"), ("DKT", "DKT"), ("ESSILOR 2.5 NVG", "ESSILOR 2.5 NVG"), ("ESSILOR NVG CONS", "ESSILOR NVG CONS"), ("FRESH EYE", "FRESH EYE"), ("GALENIUM PSC", "GALENIUM PSC"), ("GEO MEDICAL", "GEO MEDICAL"), ("JENNY HOUSE", "JENNY HOUSE"), ("KINO MEDICAL", "KINO MEDICAL"), ("KLARENS", "KLARENS"), ("MEIJI IND ETC", "MEIJI IND ETC"), ("MPS", "MPS"), ("OMRON", "OMRON"), ("ONEMED", "ONEMED"), ("SENSI", "SENSI"), ("TAKEDA OTC", "TAKEDA OTC"), ("THERASKIN", "THERASKIN"), ("VITAHEALTH CONS", "VITAHEALTH CONS"), ("NA", "NA")],string="Sales Principal", default='NA')
+    x_chanord = fields.Selection([("ECO", "ECO"), ("NA", "NA"),],string="Chanord", default='NA')
 
 class SAPApiController(models.Model):
     _inherit = ['purchase.order']
