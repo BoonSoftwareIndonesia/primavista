@@ -1147,5 +1147,121 @@ class ApiVen(http.Controller):
         message = {}
         api_log = request.env['api_ven.api_ven']
         
+        # Create api log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': adjustList,
+                'message_type': 'ADJUST'
+            })
+
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+
+        # Create incoming txt
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(adjustList), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
+        
+        # ==========================================
+        adjustList = adjustList[0].get('adj', [])
+        
+        # Looping        
+        try:
+            # Validation            
+            if not adjustList:                
+                error["Error"] = 'adjustList is empty'
+                is_error = True
+                    
+            # Searching existing model                                
+            for adjust_item in adjustList:
+                if is_error:
+                    break
+                        
+                product_id = adjust_item.get('product')
+                if not product_id:
+                    error["Error"] = 'Product ID is missing in adjustList'
+                    is_error = True
+                    break                                        
+                    
+                quantity = adjust_item.get('qtyOnHand')
+        
+                # Update the stock different + apply auto confirm
+                if quantity is not None:                    
+                    product = request.env['stock.quant'].search([('product_id', '=', product_id)], limit=1)
+                    if product:
+                        product.write({'quantity': quantity})
+                        response_msg = "Stock adjusted successfully"
+                    else:
+                        error['Error'] = f'Product not found with ID {product_id}'
+                        is_error = True
+                else:
+                    error['Error'] = 'Quantity is missing for product with ID ' + str(product_id)
+                    is_error = True
+        
+            if not is_error:
+                response_msg = "Stock adjusted successfully"
+                
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True                                
+        # ==========================================
+
+        # Print out everything in a model
+        # products = request.env['product.product'].sudo().search([])        
+    
+        # # Prepare response data
+        # response_data = []
+        # for product in products:
+        #     # Convert record to dictionary
+        #     product_dict = product.read()[0]
+    
+        #     # Remove unwanted fields
+        #     fields_to_remove = ["image_1024", "image_128", "image_1920", "image_512", "image_256"]
+        #     for field in fields_to_remove:
+        #         product_dict.pop(field, None)
+    
+        #     response_data.append(product_dict)
+
+        # response = {'message': response_msg, 'data': response_data}
+
+        # Update API status
+        if is_error == True:
+            api_log['status'] = 'error'
+        else:
+            Response.status = "200"
+            api_log['status'] = 'success'
+
+        message = {
+            'response': response_msg,
+            'message': error
+        } 
+
+        # Create Response Date
+        api_log['response_msg'] = message
+        api_log['response_date'] = datetime.now()        
+        
+        
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(message), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'mimetype': 'text/plain'
+        })
+        
         return message
         # return response
