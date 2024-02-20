@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_odoo_wms_stock_compare_odoo_wms_stock_compare,odoo_wms_stock_compare.odoo_wms_stock_compare,model_odoo_wms_stock_compare_odoo_wms_stock_compare,base.group_user,1,1,1,1

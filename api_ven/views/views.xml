@@ -140,17 +140,6 @@
           </field> 
       </record>
 
-    <record id="view_warehouse_list" model="ir.ui.view"> 
-          <field name="name">stock_warehouse.stock_warehouse.list</field> 
-          <field name="model">src.odoo.addons.stock.models.stock_warehouse.stock_warehouse</field> 
-          <field name="arch" type="xml"> 
-              <tree string="Lot Record Form"> 
-                  <field name="name"/>
-              </tree> 
-          </field> 
-      </record>
-
-
       <record id="action_api" model="ir.actions.act_window">
             <field name="name">Logs</field>
             <field name="type">ir.actions.act_window</field>
