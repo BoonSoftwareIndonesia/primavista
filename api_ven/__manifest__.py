@@ -30,6 +30,7 @@
         'views/views.xml',
         'views/templates.xml',
         'views/activity_log_view.xml',
+        'views/custom_view.xml',
 #         'views/location.xml',
     ],
     
