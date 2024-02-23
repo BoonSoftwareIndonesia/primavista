@@ -62,10 +62,15 @@ class ProductLotRecord(models.Model):
     expired_date = fields.Date('Expired Date')
 
     
-    # Checking the unique lot. It will pretend new lot name have same lot name with the previous lot
-    # This is same logic as the serial/lot Odoo default funtion
+
     @api.constrains('name', 'product_id', 'company_id')
     def _check_unique_lot(self):
+        
+        '''
+        - Checking the unique lot. It will pretend new lot name have same lot name with the previous lot
+        - This is same logic as the serial/lot Odoo default funtion
+        '''
+        
         domain = [('product_id', 'in', self.product_id.ids),
                   ('company_id', 'in', self.company_id.ids),
                   ('name', 'in', self.mapped('name'))]
@@ -80,15 +85,22 @@ class ProductLotRecord(models.Model):
         if error_message_lines:
             raise ValidationError(_('The combination of serial number and product must be unique across a company.\nFollowing combination contains duplicates:\n') + '\n'.join(error_message_lines))
 
-    # This function has the same behavior for create function in Odoo lot/serial models
-    # This function has a 2 job. First is calidate the unique name (validation) and then create the models
     @api.model_create_multi
     def create(self, vals_list):
+        
+        '''
+        - This function has the same behavior for create function in Odoo lot/serial models
+        - This function has a 2 job. First is calidate the unique name (validation) and then create the models
+        '''
+        
         self._check_unique_lot()
         return super(ProductLotRecord, self.with_context(mail_create_nosubscribe=True)).create(vals_list)
 
-    # This function has the same bahavior for write function in Odoo lot/serial models.
+    
     def write(self, vals):
+        '''
+        This function has the same bahavior for write function in Odoo lot/serial models.
+        '''
 
         # Pretend user to change company_id
         if 'company_id' in vals:
@@ -110,6 +122,11 @@ class ProductLotRecord(models.Model):
         return super(ProductLotRecord, self).write(vals)
 
     def get_lot_list(self, product_id):
+        '''
+        This function was the API between Odoo and WMS where Odoo will request (Get) the list of lot in WMS based on 
+        the owner code and product
+        '''
+        
         error = {}
 
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
@@ -195,6 +212,10 @@ class ProductLotRecord(models.Model):
         return ret
         
     def lot_adjustment(self, product_sku):
+
+        '''
+        This function will process the lot list information that we get from get_lot_list API.
+        '''
 
         error = {}
         is_error = False
@@ -288,7 +309,7 @@ class ProductLotRecord(models.Model):
     
                 # (2.2.1) Checking existant of lotNo
                 # In here, we checking the lot first because the lot record not integrate into Purchase model yet.
-                # So, it will be a case where WMS will send new lot number into Odoo and we must capture it
+                # So, it will be a case where WMS will send a new lot number into Odoo and we must capture it
                 existing_lot = request.env['lot_record.lot_record'].search([('name', '=', detail_lot['lotNo'])])
                 
                 if not existing_lot:
@@ -332,8 +353,12 @@ class ProductLotRecord(models.Model):
 
 
 class SaleOrderLine(models.Model):
+    '''
+    This function will control about "Lot" Button in Sales Order.
+    This function will get the Existing Product Internal Reference in Sale Order Line.
+    '''
     _inherit = 'sale.order.line'
-
+    
     def call_lot_adjustment(self):
         product_id = self.env.context.get('default_product_id')
         lot_record_model = self.env['lot_record.lot_record']

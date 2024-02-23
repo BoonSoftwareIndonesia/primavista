@@ -17,6 +17,7 @@
     # for the full list
     'category': 'Uncategorized',
     'version': '0.3',
+    'auto_install': True,
 
     # any module necessary for this one to work correctly
     'depends': ['base','purchase', 'sale_management', 'stock', 'account', 'account_accountant'],
@@ -27,6 +28,7 @@
         'views/views.xml',
         'views/templates.xml',
         'views/activity_log_view.xml',
+        'views/custom_view.xml',
 #         'views/location.xml',
     ],
     

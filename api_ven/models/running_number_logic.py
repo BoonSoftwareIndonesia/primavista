@@ -11,6 +11,20 @@ import base64
 import urllib.request
 import re
 
+"""
+    Summary Brief:
+    - This is an overide create for calling the running number for POV and AVO
+    - Since there are only 2 Owner Code (WMS) == Company (Odoo). So there is only 2 running number
+
+    LOGIC:
+    1.   In Create logic, we will checking the active company.
+
+    NOTE:
+    - Please MAKE SURE THE SEQUENCE NUMBER ALREADY EXIST FIRST
+"""
+
+
+
 class CreatePORunningNumber(models.Model):
     _inherit = ['purchase.order']
 

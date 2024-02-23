@@ -13,9 +13,36 @@ import re
 import hmac
 import hashlib
 
+"""
+Summary Brief:
+- This model will control the integration between Odoo and Indonesia E-Commerce like Shopee and Tokopedia.
+- For now, the API that working is Tokopedia. But, at 23-02-2024 this API is down due to there is an issue in Tokopedia platform. Latest developer can't rise ticket because we can't access Tokopedia technical ticket trello.
+- The Shopee can't be implement due to there is an error in access token. Current Developer (VL) already try to communicated with Shopee team but not get the right answer.
+    
+Logic:
+
+A. Tokopedia logic:
+1. System will request Tokopedia access token using API.
+2. This access token will be used to get shop information using API.
+3. After we get shop_id using get_shop_information API, system will fetch the order list.
+4. After Tokopedia order list already existing, Odoo will process this order list with some case:
+==> If Product not exist, Odoo will generate new product
+==> After Product exisitng, Odoo will generate the Sales Order and auto confirm it [For additional information. Please re-check the field mapping because in the latest development, developer didn't full considering the field mapping]
+
+B. Shopee Logic:
+1. Systems will request the new sign that needed in all API connection. This request will be using API between Shopee and Odoo
+2. Shopee will get order_list where this order list only contain order number. [Not like Tokopedia where the order list is include the detail of the order].
+3. Each of order in order list, Odoo will request using API request.
+4. After Shopee detail order already existing, Odoo will process this order list with some case:
+==> If Product not exist, Odoo will generate new product
+==> After Product exisitng, Odoo will generate the Sales Order and auto confirm it [For additional information. Please re-check the field mapping because in the latest development, developer didn't full considering the field mapping]
+"""
+
+
 class SaleOrderExt(models.Model):
     _inherit = "sale.order"
-    
+
+    # Compute Total Quantity
     def _compute_x_total_quantity(self):
         for record in self:
             total = 0
@@ -24,11 +51,12 @@ class SaleOrderExt(models.Model):
             
             record['x_studio_total_qty'] = total
     
+    # Additional field for sale order
     x_buyer_id = fields.Integer(readonly=False)
     x_ecommerce_code = fields.Char(string='E Commerce Code', readonly=True) 
     x_fulfill_by = fields.Char(string='Fulfill By', readonly=False) 
     x_insurance_cost = fields.Float(string='Insurance Cost', readonly=False) 
-    x_is_cod_mitra = fields.Boolean(string='Is Cod Mitra', readonly=False) # ==> Boolean
+    x_is_cod_mitra = fields.Boolean(string='Is Cod Mitra', readonly=False)
     x_order_status = fields.Char(string='Order Status', readonly=False)
     x_payment_date = fields.Datetime(string='Payment Date', readonly=False) 
     x_recipient_address_city = fields.Char(string='Recipient Address City', readonly=False)
@@ -43,7 +71,6 @@ class SaleOrderExt(models.Model):
     x_service_type = fields.Char(string='Service Type', readonly=False)
     x_shipping_agency = fields.Char(string='Shipping Agency', readonly=False)
     
-    # 
     x_shipping_cost = fields.Float(string='Shipping Cost', readonly=False)
     x_shop_id = fields.Integer(readonly=False)
     x_studio_total_qty = fields.Float(string='Total Quantity', readonly=True, compute='_compute_x_total_quantity')
@@ -55,11 +82,13 @@ class SaleOrderExt(models.Model):
 
 class SaleOrderLineExt(models.Model):
     _inherit = "sale.order.line"
-    
+
+    # Additional field for sale order line
     x_product_sku = fields.Char(string = "Product SKU", readonly=False)
     x_product_notes = fields.Char(string = "Product Note", readonly=False)
     x_is_wholesale = fields.Boolean(string='Wholesale', readonly=False)
-    
+
+    # Additional, since in product already product SKU (Internal Reference). In the next development, you can considering to use the product internal reference.
 
 # Fetch Data From TokPed =============================================================
 class ApiFetchTokPed(models.Model):
@@ -105,7 +134,7 @@ class ApiFetchTokPed(models.Model):
         resp = requests.post('https://accounts.tokopedia.com/token', params=params, headers=headers)
 
         if resp.status_code != 200:
-            raise UserError(f"Error when get generate access token from Tokopedia. Please your Boonsoftware consultant for more information!")
+            raise UserError(f"Error when get generate access token from Tokopedia. Please contact your Boonsoftware consultant for more information!")
 
         # Convert the return result from token API to JSON
         ret = json.loads(resp.content)
@@ -144,7 +173,7 @@ class ApiFetchTokPed(models.Model):
         resp = requests.get(f'https://fs.tokopedia.net/v1/shop/fs/{fs_id}/shop-info', headers=headers, params=params)
 
         if resp.status_code != 200:
-            raise UserError(f"Error when get shop information from TokPed. Please your Boonsoftware consultant for more information!")
+            raise UserError(f"Error when get shop information from TokPed. Please contact your Boonsoftware consultant for more information!")
         
         # Convert the return result from token API to JSON
         ret = json.loads(resp.content)
@@ -703,8 +732,6 @@ class ApiFetchShopee(models.Model):
                     # This variable will search for the sale order base on invoice_ref_num from TokPed
                     # and compare it with the reference document (origin) in Odoo.
                     existing_order = request.env['sale.order'].search([('origin', '=', order.get("order_sn"))], limit=1)
-
-                    # raise UserError(f"{existing_order}")
 
                     if existing_order:
                         continue

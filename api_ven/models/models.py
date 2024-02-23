@@ -25,7 +25,7 @@ class api_ven(models.Model):
     status = fields.Selection([('new','New'),('process','Processing'),('success','Success'),('error','Error')])
     created_date = fields.Datetime(string="Created Date")
     response_date = fields.Datetime(string="Response Date")
-    message_type = fields.Selection([('RCPT','CRT_RCPT'), ('DO','CRT_DO'), ('PO','DW_PO'), ('SO','DW_SO'), ('PO_RET','DW_PO_RET'), ('SO_RET','DW_SO_RET'), ('RCPT_RET','CRT_RCPT_RET'), ('DO_RET','CRT_DO_RET'), ('CUST','DW_CUST'), ('SHIP','DW_SHIP'), ('PROD','DW_PROD'), ('STOCK','STOCK_COMPARE'), ('ADJUST', 'STOCK_ADJUSTMENT'), ('FTKPD', 'FETCH_TOKOPEDIA'), ('FOL_SHPE', 'FETCH_ORDERLIST_SHOPEE'), ('FSO_SHPE', 'FETCH_SALESORDER_SHOPEE'), ('GET_LOT', 'LOT Adjustment'), ('SAP_PO', 'Send_Odoo_PO_SAP')])
+    message_type = fields.Selection([('RCPT','CRT_RCPT'), ('DO','CRT_DO'), ('PO','DW_PO'), ('SO','DW_SO'), ('PO_RET','DW_PO_RET'), ('SO_RET','DW_SO_RET'), ('RCPT_RET','CRT_RCPT_RET'), ('DO_RET','CRT_DO_RET'), ('CUST','DW_CUST'), ('SHIP','DW_SHIP'), ('PROD','DW_PROD'), ('FTKPD', 'FETCH_TOKOPEDIA'), ('FOL_SHPE', 'FETCH_ORDERLIST_SHOPEE'), ('FSO_SHPE', 'FETCH_SALESORDER_SHOPEE'), ('GET_LOT', 'Fetching Lot List'), ('SAP_PO', 'Send_Odoo_PO_SAP'), ('GET_STOCK_COMP', 'Stock Compare'), ('ADJUST', 'Stock Adjustment')])
     incoming_txt = fields.Many2one('ir.attachment', string="Incoming txt", readonly=True)
     response_txt = fields.Many2one('ir.attachment', string="Response txt", readonly=True)
     raw_data = fields.Binary(string="Raw Data", attachment=True)
