@@ -76,7 +76,6 @@ class PurchaseOrderLineDiscount(models.Model):
             taxes = line.taxes_id.compute_all(**line._prepare_compute_all_values())
 
             # ======================================================
-            # raise UserError(line.x_regular_discount)
 
             # Validation that pretend user to input gradation discount and additional discount in the same line
             if line.x_gradation_discount > 0.00 and line.x_additional_discount > 0.00:
@@ -91,8 +90,6 @@ class PurchaseOrderLineDiscount(models.Model):
 
             if line.x_additional_discount < 0.00:
                 raise UserError(f"Additional Discount can't be less than 0. Please check your input or contact your Boonsoftware Consultant!")
-                
-
 
             # ======================================================
         

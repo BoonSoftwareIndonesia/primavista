@@ -17,9 +17,10 @@
     # for the full list
     'category': 'Uncategorized',
     'version': '0.1',
+    'auto_install': True,
 
     # any module necessary for this one to work correctly
-    'depends': ['base'],
+    'depends': ['base', 'stock', 'product'],
 
     # always loaded
     'data': [
