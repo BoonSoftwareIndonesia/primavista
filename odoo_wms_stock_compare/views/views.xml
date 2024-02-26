@@ -1,88 +1,7 @@
 <!-- ==> Select Warehouse Code -->
 
 <odoo>
-  <data>
-    <!-- explicit list view definition -->
-    <!-- <record model="ir.ui.view" id="odoo_wms_stock_compare.list">
-      <field name="name">odoo_wms_stock_compare list</field>
-      <field name="model">odoo_wms_stock_compare.odoo_wms_stock_compare</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="company_id"/>
-          <field name="product_id"/>
-          <field name="odoo_quantity_on_hand"/>
-          <field name="wms_quantity_on_hand"/>
-          <field name="odoo_wms_diff"/>
-        </tree>
-      </field>
-    </record> -->
-    <record id="odoo_wms_stock_compare.list" model="ir.ui.view">
-        <field name="name">odoo_wms_stock_compare list</field>
-        <field name="model">odoo_wms_stock_compare.odoo_wms_stock_compare</field>
-        <field name="arch" type="xml">
-            <tree string="Srock Compare list">
-                <field name="company_id"/>
-                <field name="product_id"/>
-                <field name="odoo_quantity_on_hand"/>
-                <field name="wms_quantity_on_hand"/>
-                <field name="odoo_wms_diff"/>
-            </tree>
-        </field>
-    </record>
-
-    <record model="ir.ui.view" id="odoo_wms_stock_compare.list">
-      <field name="name">odoo_wms_stock_compare warehouse list</field>
-      <field name="model">stock.warehouse</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="name"/>
-        </tree>
-      </field>
-    </record>
-
-    <!-- actions opening views on models -->
-    <record model="ir.actions.act_window" id="odoo_wms_stock_compare.action_window">
-      <field name="name">Current Odoo and WMS Stock</field>
-      <field name="res_model">odoo_wms_stock_compare.odoo_wms_stock_compare</field>
-      <field name="view_mode">tree,form</field>
-    </record>
-      
-      <!-- <record model="ir.actions.act_window" id="odoo_wms_stock_compare.action_window">
-          <field name="name">warehouse.kanban</field>
-          <field name="res_model">stock.warehouse</field>
-          <field name="view_mode">tree,form</field>
-          <field name="arch" type="xml">
-              <kanban class="o_res_partner_kanban" sample="1">
-                  <field name="name"/>
-              </kanban>
-          </field>
-      </record> -->
-
-    <!-- server action to the one above -->
-    <record model="ir.actions.server" id="odoo_wms_stock_compare.action_server">
-      <field name="name">odoo_wms_stock_compare server</field>
-      <field name="model_id" ref="model_odoo_wms_stock_compare_odoo_wms_stock_compare"/>
-      <field name="state">code</field>
-      <field name="code">
-        action = {
-          "type": "ir.actions.act_window",
-          "view_mode": "tree,form",
-          "res_model": model._name,
-        }
-      </field>
-    </record>
-      
-    <!-- Top menu item -->
-    <menuitem name="Stock Compare" id="odoo_wms_stock_compare.menu_root"/>
-    <!-- menu categories -->
-    <menuitem name="Fetch Current Data" id="odoo_wms_stock_compare.menu_1" parent="odoo_wms_stock_compare.menu_root" action="odoo_wms_stock_compare.action_window"/>
-    <!-- <menuitem name="Menu 2" id="odoo_wms_stock_compare.menu_2" parent="odoo_wms_stock_compare.menu_root"/> -->
-    <!-- actions -->
-    <!-- <menuitem name="List" id="odoo_wms_stock_compare.menu_1_list" parent="odoo_wms_stock_compare.menu_1"/> -->
-    <!-- <menuitem name="Server to list" id="odoo_wms_stock_compare" parent="odoo_wms_stock_compare.menu_2"
-              action="odoo_wms_stock_compare.action_server"/> -->
-  </data>
-    <!-- <record id="view_warehouse_kanban" model="ir.ui.view">
+    <record id="view_warehouse_kanban" model="ir.ui.view">
         <field name="name">warehouse.kanban</field>
         <field name="model">stock.warehouse</field>
         <field name="arch" type="xml">
@@ -92,19 +11,19 @@
                         <div t-attf-class="oe_kanban_card">
                             <field name="name"/>
                             <div class="oe_kanban_content">
-                                <a t-attf-href="/warehouse/{{record.id}}">View Stock Compares</a>
+                                <a t-attf-href="/warehouse/{{warehouse.id}}">View Stock Compares</a>
                             </div>
                         </div>
                     </t>
                 </templates>
             </kanban>
         </field>
-    </record> -->
+    </record>
 
 <!-- Stock Compare List:
 
 ==> Stock compare Odoo ir.ui.view -->
-    <!-- <record id="view_stock_compare_tree" model="ir.ui.view">
+    <record id="view_stock_compare_tree" model="ir.ui.view">
         <field name="name">Stock Compare Tree View</field>
         <field name="model">odoo_wms_stock_compare.odoo_wms_stock_compare</field>
         <field name="arch" type="xml">
@@ -116,14 +35,25 @@
                 <field name="odoo_wms_diff"/>
             </tree>
         </field>
-    </record> -->
+    </record>
 
 <!-- ==> Stock compare ir.action.act_window -->
-    <!-- <record id="action_stock_compare" model="ir.actions.act_window">
+    <record id="action_stock_compare" model="ir.actions.act_window">
         <field name="name">Stock Compar</field>
         <field name="res_model">odoo_wms_stock_compare.odoo_wms_stock_compare</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('warehouse_id','=', warehouse_id)]</field>
         <field name="context">{'warehouse_id': active_id}</field>
-    </record> -->
+    </record>
+
+
+        <!-- Top menu item -->
+    <menuitem name="Stock Compare" id="odoo_wms_stock_compare.menu_root"/>
+    <!-- menu categories -->
+    <menuitem name="Fetch Current Data" id="odoo_wms_stock_compare.menu_1" parent="odoo_wms_stock_compare.menu_root" action="odoo_wms_stock_compare.action_window"/>
+    <!-- <menuitem name="Menu 2" id="odoo_wms_stock_compare.menu_2" parent="odoo_wms_stock_compare.menu_root"/> -->
+    <!-- actions -->
+    <!-- <menuitem name="List" id="odoo_wms_stock_compare.menu_1_list" parent="odoo_wms_stock_compare.menu_1"/> -->
+    <!-- <menuitem name="Server to list" id="odoo_wms_stock_compare" parent="odoo_wms_stock_compare.menu_2"
+              action="odoo_wms_stock_compare.action_server"/> -->
 </odoo>
