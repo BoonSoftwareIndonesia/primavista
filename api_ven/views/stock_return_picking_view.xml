@@ -1,3 +1,15 @@
-<odoo>
-
+<odoo>   
+    <record id="additional_stock_return_picking_field_view" model="ir.ui.view">
+        <field name="name">stock.return.picking.stock.account.form</field>        
+        <field name="model">stock.return.picking</field>
+        <field name="inherit_id" ref="stock.view_stock_return_picking_form"/>
+        <field name="arch" type="xml">                                
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="x_wms_lot_records"/>
+            </xpath>            
+            <xpath expr="//field[@name='uom_id']" position="after">
+                <field name="x_stock_status_code"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>

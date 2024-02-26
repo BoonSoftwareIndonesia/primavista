@@ -11,5 +11,5 @@
                 <field name="x_stock_status_code"/>
             </xpath>
         </field>
-    </record>   
+    </record>
 </odoo>
