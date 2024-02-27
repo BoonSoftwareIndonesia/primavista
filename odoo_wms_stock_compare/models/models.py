@@ -5,8 +5,13 @@ class odoo_wms_stock_compare(models.Model):
     _name = 'odoo_wms_stock_compare.odoo_wms_stock_compare'
     _description = 'odoo_wms_stock_compare.odoo_wms_stock_compare'
 
+    # Compute Total Quantity
     def _compute_quantity_diff(self):
-        self.odoo_wms_diff = self.odoo_quantity_on_hand - self.wms_quantity_on_hand
+        for record in self:
+            record['odoo_wms_diff'] = record.odoo_quantity_on_hand - record.wms_quantity_on_hand
+    
+    # def _compute_quantity_diff(self):
+    #     self.odoo_wms_diff = self.odoo_quantity_on_hand - self.wms_quantity_on_hand
 
     # company_id = fields.Many2one('res.company', 'Company', required=True, index=True)
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company.id)

@@ -13,7 +13,7 @@ class StockRuleExt(models.Model):
     def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, values, po, supplier):
         res = super(StockRuleExt, self)._prepare_purchase_order_line(product_id, product_qty, product_uom, values, po, supplier)
         res['x_studio_opt_char_1'] = values.get('x_studio_opt_char_1', False)
-        return res
+        return res 
     
     # This sets the x_studio_opt_char_1 in stock move based on the x_studio_line_no value from the SO line
     # While creating stock.picking or stock.move, it impacts procurement/stock.rule 
