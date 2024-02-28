@@ -407,6 +407,7 @@ class ApiFetchTokPed(models.Model):
                         # if the order status is other that 400. Systems will pass it and looking for next list
                         running_code = self.env['ir.sequence'].next_by_code('avo.sale.order')
 
+                        partner = request.env['res.partner'].search([('name', '=', "TOKOPEDIA CUSTOMER SHIP ADDRESS")], limit=1)
 
                         # NOTE if please re-mapping all this mapping:
                         """
@@ -415,18 +416,17 @@ class ApiFetchTokPed(models.Model):
                         - partner_invoice_id & partner_shipping_id -> Please checking if this mandatory or not
                         - pricelist_id -> please check if this is mandatory or not
                         - warehouse_id -> please checking if the warehouse already same as the avo needed
-                        - 
+                        - partner_invoice_id -> please checking about this mapping (For now, it will be take down)
+                        - partner_shipping_id -> please checking about this mapping (For now, it will be take down)
                         """
                             
                         request.env['sale.order'].create({
                             'name': running_code,
                             'origin': order.get("invoice_ref_num"),
                             'x_studio_doc_trans_code': "OR",
-                            'partner_id': 1043,
+                            'partner_id': partner.get("id"),
                             'company_id': 2,
                             'date_order': date_order_converter,
-                            'partner_invoice_id': 836,
-                            'partner_shipping_id': 836,
                             'picking_policy': "direct",
                             'pricelist_id': 1,
                             'warehouse_id': 2,
