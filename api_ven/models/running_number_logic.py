@@ -23,8 +23,6 @@ import re
     - Please MAKE SURE THE SEQUENCE NUMBER ALREADY EXIST FIRST
 """
 
-
-
 class CreatePORunningNumber(models.Model):
     _inherit = ['purchase.order']
 
