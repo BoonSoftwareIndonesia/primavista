@@ -11,7 +11,7 @@
                         <div t-attf-class="oe_kanban_card">
                             <field name="name"/>
                             <div class="oe_kanban_content">
-                                <button name="%(action_stock_compare)d" string="View Stock" type="action" class="btn btn-primary btn-lg"/>
+                                <button name="%(action_stock_compare)d" string="View Stock" type="action" class="btn btn-primary">View Stock</button>
                             </div>
                         </div>
                     </t>
