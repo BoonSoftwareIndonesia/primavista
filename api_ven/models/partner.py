@@ -116,7 +116,7 @@ class PartnerExt(models.Model):
                     
         # Create activity log for customer creation
         self.create_activity_logs(partners, "create", new_vals = new_vals)
-    return partners
+        return partners
     
     
     # Create activity log ======================
