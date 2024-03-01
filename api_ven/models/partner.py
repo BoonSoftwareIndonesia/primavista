@@ -109,14 +109,14 @@ class PartnerExt(models.Model):
         #         self.env['res.partner'].api_dw_customer(partners)
             
             # Get the new customer's fields and values
-            new_vals = {}
-            for rec in partners:
-                for vals, rec in zip(vals_list, partners):
-                    new_vals[rec.id] = vals
+        new_vals = {}
+        for rec in partners:
+            for vals, rec in zip(vals_list, partners):
+                new_vals[rec.id] = vals
                     
-            # Create activity log for customer creation
-            self.create_activity_logs(partners, "create", new_vals = new_vals)
-        return partners
+        # Create activity log for customer creation
+        self.create_activity_logs(partners, "create", new_vals = new_vals)
+    return partners
     
     
     # Create activity log ======================
