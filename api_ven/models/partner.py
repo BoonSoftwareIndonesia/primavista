@@ -57,24 +57,24 @@ class PartnerExt(models.Model):
             partners.zip = "12345"
         if not partners.country_id:
             partners.country_id = 100
-        # if not partners.company_id:
-        #     partners.company_id = self.env.context['allowed_company_ids'][0]
-        # if not partners.x_studio_customer_id:
-        #     if partners.type == "delivery" and self.env.context['allowed_company_ids'][0] == 1:
-        #         partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.ship.no')
-        #     elif partners.type == "delivery" and self.env.context['allowed_company_ids'][0] == 2:
-        #         partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.ship.no')
-        #     else:
-        #         if partners.customer_rank == 1:
-        #             if self.env.context['allowed_company_ids'][0] == 1: 
-        #                 partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.customer.id')
-        #             else:
-        #                 partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.customer.id')
-        #         else:
-        #             if self.env.context['allowed_company_ids'][0] == 1:
-        #                 partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.vendor.id')
-        #             else:
-        #                 partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.vendor.id')
+        if not partners.company_id:
+            partners.company_id = self.env.context['allowed_company_ids'][0]
+        if not partners.x_studio_customer_id:
+            if partners.type == "delivery" and self.env.context['allowed_company_ids'][0] == 1:
+                partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.ship.no')
+            elif partners.type == "delivery" and self.env.context['allowed_company_ids'][0] == 2:
+                partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.ship.no')
+            else:
+                if partners.customer_rank == 1:
+                    if self.env.context['allowed_company_ids'][0] == 1: 
+                        partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.customer.id')
+                    else:
+                        partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.customer.id')
+                else:
+                    if self.env.context['allowed_company_ids'][0] == 1:
+                        partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.vendor.id')
+                    else:
+                        partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.vendor.id')
     
     # Triggers the api_dw_customer() function that sends an API log when creating new customer ======================
     @api.model_create_multi
@@ -89,34 +89,34 @@ class PartnerExt(models.Model):
         # Get test_import context
         test_import = self._context.get('test_import')
         
-        # # If we are not testing (test_import = False), then create customer and send API
-        # if not test_import:
-        #     #if we are creating a child partner, create ship_no
-        #     if vals_list[0]['type'] == "delivery":
+        # If we are not testing (test_import = False), then create customer and send API
+        if not test_import:
+            #if we are creating a child partner, create ship_no
+            if vals_list[0]['type'] == "delivery":
 
-        #         # curr_parent_id = vals_list[0]['parent_id']
+                # curr_parent_id = vals_list[0]['parent_id']
 
-        #         # parent_model = request.env['res.partner'].search([('id', '=', curr_parent_id)], limit=1)
+                # parent_model = request.env['res.partner'].search([('id', '=', curr_parent_id)], limit=1)
                 
-        #         # if not parent_model:
-        #         # raise UserError("Please save customer or vendor first, or contact consultant")
-        #     # else:
-        #         self.env['res.partner'].api_dw_ship_no(partners)
+                # if not parent_model:
+                # raise UserError("Please save customer or vendor first, or contact consultant")
+            # else:
+                self.env['res.partner'].api_dw_ship_no(partners)
                 
-        #         #if not a child partner, Call api_dw_customer to send API to WMS
-        #     else:
-        #             # raise UserError("Entry this is a dw_customer")
-        #         self.env['res.partner'].api_dw_customer(partners)
+                #if not a child partner, Call api_dw_customer to send API to WMS
+            else:
+                    # raise UserError("Entry this is a dw_customer")
+                self.env['res.partner'].api_dw_customer(partners)
             
             # Get the new customer's fields and values
-        new_vals = {}
-        for rec in partners:
-            for vals, rec in zip(vals_list, partners):
-                new_vals[rec.id] = vals
+            new_vals = {}
+            for rec in partners:
+                for vals, rec in zip(vals_list, partners):
+                    new_vals[rec.id] = vals
                     
-        # Create activity log for customer creation
-        self.create_activity_logs(partners, "create", new_vals = new_vals)
-        return partners
+            # Create activity log for customer creation
+            self.create_activity_logs(partners, "create", new_vals = new_vals)
+            return partners
     
     
     # Create activity log ======================
