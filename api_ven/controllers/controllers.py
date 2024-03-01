@@ -1219,23 +1219,41 @@ class ApiVen(http.Controller):
             is_error = True                                
         # ==========================================
 
-        # Print out everything in a model
-        # products = request.env['product.product'].sudo().search([])        
-    
+        # # Print out only specified fields in a model
+        # products = request.env['sale.order'].sudo().search([])        
+        
         # # Prepare response data
         # response_data = []
         # for product in products:
-        #     # Convert record to dictionary
-        #     product_dict = product.read()[0]
-    
-        #     # Remove unwanted fields
-        #     fields_to_remove = ["image_1024", "image_128", "image_1920", "image_512", "image_256"]
-        #     for field in fields_to_remove:
-        #         product_dict.pop(field, None)
-    
+        #     # Create a dictionary with only the specified fields
+        #     product_dict = {
+        #         'partner_id': product.partner_id.id,
+        #         'partner_invoice_id': product.partner_invoice_id.id if product.partner_invoice_id else None,
+        #         'partner_shipping_id': product.partner_shipping_id.id if product.partner_shipping_id else None,
+        #         'pricelist_id': product.pricelist_id.id if product.pricelist_id else None,
+        #     }
+            
         #     response_data.append(product_dict)
+        
+        # response = {'message': 'Success', 'data': response_data}
 
-        # response = {'message': response_msg, 'data': response_data}
+        # Print out everything in the res.partner model
+        partners = request.env['res.partner'].sudo().search([])        
+        
+        # Prepare response data
+        response_data = []
+        for partner in partners:
+            # Convert record to dictionary
+            partner_dict = partner.read()[0]
+            
+            # Remove unwanted fields if any
+            # Example: fields_to_remove = ["unwanted_field_1", "unwanted_field_2"]
+            # for field in fields_to_remove:
+            #     partner_dict.pop(field, None)
+            
+            response_data.append(partner_dict)
+        
+        response = {'message': 'Success', 'data': response_data}
 
         # Update API status
         if is_error == True:
@@ -1263,5 +1281,5 @@ class ApiVen(http.Controller):
             'mimetype': 'text/plain'
         })
         
-        return message
-        # return response
+        # return message
+        return response

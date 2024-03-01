@@ -413,8 +413,8 @@ class ApiFetchTokPed(models.Model):
                         """
                         - Partner Id -> Base on tokopedia customer ID
                         - Company ID -> Must been AVO company ID
-                        - partner_invoice_id & partner_shipping_id -> Please checking if this mandatory or not
-                        - pricelist_id -> please check if this is mandatory or not
+                        - partner_invoice_id & partner_shipping_id -> Please checking if this mandatory or not -> mandatory
+                        - pricelist_id -> please check if this is mandatory or not -> mandatory: pricelist_id shows the currency used which in Tokopedia's case is IDR
                         - warehouse_id -> please checking if the warehouse already same as the avo needed
                         - partner_invoice_id -> please checking about this mapping (For now, it will be take down)
                         - partner_shipping_id -> please checking about this mapping (For now, it will be take down)
@@ -425,6 +425,8 @@ class ApiFetchTokPed(models.Model):
                             'origin': order.get("invoice_ref_num"),
                             'x_studio_doc_trans_code': "OR",
                             'partner_id': partner.get("id"),
+                            'partner_invoice_id': partner.get("id"),
+                            'partner_shipping_id': partner.get("id"),
                             'company_id': 2,
                             'date_order': date_order_converter,
                             'picking_policy': "direct",
@@ -486,8 +488,8 @@ class ApiFetchTokPed(models.Model):
                             """
                             - categ_id -> Please hardcode this into sale_able product category first
                             - company_id -> Must been AVO company ID
-                            - detailed_type -> Please checking if this mandatory or not
-                            - pricelist_id -> please check if this is mandatory or not
+                            - detailed_type -> Please checking if this mandatory or not -> mandatory
+                            - pricelist_id -> please check if this is mandatory or not -> not mandatory
                             - warehouse_id -> please checking if the warehouse already same as the avo needed
                             - uom_id -> checking the uom ID is already right or not. You can hardcode it into units
                             """
