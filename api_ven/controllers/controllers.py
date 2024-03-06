@@ -1237,19 +1237,18 @@ class ApiVen(http.Controller):
         
         # response = {'message': 'Success', 'data': response_data}
 
-        # Print out everything in the res.partner model
+        # Print out id, currency_id, and invoice_ids of the res.partner model
         partners = request.env['res.partner'].sudo().search([])        
         
         # Prepare response data
         response_data = []
         for partner in partners:
-            # Convert record to dictionary
-            partner_dict = partner.read()[0]
-            
-            # Remove unwanted fields if any
-            # Example: fields_to_remove = ["unwanted_field_1", "unwanted_field_2"]
-            # for field in fields_to_remove:
-            #     partner_dict.pop(field, None)
+            # Extract only the required fields
+            partner_dict = {
+                'id': partner.id,                
+                'invoice_ids': [invoice.id for invoice in partner.invoice_ids],
+                'name': partner.name,
+            }
             
             response_data.append(partner_dict)
         
