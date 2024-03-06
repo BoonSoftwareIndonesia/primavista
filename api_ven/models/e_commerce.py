@@ -93,7 +93,7 @@ class SaleOrderLineExt(models.Model):
 # Fetch Data From TokPed =============================================================
 class ApiFetchTokPed(models.Model):
     _inherit = "sale.order"
-
+    
     def get_tokped_access_token(self):
         """
         This function has a purpose to Request tokopedia access token,
@@ -146,6 +146,8 @@ class ApiFetchTokPed(models.Model):
         expires_in = ret.get("expires_in")
         token_type = ret.get("token_type")
 
+        # raise UserError("Access Token: {}, Expires In: {}, Token Type: {}".format(access_token, expires_in, token_type))
+
         # =================================================================
 
         return access_token, expires_in, token_type
@@ -170,10 +172,12 @@ class ApiFetchTokPed(models.Model):
         }
 
         # Create request and get the shop list      
-        resp = requests.get(f'https://fs.tokopedia.net/v1/shop/fs/{fs_id}/shop-info', headers=headers, params=params)
+        resp = requests.get(f'https://fs.tokopedia.net/v1/shop/fs/{fs_id}/shop-info', headers=headers, params=params)     
 
         if resp.status_code != 200:
-            raise UserError(f"Error when get shop information from TokPed. Please contact your Boonsoftware consultant for more information!")
+            # raise UserError(f"Error when get shop information from TokPed. Please contact your Boonsoftware consultant for more information!")
+            error_message = f"Error when getting shop information from TokPed. Status code: {resp.status_code}. Reason: {resp.reason}."
+            raise UserError(error_message)
         
         # Convert the return result from token API to JSON
         ret = json.loads(resp.content)

@@ -1,6 +1,6 @@
 <odoo>
     
-<!-- Declare the action to open the menu item -->
+<!-- Declare the action to open the menu item -->     
       <record id="action_activity_log" model="ir.actions.act_window">
             <field name="name">Activity Logs</field>
             <field name="type">ir.actions.act_window</field>
@@ -11,7 +11,7 @@
                 <p class="o_view_nocontent_smiling_face">
                     Create your first activity log
                 </p>
-            </field>
+            </field>            
         </record>
 
 <!-- Declare the menu item -->
@@ -21,8 +21,23 @@
             action="action_activity_log"
             sequence="20"/>
 
+        <!-- <record id="action_tokped_access_token_server" model="ir.actions.server">
+            <field name="name">Get TokPed Access Token</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="state">code</field>
+            <field name="code">
+                env['sale.order'].get_tokped_access_token()
+            </field>
+        </record>
+
+        <menuitem id="new_menu_item"
+              name="Get TokPed Access Token"
+              parent="api_menu_root"
+              action="action_tokped_access_token_server"
+              sequence="30"/> -->
+    
 <!-- Declare the tree view (Display the table with columns and rows of activity log data) -->
-      <record id="activity_log_tree" model="ir.ui.view">
+      <record id="activity_log_tree" model="ir.ui.view">            
             <field name="name">api_ven.activity_log.tree</field>
             <field name="model">api_ven.activity_log</field>
             <field name="arch" type="xml">
@@ -82,7 +97,7 @@
         </record>
 
 <!-- To specify the search and group by filters -->
-      <record id="activity_log_search" model="ir.ui.view">
+      <record id="activity_log_search" model="ir.ui.view">            
             <field name="name">api_ven.activity_log.search</field>
             <field name="model">api_ven.activity_log</field>
             <field name="arch" type="xml">
@@ -121,5 +136,5 @@
                     </group>
                 </search>
             </field>
-        </record>
+        </record>  
 </odoo>
