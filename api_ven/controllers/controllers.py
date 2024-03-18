@@ -1238,17 +1238,13 @@ class ApiVen(http.Controller):
         # response = {'message': 'Success', 'data': response_data}
 
         # Print out id, currency_id, and invoice_ids of the res.partner model
-        partners = request.env['res.partner'].sudo().search([])        
+        partners = request.env['odoo_wms_stock_compare.odoo_wms_stock_compare'].sudo().search([])        
         
         # Prepare response data
         response_data = []
         for partner in partners:
-            # Extract only the required fields
-            partner_dict = {
-                'id': partner.id,                
-                'invoice_ids': [invoice.id for invoice in partner.invoice_ids],
-                'name': partner.name,
-            }
+            # Extract all fields
+            partner_dict = {field.name: field.value for field in partner._fields.values()}
             
             response_data.append(partner_dict)
         
