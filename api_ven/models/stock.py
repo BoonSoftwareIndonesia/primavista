@@ -113,7 +113,7 @@ class StockReturnPickingExt(models.TransientModel):
             wms_no = pick.x_wms_rec_no
 
         # Set the value of x_wms_rec_no and x_studio_doc_trans_code for the return's stock picking
-        curr_pick.write({'x_wms_rec_no': wms_no})
+        curr_pick.write({'x_wms_rec_no': wms_no, 'x_studio_doc_trans_code':trans_code})
         # Set the value of x_wms_rec_no and x_studio_doc_trans_code for the return's stock moves
         curr_pick.move_lines.write({'x_wms_rec_no': wms_no})
         # Set the value of x_wms_rec_no and x_studio_doc_trans_code for the return's stock move lines
