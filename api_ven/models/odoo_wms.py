@@ -13,7 +13,7 @@ import re
 
 class PurchaseOrderExt(models.Model):
     _inherit = 'purchase.order'
-    x_studio_doc_trans_code = fields.Selection([("PODR", "PODR"),],string="Doc Trans Code", default='PODR')
+    x_studio_doc_trans_code = fields.Selection([("PODR", "PODR"),("SAMPLE", "SAMPLE")],string="Doc Trans Code", default='PODR')
 
 # Override for PO and SO return ======================
 # Override stock move creation process when a PO is confirmed. 
@@ -57,7 +57,7 @@ class StockMoveLineExt(models.Model):
 
 class StockPickingExt(models.Model):
     _inherit = 'stock.picking'
-    x_studio_doc_trans_code = fields.Selection([("CONS-IN", "CONS-IN"),("EI", "EI"),("EXI","EXI"),("GR","GR"),("GRA","GRA"),("PODR","PODR"),("R","R"),("TRC-IN","TRC-IN"),("WHS-TRF","WHS-TRF"),("GRN","GRN"),("GRT","GRT"),("CONS-OUT","CONS-OUT"),("CP","CP"),("EO","EO"),("EXO","EXO"),("FOC","FOC"),("OCS","OCS"),("OR","OR"),("OSS","OSS"),("POR","POR"),("RTP","RTP"),("RTV","RTV"),("SMPL","SMPL"),("TRC-OUT","TRC-OUT"),], string="Doc Trans Code")
+    x_studio_doc_trans_code = fields.Selection([("CONS-IN", "CONS-IN"),("EI", "EI"),("EXI","EXI"),("GR","GR"),("GRA","GRA"),("PODR","PODR"),("R","R"),("TRC-IN","TRC-IN"),("WHS-TRF","WHS-TRF"),("GRN","GRN"),("GRT","GRT"),("CONS-OUT","CONS-OUT"),("CP","CP"),("EO","EO"),("EXO","EXO"),("FOC","FOC"),("OCS","OCS"),("OR","OR"),("OSS","OSS"),("POR","POR"),("RTP","RTP"),("RTV","RTV"),("SMPL","SMPL"),("TRC-OUT","TRC-OUT"),("SAMPLE","SAMPLE")], string="Doc Trans Code")
 
 class UomExt(models.Model):
     _inherit = 'uom.uom'

@@ -1238,21 +1238,6 @@ class ApiVen(http.Controller):
         # response = {'message': 'Success', 'data': response_data}
 
         # Print out id, currency_id, and invoice_ids of the res.partner model
-        partners = request.env['res.partner'].sudo().search([])        
-        
-        # Prepare response data
-        response_data = []
-        for partner in partners:
-            # Extract only the required fields
-            partner_dict = {
-                'id': partner.id,                
-                'invoice_ids': [invoice.id for invoice in partner.invoice_ids],
-                'name': partner.name,
-            }
-            
-            response_data.append(partner_dict)
-        
-        response = {'message': 'Success', 'data': response_data}
 
         # Update API status
         if is_error == True:
