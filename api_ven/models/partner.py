@@ -12,6 +12,7 @@ class PartnerExt(models.Model):
     name = fields.Char(index=True, required=True)
     # No duplicate x_studio_customer_id
     x_studio_customer_id = fields.Char(string='Customer ID', copy=False, readonly=False)
+    
     # x_studio_customer_group = fields.Char(string='Customer Group',default='IOC')
     x_studio_customer_group = fields.Selection([("APT", "APOTIK"),("CBG", "CABANG"),("CLC","CLC"),("ECO","ECO"),("EVT","EVT"),("HCP","HCP"),("HOS","HOS"), ("INST","INST"), ("IOC","IOC"), ("KAC","KAC"), ("MKT","MKT"), ("MTC","MTC"), ("NA","Not Applicable"), ("PBAK","PBAK"), ("PBF","PBF"), ("PCP","PRINCIPAL"), ("SUPPLIER","Suppliers"), ("SUPPLIERS","SUPPLIERS"), ("TKC","TKC"), ("TKO","TOKO OBAT"), ("TKU","TKU"),],string="Selection", default='IOC')
     street = fields.Char(default='NA')
