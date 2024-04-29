@@ -2,6 +2,7 @@ from odoo import models, fields, api
 from odoo.http import request, Response
 from odoo.exceptions import UserError
 from datetime import datetime
+from lxml import etree
 
 
 # Override product template =============================
@@ -258,3 +259,47 @@ class ProductExt(models.Model):
             # `_get_variant_id_for_combination` depends on existing variants
             self.clear_caches()
             return products
+
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    # Computed field to fetch all product categories
+    product_category_selection = fields.Selection(
+        selection='_get_product_categories',
+        string='Product Category',                
+    )
+
+    def _get_product_categories(self):
+        # This method returns the list of tuples for the selection field
+        return [(category.id, category.display_name) for category in self.env['product.category'].search([])]
+
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    product_id = fields.Many2one(
+        'product.product', 
+        string='Product', 
+        domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id), ('categ_id', '=', parent.product_category_selection)]"       
+    )
+    
+    @api.model
+    def create(self, vals):        
+        # Call the original create method to create the record
+        line = super(SaleOrderLine, self).create(vals)
+        
+        # Check if the sale order has a category selected
+        raise UserError(line.order_id.product_category_selection)
+        if line.order_id and line.order_id.product_category_selection:
+            # Set the domain to filter products based on the selected category
+            line.product_id = False
+            line._fields['product_id'].domain = [('categ_id', '=', line.order_id.product_category_selection)]
+        
+        return line
+
+
+
+
+
+
+
