@@ -411,8 +411,7 @@ class ApiVen(http.Controller):
         response_msg = "Failed to create DO!"
         message = {}
         line_details = []
-        is_partial = False
-        debug = []
+        is_partial = False        
 
         # Create API log
         try:
@@ -449,8 +448,7 @@ class ApiVen(http.Controller):
                 lines = []
                 
                 # (2) Validations
-                stock_picking = request.env['stock.picking'].search([('name','=',rec['soNo'])], limit=1)
-                debug.append("Stock Picking Search Result: " + str(stock_picking))
+                stock_picking = request.env['stock.picking'].search([('name','=',rec['soNo'])], limit=1)                
                 # raise UserError(stock_picking);
                 curr_company_id = stock_picking.company_id
                 if not stock_picking:
@@ -609,8 +607,7 @@ class ApiVen(http.Controller):
 
         message = {
             'response': response_msg, 
-            'message': error
-            'debug': debug
+            'message': error            
         } 
 
         api_log['response_msg'] = message
