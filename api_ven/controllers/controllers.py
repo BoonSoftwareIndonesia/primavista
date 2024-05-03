@@ -408,7 +408,7 @@ class ApiVen(http.Controller):
         warn_cnt = 1
         rcpt_lines = []
         is_error = False
-        response_msg = "Failed to create GRN!"
+        response_msg = "Failed to create DO!"
         message = {}
         line_details = []
         is_partial = False
@@ -449,6 +449,7 @@ class ApiVen(http.Controller):
                 
                 # (2) Validations
                 stock_picking = request.env['stock.picking'].search([('name','=',rec['soNo'])], limit=1)
+                Raise UserError(stock_picking);
                 curr_company_id = stock_picking.company_id
                 if not stock_picking:
                     error["Error"] = "Stock move does not exist"
