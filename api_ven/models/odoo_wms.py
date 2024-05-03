@@ -33,7 +33,7 @@ class PurchaseOrderLineExt(models.Model):
 
 class SaleOrderExt(models.Model):
     _inherit = 'sale.order'
-    x_studio_doc_trans_code = fields.Selection([("OR", "OR"),("SMPL", "SAMPLE"),("ORD","ORD"),("FOC","FOC"),("COSN OUT","COSN OUT"),("CONS","CONS"),("Adjustment GI","Adjustment GI"),("POR","POR")],string="Doc Trans Code", default='OR')
+    x_studio_doc_trans_code = fields.Selection([("OR", "OR"),("SMPL", "SAMPLE"),("ORD","ORD"),("FOC","FOC"),("COSN OUT","COSN OUT"),("CONS","CONS"),("Adjustment GI","Adjustment GI"),("POR","POR"),("EXI","EXI"),("EXO","EXO")],string="Doc Trans Code", default='OR')
 
 # Override stock move creation process when a SO is confirmed. 
 # This prepares the stock moves data for one order line and returns a list of dictionary ready to be used in stock.move's create()
