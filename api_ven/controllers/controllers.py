@@ -449,7 +449,7 @@ class ApiVen(http.Controller):
                 
                 # (2) Validations
                 stock_picking = request.env['stock.picking'].search([('name','=',rec['soNo'])], limit=1)
-                raise UserError(stock_picking);
+                # raise UserError(stock_picking);
                 curr_company_id = stock_picking.company_id
                 if not stock_picking:
                     error["Error"] = "Stock move does not exist"
