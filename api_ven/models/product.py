@@ -75,7 +75,7 @@ class ProductTemplateExt(models.Model):
             if self.env.context['allowed_company_ids'][0] == 1:
                 vals_list[0]['company_id'] = 1
             else:
-                vals_list[0]['company_id'] = 2
+                vals_list[0]['company_id'] = 5
             
         # Call the super() method
         products = super(ProductTemplateExt, self).create(vals_list)
@@ -260,43 +260,79 @@ class ProductExt(models.Model):
             self.clear_caches()
             return products
 
-class SaleOrder(models.Model):
-    _inherit = 'sale.order'
+# class SaleOrder(models.Model):
+#     _inherit = 'sale.order'
 
-    # Computed field to fetch all product categories
-    product_category_selection = fields.Selection(
-        selection='_get_product_categories',
-        string='Product Category',                
-    )
+#     x_product_category_selection = fields.Selection(
+#         selection='_get_product_categories',
+#         string='Product Category',
+#         store=True, # This ensures the field's value is stored in the database        
+#     )
 
-    def _get_product_categories(self):
-        # This method returns the list of tuples for the selection field
-        return [(category.id, category.display_name) for category in self.env['product.category'].search([])]
-
-
-class SaleOrderLine(models.Model):
-    _inherit = 'sale.order.line'
-
-    product_id = fields.Many2one(
-        'product.product', 
-        string='Product', 
-        domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id), ('categ_id', '=', parent.product_category_selection)]"       
-    )
+#     def _get_product_categories(self):
+#         # This method returns the list of tuples for the selection field
+#         return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
     
-    @api.model
-    def create(self, vals):        
-        # Call the original create method to create the record
-        line = super(SaleOrderLine, self).create(vals)
-        
-        # Check if the sale order has a category selected
-        raise UserError(line.order_id.product_category_selection)
-        if line.order_id and line.order_id.product_category_selection:
-            # Set the domain to filter products based on the selected category
-            line.product_id = False
-            line._fields['product_id'].domain = [('categ_id', '=', line.order_id.product_category_selection)]
-        
-        return line
+#     def action_confirm(self):
+#         res = super(SaleOrder, self).action_confirm()
+#         for order in self:
+#             for picking in order.picking_ids:
+#                 picking.x_doc_trans_code = order.x_studio_doc_trans_code
+#         return res
+            
+# class StockPicking(models.Model):
+#     _inherit = 'stock.picking'
 
+#     # Now, this field is both computed and stored
+#     x_product_category_selection = fields.Selection(
+#         selection='_get_product_categories',
+#         string='Product Category',
+#         store=True, # This ensures the field's value is stored in the database        
+#     )
+
+#     def _get_product_categories(self):
+#         # This method returns the list of tuples for the selection field
+#         return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
+
+#     x_doc_trans_code = fields.Selection(
+#         selection='_get_x_studio_doc_trans_codes',
+#         string='Doc Trans Code',
+#         store=True,
+#     )
+
+#     @api.model
+#     def _get_x_studio_doc_trans_codes(self):
+#         # Correctly fetch the field definition of x_studio_doc_trans_code from sale.order
+#         field = self.env['sale.order']._fields.get('x_studio_doc_trans_code')
+#         # Return the selection options
+#         return field.selection
+
+# class ProductTemplate(models.Model):
+#     _inherit = 'product.product'
+
+#     @api.model
+#     def name_search(self, name='', args=None, operator='ilike', limit=None):
+#         if args is None:
+#             args = []
+
+#         # raise UserError(self.env.context.get('product_category_selection'))                
+#         category_id = self.env.context.get('product_category_selection')        
+#         if category_id:
+#             args.append(('categ_id', '=', category_id))
+
+#         return super(ProductTemplate, self).name_search(name=name, args=args, operator=operator, limit=limit)
+
+#     @api.model
+#     def search(self, args=None, offset=0, limit=None, order=None, count=False):
+#         if args is None:
+#             args = []
+
+#         # raise UserError(self.env.context.get('product_category_selection'))        
+#         category_id = self.env.context.get('product_category_selection')
+#         if category_id:
+#             args.append(('categ_id', '=', category_id))
+
+#         return super(ProductTemplate, self).search(args, offset=offset, limit=limit, order=order, count=count)
 
 
 
