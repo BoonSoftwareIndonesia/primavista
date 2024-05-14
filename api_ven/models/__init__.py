@@ -5,6 +5,7 @@ from . import activity_log_line
 from . import partner
 from . import product
 from . import models
+from . import invoices
 from . import stock
 from . import e_commerce
 from . import lot_record

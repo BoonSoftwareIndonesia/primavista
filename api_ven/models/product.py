@@ -1,6 +1,6 @@
 from odoo import models, fields, api
 from odoo.http import request, Response
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from datetime import datetime
 from lxml import etree
 
@@ -79,10 +79,11 @@ class ProductTemplateExt(models.Model):
             
         # Call the super() method
         products = super(ProductTemplateExt, self).create(vals_list)
-
-        # Checking if user access the parent category or not
-        if not products.categ_id.parent_id:
-            raise UserError(f"Can't create product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
+        
+        if products.categ_id:            
+            # Checking if user access the parent category or not            
+            if not products.categ_id.parent_id:
+                raise UserError(f"Can't create product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
         
         # Get the test_import context
         test_import = self._context.get('test_import')
@@ -113,11 +114,12 @@ class ProductTemplateExt(models.Model):
         
         # Call the super() method
         res = super(ProductTemplateExt, self).write(vals)
-        
-        # Checking if user access the parent category or not
-        if not self.categ_id.parent_id:
-            # raise UserError(f"parent: {self.categ_id.parent_id.name} || Child: {self.categ_id.name}")
-            raise UserError(f"Can't edit product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
+
+        if self.categ_id:               
+            # Checking if user access the parent category or not
+            if not self.categ_id.parent_id:
+                # raise UserError(f"parent: {self.categ_id.parent_id.name} || Child: {self.categ_id.name}")
+                raise UserError(f"Can't edit product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
         
         # If the product's write_date and create_date are different, we are doing an update, so we can proceed
         if self.write_date != self.create_date:
@@ -283,40 +285,62 @@ class SaleOrder(models.Model):
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    # Now, this field is both computed and stored
+    # Custom field to store product categories
     x_product_category_selection = fields.Selection(
         selection='_get_product_categories',
         string='Product Category',
         store=True, # This ensures the field's value is stored in the database        
     )
 
-    def _get_product_categories(self):
-        # This method returns the list of tuples for the selection field
+    # Function to get all product categories
+    def _get_product_categories(self):        
         return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
 
+    # Custom field to store doc trabs code
     x_doc_trans_code = fields.Selection(
         selection='_get_x_studio_doc_trans_codes',
         string='Doc Trans Code',
         store=True,
     )
-
+    
     @api.model
     def _get_x_studio_doc_trans_codes(self):
-        # Correctly fetch the field definition of x_studio_doc_trans_code from sale.order
+        # Fetch the field definition of x_studio_doc_trans_code from sale.order
         field = self.env['sale.order']._fields.get('x_studio_doc_trans_code')
         # Return the selection options
         return field.selection
 
+    x_exo_number = fields.Char(string='EXO Number')
+
+    @api.model
+    def create(self, vals):
+        if vals.get('x_exo_number'):
+            # Check if the 'x_exo_number' is unique
+            if self.search_count([('x_exo_number', '=', vals['x_exo_number'])]) > 0:
+                raise ValidationError("Running Number has already been used!")
+    
+            # Check if the 'x_exo_number' matches any records
+            matching_picking = self.env['stock.picking'].search([
+                ('name', 'like', '%OUT%'),  # Search for names containing "OUT"
+                ('x_doc_trans_code', '=', 'EXO'),
+                ('name', '=', vals['x_exo_number'])
+            ])
+            if not matching_picking:
+                raise ValidationError("The EXO Number must match the Running Number of any records!")
+        return super(StockPicking, self).create(vals)
+        
 class ProductTemplate(models.Model):
     _inherit = 'product.product'
 
+    # The two functions below allow us to modify the product selection popup so that it filters the product by the selected product category selection
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=None):
         if args is None:
             args = []
 
         # raise UserError(self.env.context.get('product_category_selection'))                
-        category_id = self.env.context.get('product_category_selection')        
+        # The context is defined using Odoo Studio. Please use self.env.context.get otherwise it would give out errors!     
+        category_id = self.env.context.get('product_category_selection')
         if category_id:
             args.append(('categ_id', '=', category_id))
 
