@@ -262,101 +262,101 @@ class ProductExt(models.Model):
             self.clear_caches()
             return products
 
-class SaleOrder(models.Model):
-    _inherit = 'sale.order'
+# class SaleOrder(models.Model):
+#     _inherit = 'sale.order'
 
-    x_product_category_selection = fields.Selection(
-        selection='_get_product_categories',
-        string='Product Category',
-        store=True, # This ensures the field's value is stored in the database        
-    )
+#     x_product_category_selection = fields.Selection(
+#         selection='_get_product_categories',
+#         string='Product Category',
+#         store=True, # This ensures the field's value is stored in the database        
+#     )
 
-    def _get_product_categories(self):
-        # This method returns the list of tuples for the selection field
-        return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
+#     def _get_product_categories(self):
+#         # This method returns the list of tuples for the selection field
+#         return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
     
-    def action_confirm(self):
-        res = super(SaleOrder, self).action_confirm()
-        for order in self:
-            for picking in order.picking_ids:
-                picking.x_doc_trans_code = order.x_studio_doc_trans_code
-        return res
+#     def action_confirm(self):
+#         res = super(SaleOrder, self).action_confirm()
+#         for order in self:
+#             for picking in order.picking_ids:
+#                 picking.x_doc_trans_code = order.x_studio_doc_trans_code
+#         return res
             
-class StockPicking(models.Model):
-    _inherit = 'stock.picking'
+# class StockPicking(models.Model):
+#     _inherit = 'stock.picking'
 
-    # Custom field to store product categories
-    x_product_category_selection = fields.Selection(
-        selection='_get_product_categories',
-        string='Product Category',
-        store=True, # This ensures the field's value is stored in the database        
-    )
+#     # Custom field to store product categories
+#     x_product_category_selection = fields.Selection(
+#         selection='_get_product_categories',
+#         string='Product Category',
+#         store=True, # This ensures the field's value is stored in the database        
+#     )
 
-    # Function to get all product categories
-    def _get_product_categories(self):        
-        return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
+#     # Function to get all product categories
+#     def _get_product_categories(self):        
+#         return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
 
-    # Custom field to store doc trabs code
-    x_doc_trans_code = fields.Selection(
-        selection='_get_x_studio_doc_trans_codes',
-        string='Doc Trans Code',
-        store=True,
-    )
+#     # Custom field to store doc trabs code
+#     x_doc_trans_code = fields.Selection(
+#         selection='_get_x_studio_doc_trans_codes',
+#         string='Doc Trans Code',
+#         store=True,
+#     )
     
-    @api.model
-    def _get_x_studio_doc_trans_codes(self):
-        # Fetch the field definition of x_studio_doc_trans_code from sale.order
-        field = self.env['sale.order']._fields.get('x_studio_doc_trans_code')
-        # Return the selection options
-        return field.selection
+#     @api.model
+#     def _get_x_studio_doc_trans_codes(self):
+#         # Fetch the field definition of x_studio_doc_trans_code from sale.order
+#         field = self.env['sale.order']._fields.get('x_studio_doc_trans_code')
+#         # Return the selection options
+#         return field.selection
 
-    x_exo_number = fields.Char(string='EXO Number')
+#     x_exo_number = fields.Char(string='EXO Number')
 
-    @api.model
-    def create(self, vals):
-        if vals.get('x_exo_number'):
-            # Check if the 'x_exo_number' is unique
-            if self.search_count([('x_exo_number', '=', vals['x_exo_number'])]) > 0:
-                raise ValidationError("Running Number has already been used!")
+#     @api.model
+#     def create(self, vals):
+#         if vals.get('x_exo_number'):
+#             # Check if the 'x_exo_number' is unique
+#             if self.search_count([('x_exo_number', '=', vals['x_exo_number'])]) > 0:
+#                 raise ValidationError("Running Number has already been used!")
     
-            # Check if the 'x_exo_number' matches any records
-            matching_picking = self.env['stock.picking'].search([
-                ('name', 'like', '%OUT%'),  # Search for names containing "OUT"
-                ('x_doc_trans_code', '=', 'EXO'),
-                ('name', '=', vals['x_exo_number'])
-            ])
-            if not matching_picking:
-                raise ValidationError("The EXO Number must match the Running Number of any records!")
-        return super(StockPicking, self).create(vals)
+#             # Check if the 'x_exo_number' matches any records
+#             matching_picking = self.env['stock.picking'].search([
+#                 ('name', 'like', '%OUT%'),  # Search for names containing "OUT"
+#                 ('x_doc_trans_code', '=', 'EXO'),
+#                 ('name', '=', vals['x_exo_number'])
+#             ])
+#             if not matching_picking:
+#                 raise ValidationError("The EXO Number must match the Running Number of any records!")
+#         return super(StockPicking, self).create(vals)
         
-class ProductTemplate(models.Model):
-    _inherit = 'product.product'
+# class ProductTemplate(models.Model):
+#     _inherit = 'product.product'
 
-    # The two functions below allow us to modify the product selection popup so that it filters the product by the selected product category selection
-    @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=None):
-        if args is None:
-            args = []
+#     # The two functions below allow us to modify the product selection popup so that it filters the product by the selected product category selection
+#     @api.model
+#     def name_search(self, name='', args=None, operator='ilike', limit=None):
+#         if args is None:
+#             args = []
 
-        # raise UserError(self.env.context.get('product_category_selection'))                
-        # The context is defined using Odoo Studio. Please use self.env.context.get otherwise it would give out errors!     
-        category_id = self.env.context.get('product_category_selection')
-        if category_id:
-            args.append(('categ_id', '=', category_id))
+#         # raise UserError(self.env.context.get('product_category_selection'))                
+#         # The context is defined using Odoo Studio. Please use self.env.context.get otherwise it would give out errors!     
+#         category_id = self.env.context.get('product_category_selection')
+#         if category_id:
+#             args.append(('categ_id', '=', category_id))
 
-        return super(ProductTemplate, self).name_search(name=name, args=args, operator=operator, limit=limit)
+#         return super(ProductTemplate, self).name_search(name=name, args=args, operator=operator, limit=limit)
 
-    @api.model
-    def search(self, args=None, offset=0, limit=None, order=None, count=False):
-        if args is None:
-            args = []
+#     @api.model
+#     def search(self, args=None, offset=0, limit=None, order=None, count=False):
+#         if args is None:
+#             args = []
 
-        # raise UserError(self.env.context.get('product_category_selection'))        
-        category_id = self.env.context.get('product_category_selection')
-        if category_id:
-            args.append(('categ_id', '=', category_id))
+#         # raise UserError(self.env.context.get('product_category_selection'))        
+#         category_id = self.env.context.get('product_category_selection')
+#         if category_id:
+#             args.append(('categ_id', '=', category_id))
 
-        return super(ProductTemplate, self).search(args, offset=offset, limit=limit, order=order, count=count)
+#         return super(ProductTemplate, self).search(args, offset=offset, limit=limit, order=order, count=count)
 
 
 
