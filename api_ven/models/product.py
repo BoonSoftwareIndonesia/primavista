@@ -4,10 +4,9 @@ from odoo.exceptions import UserError, ValidationError
 from datetime import datetime
 from lxml import etree
 
-
 # Override product template =============================
 class ProductTemplateExt(models.Model):
-    _inherit = 'product.template'
+    _inherit = 'product.template'        
 
     # Adding new field(s)
     x_product_brand = fields.Selection([("NA", "NA"),("Tom Ford", "Tom Ford"), ("3M", "3M"), ("AKMU", "AKMU"), ("ALPHA", "ALPHA"), ("APA", "APA"), ("BERNOFARM OTC", "BERNOFARM OTC"), ("DKT", "DKT"), ("ESSILOR NVG CONS", "ESSILOR NVG CONS"), ("GALENIUM PSC", "GALENIUM PSC"), ("GEO MEDICAL", "GEO MEDICAL"), ("JENNY HOUSE", "JENNY HOUSE"), ("KLARENS", "KLARENS"), ("MPS", "MPS"), ("ONEMED", "ONEMED"), ("SENSI", "SENSI"), ("TAKEDA OTC", "TAKEDA OTC"), ("THERASKIN", "THERASKIN"), ("VITAHEALTH CONS", "VITAHEALTH CONS"), ("NVG ESSILOR", "NVG ESSILOR")],string="Product Brand", default='NA')
@@ -15,6 +14,16 @@ class ProductTemplateExt(models.Model):
     x_product_length = fields.Float(string="Product Length")
     x_product_width = fields.Float(string="Product Width")
     x_is_lot_tracking = fields.Boolean(string="Tracking by Lot")
+
+    # The custom field below is to add owner to products, PO, SO, DO, receipt, stock move, and res.partner. Make sure to change all fields on other models too if there's a change!
+    owner_name = fields.Selection([
+        ('AVI', 'AVI'),
+        ('AVIO', 'AVIO'),
+        ('BNL', 'BNL'),
+        ('ESSILOR', 'ESSILOR'),
+        ('OMRON', 'OMRON'),
+        ('VITAHEALTH', 'VITAHEALTH')
+    ], string='Owner')    
 
     # Override field(s)
     default_code = fields.Char(
@@ -80,7 +89,7 @@ class ProductTemplateExt(models.Model):
         # Call the super() method
         products = super(ProductTemplateExt, self).create(vals_list)
         
-        if products.categ_id:            
+        if products.categ_id:                        
             # Checking if user access the parent category or not            
             if not products.categ_id.parent_id:
                 raise UserError(f"Can't create product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
@@ -101,6 +110,14 @@ class ProductTemplateExt(models.Model):
             
             # Send API to WMS
             self.env['product.template'].api_dw_product(products)
+
+        # Set owner_name in product.product based on owner_name in product.template
+        product_variants = self.env['product.product']
+        for product_template, vals in zip(products, vals_list):
+            owner_name = vals.get('owner_name')
+            if owner_name:
+                product_variants |= product_template.product_variant_id
+        product_variants.write({'owner_name': owner_name})     
             
         return products
             
@@ -262,104 +279,284 @@ class ProductExt(models.Model):
             self.clear_caches()
             return products
 
-# class SaleOrder(models.Model):
-#     _inherit = 'sale.order'
-
-#     x_product_category_selection = fields.Selection(
-#         selection='_get_product_categories',
-#         string='Product Category',
-#         store=True, # This ensures the field's value is stored in the database        
-#     )
-
-#     def _get_product_categories(self):
-#         # This method returns the list of tuples for the selection field
-#         return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
-    
-#     def action_confirm(self):
-#         res = super(SaleOrder, self).action_confirm()
-#         for order in self:
-#             for picking in order.picking_ids:
-#                 picking.x_doc_trans_code = order.x_studio_doc_trans_code
-#         return res
+# # # # # # # # # # # # # # # # # 
+# CODE FOR EXCHANGE BEGINS HERE #
+# # # # # # # # # # # # # # # # #            
             
-# class StockPicking(models.Model):
-#     _inherit = 'stock.picking'
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
 
-#     # Custom field to store product categories
-#     x_product_category_selection = fields.Selection(
-#         selection='_get_product_categories',
-#         string='Product Category',
-#         store=True, # This ensures the field's value is stored in the database        
-#     )
-
-#     # Function to get all product categories
-#     def _get_product_categories(self):        
-#         return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
-
-#     # Custom field to store doc trabs code
-#     x_doc_trans_code = fields.Selection(
-#         selection='_get_x_studio_doc_trans_codes',
-#         string='Doc Trans Code',
-#         store=True,
-#     )
+    owner_name = fields.Selection([
+        ('AVI', 'AVI'),
+        ('AVIO', 'AVIO'),
+        ('BNL', 'BNL'),
+        ('ESSILOR', 'ESSILOR'),
+        ('OMRON', 'OMRON'),
+        ('VITAHEALTH', 'VITAHEALTH')
+    ], string='Owner')
     
-#     @api.model
-#     def _get_x_studio_doc_trans_codes(self):
-#         # Fetch the field definition of x_studio_doc_trans_code from sale.order
-#         field = self.env['sale.order']._fields.get('x_studio_doc_trans_code')
-#         # Return the selection options
-#         return field.selection
+    x_product_category_selection = fields.Selection(
+        selection='_get_product_categories',
+        string='Product Category',
+        store=True, # This ensures the field's value is stored in the database        
+    )
 
-#     x_exo_number = fields.Char(string='EXO Number')
+    def _get_product_categories(self):
+        # This method returns the list of tuples for the selection field
+        return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
 
-#     @api.model
-#     def create(self, vals):
-#         if vals.get('x_exo_number'):
-#             # Check if the 'x_exo_number' is unique
-#             if self.search_count([('x_exo_number', '=', vals['x_exo_number'])]) > 0:
-#                 raise ValidationError("Running Number has already been used!")
-    
-#             # Check if the 'x_exo_number' matches any records
-#             matching_picking = self.env['stock.picking'].search([
-#                 ('name', 'like', '%OUT%'),  # Search for names containing "OUT"
-#                 ('x_doc_trans_code', '=', 'EXO'),
-#                 ('name', '=', vals['x_exo_number'])
-#             ])
-#             if not matching_picking:
-#                 raise ValidationError("The EXO Number must match the Running Number of any records!")
-#         return super(StockPicking, self).create(vals)
+    def action_confirm(self):
+        res = super(SaleOrder, self).action_confirm()
         
-# class ProductTemplate(models.Model):
-#     _inherit = 'product.product'
+        for order in self:
+            for picking in order.picking_ids:
+                picking.x_doc_trans_code = order.x_studio_doc_trans_code
 
-#     # The two functions below allow us to modify the product selection popup so that it filters the product by the selected product category selection
-#     @api.model
-#     def name_search(self, name='', args=None, operator='ilike', limit=None):
-#         if args is None:
-#             args = []
+        for order in self:
+            for picking in order.picking_ids:
+                picking.write({'owner_name': order.owner_name})
 
-#         # raise UserError(self.env.context.get('product_category_selection'))                
-#         # The context is defined using Odoo Studio. Please use self.env.context.get otherwise it would give out errors!     
-#         category_id = self.env.context.get('product_category_selection')
-#         if category_id:
-#             args.append(('categ_id', '=', category_id))
+        return res
+                
+    
+class StockPicking(models.Model):
+    _inherit = 'stock.picking'
+    
+    x_total_quantity_receipt = fields.Float(string='Total Quantity', compute='_compute_total_quantity', store=True)
 
-#         return super(ProductTemplate, self).name_search(name=name, args=args, operator=operator, limit=limit)
+    @api.depends('move_lines.quantity_done')
+    def _compute_total_quantity(self):
+        for picking in self:
+            picking.x_total_quantity_receipt = sum(picking.move_lines.mapped('quantity_done'))    
+    
+    # Custom field to store product categories
+    x_product_category_selection = fields.Selection(
+        selection='_get_product_categories',
+        string='Product Category',
+        store=True, # This ensures the field's value is stored in the database        
+    )
 
-#     @api.model
-#     def search(self, args=None, offset=0, limit=None, order=None, count=False):
-#         if args is None:
-#             args = []
+    # Function to get all product categories
+    def _get_product_categories(self):        
+        return [(category.display_name, category.display_name) for category in self.env['product.category'].search([])]
 
-#         # raise UserError(self.env.context.get('product_category_selection'))        
-#         category_id = self.env.context.get('product_category_selection')
-#         if category_id:
-#             args.append(('categ_id', '=', category_id))
+    # Custom field to store doc trabs code
+    x_doc_trans_code = fields.Selection(
+        selection='_get_x_studio_doc_trans_codes',
+        string='Doc Trans Code',
+        store=True,
+    )
 
-#         return super(ProductTemplate, self).search(args, offset=offset, limit=limit, order=order, count=count)
+    # custom field to store owner
+    owner_name = fields.Selection([
+        ('AVI', 'AVI'),
+        ('AVIO', 'AVIO'),
+        ('BNL', 'BNL'),
+        ('ESSILOR', 'ESSILOR'),
+        ('OMRON', 'OMRON'),
+        ('VITAHEALTH', 'VITAHEALTH')
+    ], string='Owner')
+    
+    @api.model
+    def _get_x_studio_doc_trans_codes(self):
+        # Fetch the field definition of x_studio_doc_trans_code from sale.order
+        field = self.env['sale.order']._fields.get('x_studio_doc_trans_code')
+        # Return the selection options
+        return field.selection
 
+    x_exo_number = fields.Char(string='EXO Number')
 
+    @api.model
+    def create(self, vals):        
+        if vals.get('x_exo_number'):            
+            # Check if the 'x_exo_number' is unique among non-cancelled pickings
+            if self.search_count([('x_exo_number', '=', vals['x_exo_number']), ('state', '!=', 'cancel')]) > 0:
+                raise ValidationError("Running Number has already been used!")
+    
+            # Check if the 'x_exo_number' matches any records
+            matching_picking = self.env['stock.picking'].search([
+                ('name', 'like', '%OUT%'),  # Search for names containing "OUT"
+                ('x_doc_trans_code', '=', 'EXO'),
+                ('name', '=', vals['x_exo_number'])
+            ])
+            if not matching_picking:
+                raise ValidationError("The EXO Number must match the Running Number of any records!")
+            
+            # Check if the product category selection matches the delivery order
+            if matching_picking and vals.get('x_product_category_selection'):
+                delivery_order = matching_picking.filtered(lambda picking: picking.state == 'done')
+                if not delivery_order:
+                    raise ValidationError("No completed delivery order found for the matching EXO Number.")
+                if vals['x_product_category_selection'] != delivery_order.x_product_category_selection:
+                    raise ValidationError(f"The product category selection '{vals['x_product_category_selection']}' does not match the expected product category '{delivery_order.x_product_category_selection}' from the delivery order.")
+                    
+        return super(StockPicking, self).create(vals)
+        
+    # Validate quantity
+    def button_validate(self):
+        # Call super to perform default validation
+        res = super(StockPicking, self).button_validate()
 
+        # Call function to change owner_name in stock.quant
+        for picking in self:            
+            picking._update_quant_owner_name()
+        return res
+        
+        # Iterate through each receipt
+        for receipt in self.filtered(lambda r: r.picking_type_code == 'incoming' and r.x_doc_trans_code in ['EXI', 'EXO']):
+            # Find related delivery order with the same 'x_exo_number'
+            delivery_order = self.env['stock.picking'].search([
+                ('picking_type_code', '=', 'outgoing'),
+                ('x_doc_trans_code', '=', 'EXO'),                
+                ('name', '=', receipt.x_exo_number)
+            ], limit=1)
 
+            # If no related delivery order found, raise validation error
+            if not delivery_order:
+                raise ValidationError(f"No related delivery order found for receipt {receipt.name}.")
 
+            # Compare 'x_total_quantity' fields
+            if receipt.x_total_quantity_receipt != delivery_order.x_total_quantity_receipt:
+                raise ValidationError(f"Total quantity in receipt {receipt.name} ({receipt.x_total_quantity_receipt}) does not match with delivery order {delivery_order.name} ({delivery_order.x_total_quantity_receipt}).")
 
+        return res
+
+    def _update_quant_owner_name(self):
+        for move in self.move_lines:
+            for quant in move.product_id.stock_quant_ids:
+                quant.owner_name = move.owner_name
+        
+class ProductTemplate(models.Model):
+    _inherit = 'product.product'
+
+    owner_name = fields.Selection([
+        ('AVI', 'AVI'),
+        ('AVIO', 'AVIO'),
+        ('BNL', 'BNL'),
+        ('ESSILOR', 'ESSILOR'),
+        ('OMRON', 'OMRON'),
+        ('VITAHEALTH', 'VITAHEALTH')
+    ], string='Owner Name')
+    
+    # The two functions below allow us to modify the product selection popup so that it filters the product by the selected product category selection
+    @api.model
+    def name_search(self, name='', args=None, operator='ilike', limit=None):
+        if args is None:
+            args = []
+
+        # raise UserError(self.env.context.get('product_category_selection'))                
+        # The context is defined using Odoo Studio. Please use self.env.context.get otherwise it would give out errors!     
+        category_id = self.env.context.get('product_category_selection')
+        if category_id:
+            args.append(('categ_id', '=', category_id))
+
+        owner_name = self.env.context.get('owner_name')
+        if owner_name:
+            args.append(('owner_name', '=', owner_name))        
+
+        return super(ProductTemplate, self).name_search(name=name, args=args, operator=operator, limit=limit)
+
+    @api.model
+    def search(self, args=None, offset=0, limit=None, order=None, count=False):
+        if args is None:
+            args = []
+
+        # raise UserError(self.env.context.get('product_category_selection'))        
+        category_id = self.env.context.get('product_category_selection')
+        if category_id:
+            args.append(('categ_id', '=', category_id))
+
+        owner_name = self.env.context.get('owner_name')
+        if owner_name:
+            args.append(('owner_name', '=', owner_name))        
+
+        return super(ProductTemplate, self).search(args, offset=offset, limit=limit, order=order, count=count)
+
+class StockQuant(models.Model):
+    _inherit = 'stock.quant'
+
+    owner_name = fields.Selection([
+        ('AVI', 'AVI'),
+        ('AVIO', 'AVIO'),
+        ('BNL', 'BNL'),
+        ('ESSILOR', 'ESSILOR'),
+        ('OMRON', 'OMRON'),
+        ('VITAHEALTH', 'VITAHEALTH')
+    ], string='Owner Name')
+
+class PurchaseOrder(models.Model):
+    _inherit = 'purchase.order'
+    
+    owner_name = fields.Selection([
+        ('AVI', 'AVI'),
+        ('AVIO', 'AVIO'),
+        ('BNL', 'BNL'),
+        ('ESSILOR', 'ESSILOR'),
+        ('OMRON', 'OMRON'),
+        ('VITAHEALTH', 'VITAHEALTH')
+    ], string='Owner')    
+
+    def button_confirm(self):
+        res = super(PurchaseOrder, self).button_confirm()
+        for order in self:
+            if order.picking_ids:
+                # Assuming each purchase order has only one picking associated
+                picking = order.picking_ids[0]
+                picking.write({'owner_name': order.owner_name})
+        return res
+
+    def action_confirm(self):
+        res = super(PurchaseOrder, self).action_confirm()
+        
+        for order in self:
+            for picking in order.picking_ids:
+                picking.write({'owner_name': order.owner_name})
+        
+        return res
+
+    def action_create_invoice(self):
+        res = super(PurchaseOrder, self).action_create_invoice()
+
+        for order in self:
+            for invoice in order.invoice_ids:
+                invoice.write({
+                    'amount_total': order.amount_total,
+                    'amount_tax': order.amount_tax,
+                    'amount_untaxed': order.amount_untaxed,
+                    'tax_totals_json': order.tax_totals_json,
+                    # Write other necessary fields here
+                })
+
+        return res        
+                        
+class PurchaseOrderLine(models.Model):
+    _inherit = 'purchase.order.line'
+
+    @api.model
+    def _prepare_stock_moves(self, picking):
+        """
+        Prepare the stock moves based on the purchase order lines.
+        Include the owner_name from the purchase.order.
+        """
+        res = super(PurchaseOrderLine, self)._prepare_stock_moves(picking)
+        
+        # Access the owner_name from the purchase.order
+        owner_name = self.order_id.owner_name        
+        
+        # Include the owner_name in the stock moves
+        for move in res:
+            move['owner_name'] = owner_name
+            
+        return res
+        
+class StockMove(models.Model):
+    _inherit = 'stock.move'
+
+    owner_name = fields.Selection([
+        ('AVI', 'AVI'),
+        ('AVIO', 'AVIO'),
+        ('BNL', 'BNL'),
+        ('ESSILOR', 'ESSILOR'),
+        ('OMRON', 'OMRON'),
+        ('VITAHEALTH', 'VITAHEALTH')
+    ], string='Owner')

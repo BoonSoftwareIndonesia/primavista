@@ -80,13 +80,16 @@ class POApiController(models.Model):
         res = ""
         unique_res = ""
         owner_code = ""
+        owner_code_flag = 1
 
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
-        
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
+                
         # To get the SO No that generated this PO
         # If this PO is generated from another SO, we also need to send the list of SO that generated this PO
         # Use regex to get the SO no only
@@ -136,7 +139,7 @@ class POApiController(models.Model):
                     "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
                     "sender": "",
                     "documentTransCode":"PODR" if record['x_studio_doc_trans_code'] == False else record['x_studio_doc_trans_code'],
-                    "ownerCode": owner_code,
+                    "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,
 #                     "warehouseCode": "" if record['picking_type_id']['warehouse_id']['code'] == False else record['picking_type_id']['warehouse_id']['code'],
                     "warehouseCode": "AVI",
                     "poDate": "" if record['date_approve'] == False else datetime.strftime(record['date_approve'], '%d/%m/%Y'),
@@ -243,7 +246,7 @@ class SOApiController(models.Model):
                 "quantityOrder": str(int(line['product_uom_qty'])),
 #                 "originalOrderUOM": line['product_uom']['name'],
                 "originalOrderUOM": "UNITS" if line['product_uom']['name'] == False else line['product_uom']['name'].upper(),
-                "lotNo": "LOT" if line['lot_record_id']['name'] == False else line['lot_record_id']['name'].upper(), 
+                "lotNo": "" if line['lot_record_id']['name'] == False else line['lot_record_id']['name'].upper(), 
                 "filterTransactionCode": "NM" if line['x_stock_status_code']  == False else line['x_stock_status_code'],
                 "soLineOptChar2": ""
             }
@@ -397,7 +400,7 @@ class ApiControllerStockPicking(models.Model):
                 "product": line['product_id']["product_tmpl_id"]["default_code"],
                 "quantityOrder": str(int(line['product_uom_qty'])),
                 "originalOrderUOM": "UNITS" if line['product_uom']['name'] == False else line['product_uom']['name'].upper(),
-                "lotNo": "LOT" if line['move_line_ids']['x_wms_lot_records'] == False else line['move_line_ids']['x_wms_lot_records'].upper(), 
+                "lotNo": "" if line['move_line_ids']['x_wms_lot_records'] == False else line['move_line_ids']['x_wms_lot_records'].upper(), 
                 "filterTransactionCode": line['move_line_ids']['x_stock_status_code'],
                 "soLineOptChar2": ""
             }
@@ -903,7 +906,7 @@ class ApiControllerProduct(models.Model):
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "product": [
                 {
-                    "ownerCode": owner_code,
+                    "ownerCode": owner_code,                    
                     "warehouseCode": "AVI",
                     "product": "" if record['default_code'] == False else record['default_code'],
                     "desc1": "" if record['name'] == False else record['name'],
