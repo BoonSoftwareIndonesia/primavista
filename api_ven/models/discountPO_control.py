@@ -15,7 +15,7 @@ class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
         
     x_regular_discount = fields.Float(string='Discount (%)')
-      
+
     @api.depends('product_qty', 'price_unit', 'taxes_id', 'x_regular_discount')
     def _compute_amount(self):
         for line in self:
