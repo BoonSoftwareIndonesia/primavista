@@ -222,12 +222,17 @@ class SOApiController(models.Model):
         line_no = 1
         # A variable to store the SO lines
         so_lines = []
+        owner_code = ""
+        owner_code_flag = 1
 
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
+            
         # raise UserError(f"owner code: {owner_code}")
         
         # Loop through all sale order lines
@@ -271,7 +276,7 @@ class SOApiController(models.Model):
                     "orderDate":"" if record['date_order'] == False else datetime.strftime(record['date_order'], '%d/%m/%Y'),
                     "requestedDeliveryDate":"",
 #                     "ownerCode":"" if record['x_studio_owner_code'] == False else record['x_studio_owner_code'],
-                     "ownerCode": owner_code,
+                     "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,
 #                     "warehouseCode": "" if record['warehouse_id']['code'] == False else record['warehouse_id']['code'],
                     "warehouseCode": "AVI",
 #                     "shipNo": "" if record['x_studio_internal_id'] == False else record['x_studio_internal_id'],
@@ -375,11 +380,15 @@ class ApiControllerStockPicking(models.Model):
         origin_name = ""
         # A variable to store partner_id value from a PO
         partner_shipping = request.env['res.partner']
+        owner_code = ""
+        owner_code_flag = 1
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
         
         # Loop through all stock moves (PO lines from stock.picking.move_ids_without_package)
         for line in record.move_ids_without_package:
@@ -456,7 +465,7 @@ class ApiControllerStockPicking(models.Model):
                     "documentTransCode":"POR",
                     "orderDate":"" if record['create_date'] == False else datetime.strftime(record['create_date'], '%d/%m/%Y'),
                     "requestedDeliveryDate":"",
-                    "ownerCode":owner_code,
+                    "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,
                     "warehouseCode": "AVI",
                     "shipNo": "" if partner_shipping['x_studio_customer_id'] == False else partner_shipping['x_studio_customer_id'],
                     "shipAddress1":"" if partner_shipping["street"] == False else partner_shipping["street"],
@@ -560,11 +569,16 @@ class ApiControllerStockPicking(models.Model):
         doc_trans_code = ""
         # To store the partial or full validation
         is_partial = False
+        owner_code = ""
+        owner_code_flag = 1
+
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
         
         # Loop through all stock moves
         for line in record['move_ids_without_package']:
@@ -618,7 +632,7 @@ class ApiControllerStockPicking(models.Model):
                     "supplierReferences": "", 
                     "sender": "",
                     "documentTransCode": "GRN", 
-                    "ownerCode": owner_code,
+                    "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,
                     "warehouseCode": "AVI",
                     # "poDate": po_date, # datetime.strftime(record['date_approve'],'%d/%m/%Y')
                     "poDate": "" if record['create_date'] == False else datetime.strftime(record['create_date'], '%d/%m/%Y'),
@@ -697,11 +711,16 @@ class ApiControllerPartner(models.Model):
     def api_dw_customer(self, record):
         error = {}
 
+        owner_code = ""
+        owner_code_flag = 1
+
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
             
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
         apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createcustomer"
@@ -714,7 +733,7 @@ class ApiControllerPartner(models.Model):
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "customer": [
                 {
-                    "ownerCode": owner_code,
+                    "ownerCode": record['x_owner_name'] if owner_code_flag == 1 else owner_code,
                     "custCode": "" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
                     "name": "" if record['name'] == False else record['name'],
                     "custGroup": "" if record['x_studio_customer_group'] == False else record['x_studio_customer_group'],
@@ -794,11 +813,16 @@ class ApiControllerPartner(models.Model):
         
         error = {}
 
+        owner_code = ""
+        owner_code_flag = 1
+
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
 
         if not record.parent_id.x_studio_customer_id:  
             raise UserError("Please save customer or vendor first, or contact consultant")
@@ -813,7 +837,7 @@ class ApiControllerPartner(models.Model):
             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "ship": [
                 {
-                    "ownerCode": owner_code,
+                    "ownerCode": record['x_owner_name'] if owner_code_flag == 1 else owner_code,
                     "custCode": "" if record['parent_id']['x_studio_customer_id'] == False else record['parent_id']['x_studio_customer_id'],
         		    "shipNo": "" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
                     "name": "" if record['name'] == False else record['name'],
@@ -892,11 +916,16 @@ class ApiControllerProduct(models.Model):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
         apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createproduct"
 
+        owner_code = ""
+        owner_code_flag = 1
+
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
@@ -906,7 +935,7 @@ class ApiControllerProduct(models.Model):
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "product": [
                 {
-                    "ownerCode": owner_code,                    
+                    "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,                    
                     "warehouseCode": "AVI",
                     "product": "" if record['default_code'] == False else record['default_code'],
                     "desc1": "" if record['name'] == False else record['name'],
