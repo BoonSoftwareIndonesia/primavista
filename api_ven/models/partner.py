@@ -11,12 +11,20 @@ class PartnerExt(models.Model):
     # Name is required
     name = fields.Char(index=True, required=True)
     # No duplicate x_studio_customer_id
-    x_studio_customer_id = fields.Char(string='Customer ID', copy=False, readonly=True)
+    x_studio_customer_id = fields.Char(string='Customer ID', copy=False, readonly=False)
     # x_studio_customer_group = fields.Char(string='Customer Group',default='IOC')
-    x_studio_customer_group = fields.Selection([("APT", "APOTIK"),("CBG", "CABANG"),("CLC","CLC"),("ECO","ECO"),("EVT","EVT"),("HCP","HCP"),("HOS","HOS"), ("INST","INST"), ("IOC","IOC"), ("KAC","KAC"), ("MKT","MKT"), ("MTC","MTC"), ("NA","Not Applicable"), ("PBAK","PBAK"), ("PBF","PBF"), ("PCP","PRINCIPAL"), ("SUPPLIER","Suppliers"), ("SUPPLIERS","SUPPLIERS"), ("TKC","TKC"), ("TKO","TOKO OBAT"), ("TKU","TKU"),],string="Selection", default='IOC')
+    x_studio_customer_group = fields.Selection([("APT", "APOTIK"),("CBG", "CABANG"),("CLC","CLC"),("ECO","ECO"),("EVT","EVT"),("HCP","HCP"),("HOS","HOS"), ("INST","INST"), ("IOC","IOC"), ("KAC","KAC"), ("MKT","MKT"), ("MTC","MTC"), ("NA","Not Applicable"), ("PBAK","PBAK"), ("PBF","PBF"), ("PCP","PRINCIPAL"), ("SUPPLIER","Suppliers"), ("SUPPLIERS","SUPPLIERS"), ("TKC","TKC"), ("TKO","TOKO OBAT"), ("TKU","TKU"),],string="Customer Group", default='IOC')   
+    x_owner_name = fields.Selection([
+        ('AVI', 'AVI'),
+        ('AVIO', 'AVIO'),
+        ('BNL', 'BNL'),
+        ('ESSILOR', 'ESSILOR'),
+        ('OMRON', 'OMRON'),
+        ('VITAHEALTH', 'VITAHEALTH')
+    ], string='Owner')        
     street = fields.Char(default='NA')
     zip = fields.Char(change_default=True, default='12345')
-    city = fields.Char(default='NA')
+    city = fields.Char(default='NA')    
     state_id = fields.Many2one("res.country.state", string='State', ondelete='restrict', domain="[('country_id', '=?', country_id)]",required=True)
     # Default country Indonesia
     country_id = fields.Many2one('res.country', string='Country', ondelete='restrict', default=100)
@@ -77,46 +85,46 @@ class PartnerExt(models.Model):
                         partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('avo.vendor.id')
     
     # Triggers the api_dw_customer() function that sends an API log when creating new customer ======================
-    @api.model_create_multi
-    def create(self, vals_list):
+    # @api.model_create_multi
+    # def create(self, vals_list):
 
-        # Call the super() method
-        partners = super(PartnerExt, self).create(vals_list)
+    #     # Call the super() method
+    #     partners = super(PartnerExt, self).create(vals_list)
         
-        # Set default values if null
-        self.set_default(partners)
+    #     # Set default values if null
+    #     self.set_default(partners)
         
-        # Get test_import context
-        test_import = self._context.get('test_import')
+    #     # Get test_import context
+    #     test_import = self._context.get('test_import')
         
-        # If we are not testing (test_import = False), then create customer and send API
-        if not test_import:
-            #if we are creating a child partner, create ship_no
-            if vals_list[0]['type'] == "delivery":
+    #     # If we are not testing (test_import = False), then create customer and send API
+    #     if not test_import:
+    #         #if we are creating a child partner, create ship_no
+    #         if vals_list[0]['type'] == "delivery":
 
-                # curr_parent_id = vals_list[0]['parent_id']
+    #             # curr_parent_id = vals_list[0]['parent_id']
 
-                # parent_model = request.env['res.partner'].search([('id', '=', curr_parent_id)], limit=1)
+    #             # parent_model = request.env['res.partner'].search([('id', '=', curr_parent_id)], limit=1)
                 
-                # if not parent_model:
-                # raise UserError("Please save customer or vendor first, or contact consultant")
-            # else:
-                self.env['res.partner'].api_dw_ship_no(partners)
+    #             # if not parent_model:
+    #             # raise UserError("Please save customer or vendor first, or contact consultant")
+    #         # else:
+    #             self.env['res.partner'].api_dw_ship_no(partners)
                 
-                #if not a child partner, Call api_dw_customer to send API to WMS
-            else:
-                    # raise UserError("Entry this is a dw_customer")
-                self.env['res.partner'].api_dw_customer(partners)
+    #             #if not a child partner, Call api_dw_customer to send API to WMS
+    #         else:
+    #                 # raise UserError("Entry this is a dw_customer")
+    #             self.env['res.partner'].api_dw_customer(partners)
             
-            # Get the new customer's fields and values
-            new_vals = {}
-            for rec in partners:
-                for vals, rec in zip(vals_list, partners):
-                    new_vals[rec.id] = vals
+    #         # Get the new customer's fields and values
+    #         new_vals = {}
+    #         for rec in partners:
+    #             for vals, rec in zip(vals_list, partners):
+    #                 new_vals[rec.id] = vals
                     
-            # Create activity log for customer creation
-            self.create_activity_logs(partners, "create", new_vals = new_vals)
-            return partners
+    #         # Create activity log for customer creation
+    #         self.create_activity_logs(partners, "create", new_vals = new_vals)
+    #         return partners
     
     
     # Create activity log ======================
@@ -231,5 +239,26 @@ class PartnerExt(models.Model):
         # Call create_activity_logs() to trigger the creation of an activity log for partner deletion
         self.create_activity_logs(records, "unlink" , old_vals = old_vals)
         
-        return None
-    
+        return None    
+
+    @api.model
+    def name_search(self, name='', args=None, operator='ilike', limit=None):
+        if args is None:
+            args = []
+            
+        owner_name = self.env.context.get('owner_name')
+        if owner_name:
+            args.append(('x_owner_name', '=', owner_name))        
+
+        return super(PartnerExt, self).name_search(name=name, args=args, operator=operator, limit=limit)
+
+    @api.model
+    def search(self, args=None, offset=0, limit=None, order=None, count=False):
+        if args is None:
+            args = []
+
+        owner_name = self.env.context.get('owner_name')
+        if owner_name:
+            args.append(('x_owner_name', '=', owner_name))        
+
+        return super(PartnerExt, self).search(args, offset=offset, limit=limit, order=order, count=count)

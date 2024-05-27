@@ -20,7 +20,7 @@
     'auto_install': True,
 
     # any module necessary for this one to work correctly
-    'depends': ['base','purchase', 'sale_management', 'stock', 'account', 'account_accountant'],
+    'depends': ['base','purchase', 'sale_management', 'stock', 'account', 'account_accountant', 'product', 'sale', 'purchase'],
 
     # always loaded
     'data': [
@@ -29,7 +29,7 @@
         'views/templates.xml',
         'views/activity_log_view.xml',
         'views/custom_view.xml',
-        'views/stock_return_picking_view.xml',
+        'views/stock_return_picking_view.xml',                
 #         'views/location.xml',
     ],
     
