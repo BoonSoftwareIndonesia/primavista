@@ -70,7 +70,7 @@ class POApiController(models.Model):
     def api_dw_po(self, record):
             
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
         
         # A variable to store the value of the current line number
         line_no = 1
@@ -130,7 +130,7 @@ class POApiController(models.Model):
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {                    
@@ -216,18 +216,23 @@ class SOApiController(models.Model):
 
     def api_dw_so(self, record):
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
         
         # A variable to store the value of the current line number
         line_no = 1
         # A variable to store the SO lines
         so_lines = []
+        owner_code = ""
+        owner_code_flag = 1
 
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
+            
         # raise UserError(f"owner code: {owner_code}")
         
         # Loop through all sale order lines
@@ -259,7 +264,7 @@ class SOApiController(models.Model):
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -271,7 +276,7 @@ class SOApiController(models.Model):
                     "orderDate":"" if record['date_order'] == False else datetime.strftime(record['date_order'], '%d/%m/%Y'),
                     "requestedDeliveryDate":"",
 #                     "ownerCode":"" if record['x_studio_owner_code'] == False else record['x_studio_owner_code'],
-                     "ownerCode": owner_code,
+                     "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,
 #                     "warehouseCode": "" if record['warehouse_id']['code'] == False else record['warehouse_id']['code'],
                     "warehouseCode": "AVI",
 #                     "shipNo": "" if record['x_studio_internal_id'] == False else record['x_studio_internal_id'],
@@ -363,7 +368,7 @@ class ApiControllerStockPicking(models.Model):
     # =======================================
     def api_return_po(self, record):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
         
         # A variable to store x_wms_rec_no value
         wms_no = ""
@@ -375,11 +380,15 @@ class ApiControllerStockPicking(models.Model):
         origin_name = ""
         # A variable to store partner_id value from a PO
         partner_shipping = request.env['res.partner']
+        owner_code = ""
+        owner_code_flag = 1
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
         
         # Loop through all stock moves (PO lines from stock.picking.move_ids_without_package)
         for line in record.move_ids_without_package:
@@ -444,7 +453,7 @@ class ApiControllerStockPicking(models.Model):
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         # reference -> origin name ganti ke yg wh/out karena ini outbound
         # tambahin payload baru otherRemarks untuk simpen si origin_name
-        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -456,7 +465,7 @@ class ApiControllerStockPicking(models.Model):
                     "documentTransCode":"POR",
                     "orderDate":"" if record['create_date'] == False else datetime.strftime(record['create_date'], '%d/%m/%Y'),
                     "requestedDeliveryDate":"",
-                    "ownerCode":owner_code,
+                    "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,
                     "warehouseCode": "AVI",
                     "shipNo": "" if partner_shipping['x_studio_customer_id'] == False else partner_shipping['x_studio_customer_id'],
                     "shipAddress1":"" if partner_shipping["street"] == False else partner_shipping["street"],
@@ -544,7 +553,7 @@ class ApiControllerStockPicking(models.Model):
     def api_return_so(self, record):
         
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
         
         # line_no = 1
         
@@ -560,11 +569,16 @@ class ApiControllerStockPicking(models.Model):
         doc_trans_code = ""
         # To store the partial or full validation
         is_partial = False
+        owner_code = ""
+        owner_code_flag = 1
+
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
         
         # Loop through all stock moves
         for line in record['move_ids_without_package']:
@@ -609,7 +623,7 @@ class ApiControllerStockPicking(models.Model):
         
         # Validation if the return is full or partial order
             payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
@@ -618,7 +632,7 @@ class ApiControllerStockPicking(models.Model):
                     "supplierReferences": "", 
                     "sender": "",
                     "documentTransCode": "GRN", 
-                    "ownerCode": owner_code,
+                    "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,
                     "warehouseCode": "AVI",
                     # "poDate": po_date, # datetime.strftime(record['date_approve'],'%d/%m/%Y')
                     "poDate": "" if record['create_date'] == False else datetime.strftime(record['create_date'], '%d/%m/%Y'),
@@ -697,24 +711,29 @@ class ApiControllerPartner(models.Model):
     def api_dw_customer(self, record):
         error = {}
 
+        owner_code = ""
+        owner_code_flag = 1
+
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
             
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createcustomer"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createcustomer"
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "customer": [
                 {
-                    "ownerCode": owner_code,
+                    "ownerCode": record['x_owner_name'] if owner_code_flag == 1 else owner_code,
                     "custCode": "" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
                     "name": "" if record['name'] == False else record['name'],
                     "custGroup": "" if record['x_studio_customer_group'] == False else record['x_studio_customer_group'],
@@ -794,26 +813,31 @@ class ApiControllerPartner(models.Model):
         
         error = {}
 
+        owner_code = ""
+        owner_code_flag = 1
+
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
 
         if not record.parent_id.x_studio_customer_id:  
             raise UserError("Please save customer or vendor first, or contact consultant")
             
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createship"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createship"
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
             "ship": [
                 {
-                    "ownerCode": owner_code,
+                    "ownerCode": record['x_owner_name'] if owner_code_flag == 1 else owner_code,
                     "custCode": "" if record['parent_id']['x_studio_customer_id'] == False else record['parent_id']['x_studio_customer_id'],
         		    "shipNo": "" if record['x_studio_customer_id'] == False else record['x_studio_customer_id'],
                     "name": "" if record['name'] == False else record['name'],
@@ -890,23 +914,28 @@ class ApiControllerProduct(models.Model):
     
     def api_dw_product(self, record):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createproduct"
+
+        owner_code = ""
+        owner_code_flag = 1
 
         #Checking the existing company first:
         if self.env.context['allowed_company_ids'][0] == 1: 
             owner_code = "PRIMAVISTA"
-        else:
-            owner_code = "AVO"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "product": [
                 {
-                    "ownerCode": owner_code,                    
+                    "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,                    
                     "warehouseCode": "AVI",
                     "product": "" if record['default_code'] == False else record['default_code'],
                     "desc1": "" if record['name'] == False else record['name'],
