@@ -9,7 +9,7 @@ class ProductTemplateExt(models.Model):
     _inherit = 'product.template'        
 
     # Adding new field(s)
-    x_product_brand = fields.Selection([("NA", "NA"),("Tom Ford", "Tom Ford"), ("3M", "3M"), ("AKMU", "AKMU"), ("ALPHA", "ALPHA"), ("APA", "APA"), ("BERNOFARM OTC", "BERNOFARM OTC"), ("DKT", "DKT"), ("ESSILOR NVG CONS", "ESSILOR NVG CONS"), ("GALENIUM PSC", "GALENIUM PSC"), ("GEO MEDICAL", "GEO MEDICAL"), ("JENNY HOUSE", "JENNY HOUSE"), ("KLARENS", "KLARENS"), ("MPS", "MPS"), ("ONEMED", "ONEMED"), ("SENSI", "SENSI"), ("TAKEDA OTC", "TAKEDA OTC"), ("THERASKIN", "THERASKIN"), ("VITAHEALTH CONS", "VITAHEALTH CONS"), ("NVG ESSILOR", "NVG ESSILOR")],string="Product Brand", default='NA')
+    x_product_brand = fields.Selection([("NA", "NA"),("Tom Ford", "Tom Ford"), ("3M", "3M"), ("AKMU", "AKMU"), ("ALPHA", "ALPHA"), ("APA", "APA"), ("BERNOFARM OTC", "BERNOFARM OTC"), ("DKT", "DKT"), ("ESSILOR NVG CONS", "ESSILOR NVG CONS"), ("GALENIUM PSC", "GALENIUM PSC"), ("GEO MEDICAL", "GEO MEDICAL"), ("JENNY HOUSE", "JENNY HOUSE"), ("KLARENS", "KLARENS"), ("MPS", "MPS"), ("ONEMED", "ONEMED"), ("SENSI", "SENSI"), ("TAKEDA OTC", "TAKEDA OTC"), ("THERASKIN", "THERASKIN"), ("VITAHEALTH CONS", "VITAHEALTH CONS"), ("NVG ESSILOR", "NVG ESSILOR"), ("ACUVUE", "ACUVUE"), ("BAUSCH LOMB IND", "BAUSCH LOMB IND"), ("ESSILOR 2.5 NVG", "ESSILOR 2.5 NVG"), ("FRESH EYE", "FRESH EYE"), ("HOSLIFE CARE", "HOSLIFE CARE"), ("JJMI", "JJMI"), ("KGM", "KGM"), ("KINO", "KINO"), ("KINO MEDICAL", "KINO MEDICAL"), ("MEIJI IND ETC", "MEIJI IND ETC"), ("OMRON", "OMRON"), ("OMRON CONS", "OMRON CONS"), ("OSS BLI", "OSS BLI"), ("OSS OTHER", "OSS OTHER"), ("VITAHEALTH", "VITAHEALTH")],string="Product Brand", default='NA')
     x_product_height = fields.Float(string="Product Height")
     x_product_length = fields.Float(string="Product Length")
     x_product_width = fields.Float(string="Product Width")
@@ -22,7 +22,9 @@ class ProductTemplateExt(models.Model):
         ('BNL', 'BNL'),
         ('ESSILOR', 'ESSILOR'),
         ('OMRON', 'OMRON'),
-        ('VITAHEALTH', 'VITAHEALTH')
+        ('VITAHEALTH', 'VITAHEALTH'),
+        ("OMRON CONS", "OMRON CONS"), 
+        ("VITAHEALTH CONS", "VITAHEALTH CONS")
     ], string='Owner')    
 
     # Override field(s)
@@ -292,7 +294,9 @@ class SaleOrder(models.Model):
         ('BNL', 'BNL'),
         ('ESSILOR', 'ESSILOR'),
         ('OMRON', 'OMRON'),
-        ('VITAHEALTH', 'VITAHEALTH')
+        ('VITAHEALTH', 'VITAHEALTH'),
+        ("OMRON CONS", "OMRON CONS"), 
+        ("VITAHEALTH CONS", "VITAHEALTH CONS")        
     ], string='Owner')
     
     x_product_category_selection = fields.Selection(
@@ -354,7 +358,9 @@ class StockPicking(models.Model):
         ('BNL', 'BNL'),
         ('ESSILOR', 'ESSILOR'),
         ('OMRON', 'OMRON'),
-        ('VITAHEALTH', 'VITAHEALTH')
+        ('VITAHEALTH', 'VITAHEALTH'),
+        ("OMRON CONS", "OMRON CONS"), 
+        ("VITAHEALTH CONS", "VITAHEALTH CONS")        
     ], string='Owner')
     
     @api.model
@@ -435,7 +441,9 @@ class ProductTemplate(models.Model):
         ('BNL', 'BNL'),
         ('ESSILOR', 'ESSILOR'),
         ('OMRON', 'OMRON'),
-        ('VITAHEALTH', 'VITAHEALTH')
+        ('VITAHEALTH', 'VITAHEALTH'),
+        ("OMRON CONS", "OMRON CONS"), 
+        ("VITAHEALTH CONS", "VITAHEALTH CONS")        
     ], string='Owner Name')
     
     # The two functions below allow us to modify the product selection popup so that it filters the product by the selected product category selection
@@ -481,7 +489,9 @@ class StockQuant(models.Model):
         ('BNL', 'BNL'),
         ('ESSILOR', 'ESSILOR'),
         ('OMRON', 'OMRON'),
-        ('VITAHEALTH', 'VITAHEALTH')
+        ('VITAHEALTH', 'VITAHEALTH'),
+        ("OMRON CONS", "OMRON CONS"), 
+        ("VITAHEALTH CONS", "VITAHEALTH CONS")        
     ], string='Owner Name')
 
 class PurchaseOrder(models.Model):
@@ -493,7 +503,9 @@ class PurchaseOrder(models.Model):
         ('BNL', 'BNL'),
         ('ESSILOR', 'ESSILOR'),
         ('OMRON', 'OMRON'),
-        ('VITAHEALTH', 'VITAHEALTH')
+        ('VITAHEALTH', 'VITAHEALTH'),
+        ("OMRON CONS", "OMRON CONS"), 
+        ("VITAHEALTH CONS", "VITAHEALTH CONS")        
     ], string='Owner')    
 
     def button_confirm(self):
@@ -558,5 +570,7 @@ class StockMove(models.Model):
         ('BNL', 'BNL'),
         ('ESSILOR', 'ESSILOR'),
         ('OMRON', 'OMRON'),
-        ('VITAHEALTH', 'VITAHEALTH')
+        ('VITAHEALTH', 'VITAHEALTH'),
+        ("OMRON CONS", "OMRON CONS"), 
+        ("VITAHEALTH CONS", "VITAHEALTH CONS")        
     ], string='Owner')
