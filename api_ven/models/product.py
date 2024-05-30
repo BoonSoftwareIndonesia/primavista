@@ -41,7 +41,11 @@ class ProductTemplateExt(models.Model):
         for product_tmpl in self:
             if product_tmpl.default_code:
                 is_duplicate = False
-                is_duplicate = request.env['product.template'].search([('id','!=',product_tmpl.id),('default_code', '=', product_tmpl.default_code)])
+                is_duplicate = request.env['product.template'].search([
+                    ('id','!=',product_tmpl.id),
+                    ('default_code', '=', product_tmpl.default_code), 
+                    ('company_id', '=', self.env.context['allowed_company_ids'][0])
+                ])
                 # If there is a duplicate, raise user error
                 if is_duplicate:
                     raise UserError(('Duplicate exists product.template: ' + product_tmpl.default_code))
@@ -83,11 +87,8 @@ class ProductTemplateExt(models.Model):
             if vals_list[0]['standard_price'] is False:
                 raise UserError(('Cost cannot be null (product template-create)'))
 
-            if self.env.context['allowed_company_ids'][0] == 1:
-                vals_list[0]['company_id'] = 1
-            else:
-                vals_list[0]['company_id'] = 5
-            
+            vals_list[0]['company_id'] = self.env.context['allowed_company_ids'][0]
+                        
         # Call the super() method
         products = super(ProductTemplateExt, self).create(vals_list)
         
@@ -246,7 +247,8 @@ class ProductExt(models.Model):
         for product_tmpl in self:
             if product_tmpl.default_code:
                 is_duplicate = False
-                is_duplicate = request.env['product.product'].search([('id','!=',product_tmpl.id),('default_code', '=', product_tmpl.default_code)])
+                is_duplicate = request.env['product.product'].search([
+                    ('id','!=',product_tmpl.id),('default_code', '=', product_tmpl.default_code), ('company_id', '=', self.env.context['allowed_company_ids'][0])])
                 # If a duplicate exists, raise user error
                 if is_duplicate:
                     raise UserError(('Duplicate exists product.product: ' + product_tmpl.default_code))
