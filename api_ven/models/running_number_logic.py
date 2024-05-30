@@ -59,9 +59,9 @@ class CreateSORunningNumber(models.Model):
             if 'date_order' in vals:
                 seq_date = fields.Datetime.context_timestamp(self, fields.Datetime.to_datetime(vals['date_order']))
             if self.env.context['allowed_company_ids'][0] == 1: 
-                vals['name'] = self.env['ir.sequence'].next_by_code('pov.sale.order', sequence_date=seq_date) or _('New')
+                vals['name'] = self.env['ir.sequence'].next_by_code('pov.sale.order', sequence_date=seq_date) or '/'
             else:
-                vals['name'] = self.env['ir.sequence'].next_by_code('avo.sale.order', sequence_date=seq_date) or _('New')
+                vals['name'] = self.env['ir.sequence'].next_by_code('avo.sale.order', sequence_date=seq_date) or '/'
 
         # Makes sure partner_invoice_id', 'partner_shipping_id' and 'pricelist_id' are defined
         if any(f not in vals for f in ['partner_invoice_id', 'partner_shipping_id', 'pricelist_id']):
