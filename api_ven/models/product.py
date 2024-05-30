@@ -577,6 +577,8 @@ class StockMove(models.Model):
         ("VITAHEALTH CONS", "VITAHEALTH CONS")        
     ], string='Owner')
 
+# Added this piece of code so that when creating a new company on production, the value "('bi', 'Bank Indonesia')" is not missing.
+
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
@@ -596,4 +598,4 @@ class ResCompany(models.Model):
         ('bnb', 'Bulgaria National Bank'),
         ('bnm', 'Bank Negara Malaysia'),
         ('bi', 'Bank Indonesia')        
-    ], string='Currency Provider')    
+    ], string='Currency Provider')
