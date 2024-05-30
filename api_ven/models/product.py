@@ -596,4 +596,4 @@ class ResCompany(models.Model):
         ('bnb', 'Bulgaria National Bank'),
         ('bnm', 'Bank Negara Malaysia'),
         ('bi', 'Bank Indonesia')        
-    ], string='Currency Provider')
+    ], string='Currency Provider')    
