@@ -37,8 +37,24 @@ class CreatePORunningNumber(models.Model):
                 seq_date = fields.Datetime.context_timestamp(self, fields.Datetime.to_datetime(vals['date_order']))
             if self.env.context['allowed_company_ids'][0] == 1: 
                 vals['name'] = self_comp.env['ir.sequence'].next_by_code('pov.purchase.order', sequence_date=seq_date) or '/'
-            else:
+            elif self.env.context['allowed_company_ids'][0] == 5:
                 vals['name'] = self_comp.env['ir.sequence'].next_by_code('avo.purchase.order', sequence_date=seq_date) or '/'
+            else:
+                # Format the date as YYYY/MM/DD
+                formatted_date = seq_date.strftime('%Y/%m/%d')
+                
+                # Extract the owner_name and x_studio_doc_trans_code from vals
+                owner_name = vals.get('owner_name')
+                doc_type = vals.get('x_studio_doc_trans_code', '')
+                
+                # Generate the sequence number
+                seq_num = self.env['ir.sequence'].next_by_code('avi.purchase.order') or '00000'
+                
+                # Create the name using the format SO-ORD/OWNER_NAME/DATE/SEQUENCE_NUMBER
+                name = f'PO-{doc_type}/{owner_name}/{formatted_date}/{seq_num}'
+                
+                # Update the name in vals
+                vals.update({'name': name})                
             
         vals, partner_vals = self._write_partner_values(vals)
         res = super(CreatePORunningNumber, self_comp).create(vals)
@@ -49,7 +65,7 @@ class CreatePORunningNumber(models.Model):
 
 class CreateSORunningNumber(models.Model):
     _inherit = "sale.order"
-
+    
     @api.model
     def create(self, vals):
         if 'company_id' in vals:
@@ -60,8 +76,24 @@ class CreateSORunningNumber(models.Model):
                 seq_date = fields.Datetime.context_timestamp(self, fields.Datetime.to_datetime(vals['date_order']))
             if self.env.context['allowed_company_ids'][0] == 1: 
                 vals['name'] = self.env['ir.sequence'].next_by_code('pov.sale.order', sequence_date=seq_date) or '/'
-            else:
+            elif self.env.context['allowed_company_ids'][0] == 5:
                 vals['name'] = self.env['ir.sequence'].next_by_code('avo.sale.order', sequence_date=seq_date) or '/'
+            else:
+                # Format the date as YYYY/MM/DD
+                formatted_date = seq_date.strftime('%Y/%m/%d')
+                
+                # Extract the owner_name and x_studio_doc_trans_code from vals
+                owner_name = vals.get('owner_name')
+                doc_type = vals.get('x_studio_doc_trans_code', '')
+                
+                # Generate the sequence number
+                seq_num = self.env['ir.sequence'].next_by_code('avi.sales.order') or '00000'
+                
+                # Create the name using the format SO-ORD/OWNER_NAME/DATE/SEQUENCE_NUMBER
+                name = f'SO-{doc_type}/{owner_name}/{formatted_date}/{seq_num}'
+                
+                # Update the name in vals
+                vals.update({'name': name})                
 
         # Makes sure partner_invoice_id', 'partner_shipping_id' and 'pricelist_id' are defined
         if any(f not in vals for f in ['partner_invoice_id', 'partner_shipping_id', 'pricelist_id']):
