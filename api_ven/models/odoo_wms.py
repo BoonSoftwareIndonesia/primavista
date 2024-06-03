@@ -70,7 +70,7 @@ class POApiController(models.Model):
     def api_dw_po(self, record):
             
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
         
         # A variable to store the value of the current line number
         line_no = 1
@@ -130,7 +130,7 @@ class POApiController(models.Model):
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {                    
@@ -216,7 +216,7 @@ class SOApiController(models.Model):
 
     def api_dw_so(self, record):
         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
         
         # A variable to store the value of the current line number
         line_no = 1
@@ -264,7 +264,7 @@ class SOApiController(models.Model):
         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -368,7 +368,7 @@ class ApiControllerStockPicking(models.Model):
     # =======================================
     def api_return_po(self, record):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createso"
         
         # A variable to store x_wms_rec_no value
         wms_no = ""
@@ -453,7 +453,7 @@ class ApiControllerStockPicking(models.Model):
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         # reference -> origin name ganti ke yg wh/out karena ini outbound
         # tambahin payload baru otherRemarks untuk simpen si origin_name
-        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+        payload = {"accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createSO/POV",
             "order":[
                 {
@@ -553,7 +553,7 @@ class ApiControllerStockPicking(models.Model):
     def api_return_so(self, record):
         
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createasn"
         
         # line_no = 1
         
@@ -623,7 +623,7 @@ class ApiControllerStockPicking(models.Model):
         
         # Validation if the return is full or partial order
             payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "asn": [
                 {
@@ -723,13 +723,13 @@ class ApiControllerPartner(models.Model):
             owner_code_flag = 0
             
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createcustomer"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createcustomer"
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "customer": [
                 {
@@ -828,13 +828,13 @@ class ApiControllerPartner(models.Model):
             raise UserError("Please save customer or vendor first, or contact consultant")
             
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createship"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createship"
         
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
             "ship": [
                 {
                     "ownerCode": record['x_owner_name'] if owner_code_flag == 1 else owner_code,
@@ -914,7 +914,7 @@ class ApiControllerProduct(models.Model):
     
     def api_dw_product(self, record):
         # The endpoint in wms that must be changed to the prd endpoint if we want to patch to prd
-        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createproduct"
+        apiurl = "https://cloud1.boonsoftware.com/avi-trn-symphony-api/createproduct"
 
         owner_code = ""
         owner_code_flag = 1
@@ -931,7 +931,7 @@ class ApiControllerProduct(models.Model):
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
         payload = {
-            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxMTYzNzI3NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxMTcyMzY3NH0.bB2S1bNFxf_D0s8Fp2BGTXNc9CRNjEiRqyWFBNDzZ4c",
 #             "namespace": "http://www.boonsoftware.com/createASN/POV",
             "product": [
                 {
