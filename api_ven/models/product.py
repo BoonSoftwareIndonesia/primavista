@@ -25,7 +25,7 @@ class ProductTemplateExt(models.Model):
         ('VITAHEALTH', 'VITAHEALTH'),
         ("OMRON CONS", "OMRON CONS"), 
         ("VITAHEALTH CONS", "VITAHEALTH CONS")
-    ], string='Owner')    
+    ], string='Owner', store=True, default='AVI')    
 
     # Override field(s)
     default_code = fields.Char(
@@ -114,13 +114,13 @@ class ProductTemplateExt(models.Model):
             # Send API to WMS
             self.env['product.template'].api_dw_product(products)
 
-        # Set owner_name in product.product based on owner_name in product.template
-        product_variants = self.env['product.product']
-        for product_template, vals in zip(products, vals_list):
-            owner_name = vals.get('owner_name')
-            if owner_name:
-                product_variants |= product_template.product_variant_id
-        product_variants.write({'owner_name': owner_name})     
+        # # Set owner_name in product.product based on owner_name in product.template
+        # product_variants = self.env['product.product']
+        # for product_template, vals in zip(products, vals_list):
+        #     owner_name = vals.get('owner_name')
+        #     if owner_name:
+        #         product_variants |= product_template.product_variant_id
+        # product_variants.write({'owner_name': owner_name})     
             
         return products
             
@@ -433,20 +433,23 @@ class StockPicking(models.Model):
         for move in self.move_lines:
             for quant in move.product_id.stock_quant_ids:
                 quant.owner_name = move.owner_name
+                quant.x_lot_number = move.x_lot_number
+                quant.x_expired_date = move.x_expired_date
         
 class ProductTemplate(models.Model):
     _inherit = 'product.product'
 
-    owner_name = fields.Selection([
-        ('AVI', 'AVI'),
-        ('AVIO', 'AVIO'),
-        ('BNL', 'BNL'),
-        ('ESSILOR', 'ESSILOR'),
-        ('OMRON', 'OMRON'),
-        ('VITAHEALTH', 'VITAHEALTH'),
-        ("OMRON CONS", "OMRON CONS"), 
-        ("VITAHEALTH CONS", "VITAHEALTH CONS")        
-    ], string='Owner Name')
+    # owner_name = fields.Selection([
+    #     ('AVI', 'AVI'),
+    #     ('AVIO', 'AVIO'),
+    #     ('BNL', 'BNL'),
+    #     ('ESSILOR', 'ESSILOR'),
+    #     ('OMRON', 'OMRON'),
+    #     ('VITAHEALTH', 'VITAHEALTH'),
+    #     ("OMRON CONS", "OMRON CONS"), 
+    #     ("VITAHEALTH CONS", "VITAHEALTH CONS")        
+    # ], string='Owner Name')
+    owner_name = fields.Selection(related='product_tmpl_id.owner_name', store=True, string='Owner')
     
     # The two functions below allow us to modify the product selection popup so that it filters the product by the selected product category selection
     @api.model
@@ -546,6 +549,9 @@ class PurchaseOrder(models.Model):
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
+    x_lot_number = fields.Char(string='Lot Number')
+    x_expired_date = fields.Date(string='Expired Date')
+    
     @api.model
     def _prepare_stock_moves(self, picking):
         """
@@ -555,7 +561,7 @@ class PurchaseOrderLine(models.Model):
         res = super(PurchaseOrderLine, self)._prepare_stock_moves(picking)
         
         # Access the owner_name from the purchase.order
-        owner_name = self.order_id.owner_name        
+        owner_name = self.order_id.owner_name     
         
         # Include the owner_name in the stock moves
         for move in res:

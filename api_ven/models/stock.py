@@ -127,3 +127,50 @@ class StockReturnPickingLineExt(models.TransientModel):
     _inherit = "stock.return.picking.line"
     x_stock_status_code = fields.Selection([("NM", "Normal"),("DM", "Damage"),("ED","Expired"),("OBS","Obsolette"),("PR","Product Recall"),("RJCT","Reject"),],string="Stock Status Code")
     x_wms_lot_records = fields.Char(string="Lot Number")
+
+class StockQuant(models.Model):
+    _inherit = 'stock.quant'
+
+    x_lot_number = fields.Char(string='Lot Number', store=True)
+    x_expired_date = fields.Date(string='Expired Date', store=True)
+
+    @api.model
+    def _get_inventory_fields_write(self):
+        fields = super(StockQuant, self)._get_inventory_fields_write()
+        return fields + ['x_lot_number', 'x_expired_date']
+
+class PurchaseOrderLine(models.Model):
+    _inherit = 'purchase.order.line'
+
+    x_lot_number = fields.Char(string='Lot Number')
+    x_expired_date = fields.Date(string='Expired Date')
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    x_lot_number = fields.Char(string='Lot Number')
+    x_expired_date = fields.Date(string='Expired Date')
+
+class StockMove(models.Model):
+    _inherit = 'stock.move'
+
+    x_lot_number = fields.Char(string='Lot Number')
+    x_expired_date = fields.Date(string='Expired Date')
+
+    @api.model
+    def create(self, vals):
+        if 'purchase_line_id' in vals:
+            purchase_line = self.env['purchase.order.line'].browse(vals['purchase_line_id'])
+            vals['x_lot_number'] = purchase_line.x_lot_number
+            vals['x_expired_date'] = purchase_line.x_expired_date
+        elif 'sale_line_id' in vals:
+            sale_line = self.env['sale.order.line'].browse(vals['sale_line_id'])
+            vals['x_lot_number'] = sale_line.x_lot_number
+            vals['x_expired_date'] = sale_line.x_expired_date
+        return super(StockMove, self).create(vals)
+
+class StockMoveLine(models.Model):
+    _inherit = 'stock.move.line'
+
+    x_lot_number = fields.Char(string='Lot Number')
+    x_expired_date = fields.Date(string='Expired Date')
