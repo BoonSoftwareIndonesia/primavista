@@ -707,292 +707,292 @@ class ApiControllerStockPicking(models.Model):
             'mimetype': 'text/plain'
         })
 
-    # def api_dw_do(self, record):      
-    #     # I don't want this function to execute when the doc trans code is EXO (I don't want the API to be sent)
-    #     if record['x_doc_trans_code'] != 'EXO':
-    #         return;
+    def api_dw_do(self, record):      
+        # I don't want this function to execute when the doc trans code is EXO (I don't want the API to be sent)
+        if record['x_doc_trans_code'] != 'EXO':
+            return;
         
-    #     # The endpoint in wms
-    #     apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
+        # The endpoint in wms
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createso"
         
-    #     line_no = 1
-    #     do_lines = []
-    #     owner_code = ""
-    #     owner_code_flag = 1
+        line_no = 1
+        do_lines = []
+        owner_code = ""
+        owner_code_flag = 1
 
-    #     if self.env.context['allowed_company_ids'][0] == 1: 
-    #         owner_code = "PRIMAVISTA"
-    #         owner_code_flag = 0
-    #     elif self.env.context['allowed_company_ids'][0] == 5: 
-    #         owner_code = "AVO"     
-    #         owner_code_flag = 0
+        if self.env.context['allowed_company_ids'][0] == 1: 
+            owner_code = "PRIMAVISTA"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
                         
-    #     for line in record.move_line_ids_without_package:            
-    #         if line.product_id.default_code is False:
-    #             continue
+        for line in record.move_line_ids_without_package:            
+            if line.product_id.default_code is False:
+                continue
             
-    #         line['x_studio_numbering'] = str(line_no)
+            line['x_studio_numbering'] = str(line_no)
 
-    #         # raise UserError(line.product_id.uom_id.name)
-    #         # raise UserError(line.move_line_ids)
+            # raise UserError(line.product_id.uom_id.name)
+            # raise UserError(line.move_line_ids)
             
-    #         do_line = {
-    #             # "soLineOptChar1": line['x_studio_opt_char_1'],
-    #             "soLineOptChar1": "",
-    #             "product": line['product_id']["product_tmpl_id"]["default_code"],
-    #             "quantityOrder": str(int(line['product_uom_qty'])),
-    #             "originalOrderUOM": "UNITS" if line.product_id.uom_id.name == False else line.product_id.uom_id.name.upper(),
-    #             # "lotNo": "" if line['move_line_ids']['x_wms_lot_records'] == False else line['move_line_ids']['x_wms_lot_records'].upper(), 
-    #             # "filterTransactionCode": line['move_line_ids']['x_stock_status_code'],
-    #             "soLineOptChar2": ""
-    #         }
+            do_line = {
+                # "soLineOptChar1": line['x_studio_opt_char_1'],
+                "soLineOptChar1": "",
+                "product": line['product_id']["product_tmpl_id"]["default_code"],
+                "quantityOrder": str(int(line['product_uom_qty'])),
+                "originalOrderUOM": "UNITS" if line.product_id.uom_id.name == False else line.product_id.uom_id.name.upper(),
+                # "lotNo": "" if line['move_line_ids']['x_wms_lot_records'] == False else line['move_line_ids']['x_wms_lot_records'].upper(), 
+                # "filterTransactionCode": line['move_line_ids']['x_stock_status_code'],
+                "soLineOptChar2": ""
+            }
             
-    #         line_no += 1
-    #         do_lines.append(do_line)
+            line_no += 1
+            do_lines.append(do_line)
 
-    #     # po_record = request.env['purchase.order']
+        # po_record = request.env['purchase.order']
         
-    #     # for po in source_po:
-    #     #     po_record = po
+        # for po in source_po:
+        #     po_record = po
         
-    #     partner_shipping = self.partner_id
+        partner_shipping = self.partner_id
 
-    #     # raise UserError(partner_shipping.x_studio_customer_id)
+        # raise UserError(partner_shipping.x_studio_customer_id)
 
-    #     payload = {
-    #         "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
-    #         "namespace": "http://www.boonsoftware.com/createDO/POV",
-    #         "order": [
-    #             {
-    #                 "customerPO": "",
-    #                 "reference": "" if record.name == False else record.name,
-    #                 "customerCode":"" if partner_shipping['x_studio_customer_id'] == False else partner_shipping['x_studio_customer_id'],
-    #                 "soHeaderOptChar3": "",
-    #                 "documentTransCode": "OR" if record.x_doc_trans_code == False else record.x_doc_trans_code,
-    #                 "orderDate": "" if record.create_date == False else datetime.strftime(record.create_date, '%d/%m/%Y'),
-    #                 "requestedDeliveryDate": "",
-    #                 "ownerCode": record.owner_name if owner_code_flag == 1 else owner_code,
-    #                 "warehouseCode": "AVI",
-    #                 "shipNo": "" if partner_shipping['x_studio_customer_id'] == False else partner_shipping['x_studio_customer_id'],
-    #                 "shipAddress1":"" if partner_shipping["street"] == False else partner_shipping["street"],
-    #                 "shipCity":"" if partner_shipping["city"] == False else partner_shipping["city"],
-    #                 "shipZipCode": "12345",
-    #                 "shipCountry":"" if partner_shipping["country_id"]["name"] == False else partner_shipping["country_id"]["name"],
-    #                 "shipZone":"NA",
-    #                 "shipRoute":"NA",
-    #                 "shipArea":"SHIP",                    
-    #                 "remark2":"",
-    #                 "remark1":"",
-    #                 "allocatequantityOrder":"TRUE",
-    #                 "shipInFull":"FALSE",
-    #                 "orderLine": do_lines
-    #             }
-    #         ]
-    #     }
+        payload = {
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "namespace": "http://www.boonsoftware.com/createDO/POV",
+            "order": [
+                {
+                    "customerPO": "",
+                    "reference": "" if record.name == False else record.name,
+                    "customerCode":"" if partner_shipping['x_studio_customer_id'] == False else partner_shipping['x_studio_customer_id'],
+                    "soHeaderOptChar3": "",
+                    "documentTransCode": "OR" if record.x_doc_trans_code == False else record.x_doc_trans_code,
+                    "orderDate": "" if record.create_date == False else datetime.strftime(record.create_date, '%d/%m/%Y'),
+                    "requestedDeliveryDate": "",
+                    "ownerCode": record.owner_name if owner_code_flag == 1 else owner_code,
+                    "warehouseCode": "AVI",
+                    "shipNo": "" if partner_shipping['x_studio_customer_id'] == False else partner_shipping['x_studio_customer_id'],
+                    "shipAddress1":"" if partner_shipping["street"] == False else partner_shipping["street"],
+                    "shipCity":"" if partner_shipping["city"] == False else partner_shipping["city"],
+                    "shipZipCode": "12345",
+                    "shipCountry":"" if partner_shipping["country_id"]["name"] == False else partner_shipping["country_id"]["name"],
+                    "shipZone":"NA",
+                    "shipRoute":"NA",
+                    "shipArea":"SHIP",                    
+                    "remark2":"",
+                    "remark1":"",
+                    "allocatequantityOrder":"TRUE",
+                    "shipInFull":"FALSE",
+                    "orderLine": do_lines
+                }
+            ]
+        }
         
-    #     headers = {
-    #         "Content-Type": "application/json",
-    #         "Connection": "keep-alive",
-    #         "Accept": "*/*"
-    #     }
+        headers = {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive",
+            "Accept": "*/*"
+        }
         
-    #     try:
-    #         api_log = self.env['api_ven.api_ven'].create({
-    #             'status': 'new',
-    #             'created_date': datetime.now(),
-    #             'incoming_msg': payload,
-    #             'message_type': 'SO'
-    #         })
+        try:
+            api_log = self.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': payload,
+                'message_type': 'SO'
+            })
 
-    #         api_log['status'] = 'process'
-    #     except Exception as e:
-    #         error['Error'] = str(e)
-    #         is_error = True
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
         
-    #     try:
-    #         api_log['incoming_txt'] = self.env['ir.attachment'].create({
-    #             'name': str(api_log['name']) + '_in.txt',
-    #             'type': 'binary',
-    #             'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
-    #             'res_model': 'api_ven.api_ven',
-    #             'res_id': api_log['id'],
-    #             'company_id': self.env.context['allowed_company_ids'][0],
-    #             'mimetype': 'text/plain'
-    #         })
-    #     except Exception as e:
-    #         error['Error'] = str(e)
-    #         is_error = True
+        try:
+            api_log['incoming_txt'] = self.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
         
-    #     r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+        r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
         
-    #     api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
-    #     api_log['response_date'] = datetime.now()
+        api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
         
-    #     if r.status_code == 200:
-    #         api_log['status'] = 'success'
-    #     else:
-    #         api_log['status'] = 'error'
+        if r.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
         
-    #     api_log['response_txt'] = self.env['ir.attachment'].create({
-    #         'name': str(api_log['name']) + '_out.txt',
-    #         'type': 'binary',
-    #         'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
-    #         'res_model': 'api_ven.api_ven',
-    #         'res_id': api_log['id'],
-    #         'company_id': self.env.context['allowed_company_ids'][0],
-    #         'mimetype': 'text/plain'
-    #     })
+        api_log['response_txt'] = self.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
+            'mimetype': 'text/plain'
+        })
 
-    # def action_set_quantities_to_reservation(self):
-    #     res = super(ApiControllerStockPicking, self).action_set_quantities_to_reservation()
-    #     # raise UserError("Test")
-    #     if self.x_doc_trans_code == "EXO":
-    #         self.api_dw_do(self)    
+    def action_set_quantities_to_reservation(self):
+        res = super(ApiControllerStockPicking, self).action_set_quantities_to_reservation()
+        # raise UserError("Test")
+        if self.x_doc_trans_code == "EXO":
+            self.api_dw_do(self)    
                         
-    #     return res
+        return res
 
-#     def api_dw_rcpt(self, record):
+    def api_dw_rcpt(self, record):
 
-#         # raise UserError("Test")
+        # raise UserError("Test")
         
-#         # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
-#         apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
+        # The endpoint in wms (must change this to prd endpoint if we want to patch to prd)
+        apiurl = "https://cloud1.boonsoftware.com/avi-prd-symphony-api/createasn"
 
-#         if record['x_doc_trans_code'] != 'EXI':
-#             raise UserError("Doc Trans Code is not EXI!")
+        if record['x_doc_trans_code'] != 'EXI':
+            raise UserError("Doc Trans Code is not EXI!")
         
-#         # A variable to store the value of the current line number
-#         line_no = 1
-#         # An array to store the PO lines
-#         po_lines = []
-#         # To store the origin of this PO (the SO(s) that generated this PO)
-#         res = ""
-#         unique_res = ""
-#         owner_code = ""
-#         owner_code_flag = 1
+        # A variable to store the value of the current line number
+        line_no = 1
+        # An array to store the PO lines
+        po_lines = []
+        # To store the origin of this PO (the SO(s) that generated this PO)
+        res = ""
+        unique_res = ""
+        owner_code = ""
+        owner_code_flag = 1
 
-#         #Checking the existing company first:
-#         if self.env.context['allowed_company_ids'][0] == 1: 
-#             owner_code = "PRIMAVISTA"
-#             owner_code_flag = 0
-#         elif self.env.context['allowed_company_ids'][0] == 5: 
-#             owner_code = "AVO"     
-#             owner_code_flag = 0
+        #Checking the existing company first:
+        if self.env.context['allowed_company_ids'][0] == 1: 
+            owner_code = "PRIMAVISTA"
+            owner_code_flag = 0
+        elif self.env.context['allowed_company_ids'][0] == 5: 
+            owner_code = "AVO"     
+            owner_code_flag = 0
                         
-#         # Loop through all purchase order lines
-#         for line in record['move_ids_without_package']:
-#             # If there is a PO line whose default code is empty, continue, don't send to WMS
-#             if line['product_id']["product_tmpl_id"]["default_code"] is False:
-#                 continue
+        # Loop through all purchase order lines
+        for line in record['move_ids_without_package']:
+            # If there is a PO line whose default code is empty, continue, don't send to WMS
+            if line['product_id']["product_tmpl_id"]["default_code"] is False:
+                continue
             
-#             # Set the current line's x_studio_line_opt_char_1 as the value of the current line_no
-#             # line['x_studio_opt_char_1'] = str(line_no)
+            # Set the current line's x_studio_line_opt_char_1 as the value of the current line_no
+            # line['x_studio_opt_char_1'] = str(line_no)
             
-#             # Create po line (Refer to the mapping documentation)
-#             po_line = {
-#                 # "inwardLineOptChar1": line['x_studio_opt_char_1'],
-#                 "inwardLineOptChar2": "",
-#                 "product": line['product_id']["product_tmpl_id"]["default_code"],
-#                 "quantityOrdered":  str(int(line['product_uom_qty'])),
-# #                 "uomCode": line['product_uom']['name'],
-#                 "uomCode": "UNITS" if line.product_id.uom_id.name == False else line.product_id.uom_id.name.upper(),
-#                 # "stockStatusCode": "NM" if line['x_stock_status_code']  == False else line['x_stock_status_code']
-#             }
-#             # Increment the line_no
-#             line_no += 1
-#             # Append the current po_line to the po_lines array
-#             po_lines.append(po_line)
+            # Create po line (Refer to the mapping documentation)
+            po_line = {
+                # "inwardLineOptChar1": line['x_studio_opt_char_1'],
+                "inwardLineOptChar2": "",
+                "product": line['product_id']["product_tmpl_id"]["default_code"],
+                "quantityOrdered":  str(int(line['product_uom_qty'])),
+#                 "uomCode": line['product_uom']['name'],
+                "uomCode": "UNITS" if line.product_id.uom_id.name == False else line.product_id.uom_id.name.upper(),
+                # "stockStatusCode": "NM" if line['x_stock_status_code']  == False else line['x_stock_status_code']
+            }
+            # Increment the line_no
+            line_no += 1
+            # Append the current po_line to the po_lines array
+            po_lines.append(po_line)
         
-#         # Catch the DO field
-#         # stock_picking_name = self.stock_picking.name
+        # Catch the DO field
+        # stock_picking_name = self.stock_picking.name
         
-#         # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
-#         # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
-#         payload = {
-#             "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
-#             "namespace": "http://www.boonsoftware.com/createASN/POV",
-#             "asn": [
-#                 {                    
-#                     "ownerReferences": "",
-#                     "poNo": "" if record['name'] == False else record['name'],                    
-#                     # "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
-#                     "sender": "",
-#                     "documentTransCode":"PODR" if record['x_doc_trans_code'] == False else record['x_doc_trans_code'],
-#                     "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,
-# #                     "warehouseCode": "" if record['picking_type_id']['warehouse_id']['code'] == False else record['picking_type_id']['warehouse_id']['code'],
-#                     "warehouseCode": "AVI",
-#                     "poDate": "" if record['scheduled_date'] == False else datetime.strftime(record['scheduled_date'], '%d/%m/%Y'),                                
-#                     # "expectedArrivalDate": "" if record['date_planned'] == False else datetime.strftime(record['date_planned'], '%d/%m/%Y'),
-#                     "otherReferences": "",
-#                     "remark1": "" if unique_res == False else unique_res,
-#                     "doNo": "",
-#                     "asnLine": po_lines
-#                 }
-#             ]
-#         }
+        # Create payload (Refer to the mapping documentation). These are the data that will be sent from Odoo to WMS
+        # The access token for the WMS needs to be changed to prd's access token if we want to patch to prd
+        payload = {
+            "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJpZCIsImlhdCI6MTYxODg1MTY2NCwic3ViIjoiaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoib2N0cyIsImV4cCI6MTYxODkzODA2NH0.KKTJME6GO_f4bP86fChza2tHXvDxKeXquJmEoGJtpUA",
+            "namespace": "http://www.boonsoftware.com/createASN/POV",
+            "asn": [
+                {                    
+                    "ownerReferences": "",
+                    "poNo": "" if record['name'] == False else record['name'],                    
+                    # "supplierReferences": "" if record['partner_ref'] == False else record['partner_ref'],
+                    "sender": "",
+                    "documentTransCode":"PODR" if record['x_doc_trans_code'] == False else record['x_doc_trans_code'],
+                    "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,
+#                     "warehouseCode": "" if record['picking_type_id']['warehouse_id']['code'] == False else record['picking_type_id']['warehouse_id']['code'],
+                    "warehouseCode": "AVI",
+                    "poDate": "" if record['scheduled_date'] == False else datetime.strftime(record['scheduled_date'], '%d/%m/%Y'),                                
+                    # "expectedArrivalDate": "" if record['date_planned'] == False else datetime.strftime(record['date_planned'], '%d/%m/%Y'),
+                    "otherReferences": "",
+                    "remark1": "" if unique_res == False else unique_res,
+                    "doNo": "",
+                    "asnLine": po_lines
+                }
+            ]
+        }
         
-#         # The header of the API request
-#         headers = {
-#             "Content-Type": "application/json",
-#             "Connection": "keep-alive",
-#             "Accept": "*/*"
-#         }
+        # The header of the API request
+        headers = {
+            "Content-Type": "application/json",
+            "Connection": "keep-alive",
+            "Accept": "*/*"
+        }
         
-#         # Create API log
-#         try:
-#             api_log = request.env['api_ven.api_ven'].create({
-#                 'status': 'new',
-#                 'created_date': datetime.now(),
-#                 'incoming_msg': payload,
-#                 'message_type': 'PO'
-#             })
+        # Create API log
+        try:
+            api_log = request.env['api_ven.api_ven'].create({
+                'status': 'new',
+                'created_date': datetime.now(),
+                'incoming_msg': payload,
+                'message_type': 'PO'
+            })
 
-#             api_log['status'] = 'process'
-#         except Exception as e:
-#             error['Error'] = str(e)
-#             is_error = True
+            api_log['status'] = 'process'
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
         
-#         # Create incoming txt
-#         try:
-#             api_log['incoming_txt'] = request.env['ir.attachment'].create({
-#                 'name': str(api_log['name']) + '_in.txt',
-#                 'type': 'binary',
-#                 'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
-#                 'res_model': 'api_ven.api_ven',
-#                 'res_id': api_log['id'],
-#                 'company_id': self.env.context['allowed_company_ids'][0],
-#                 'mimetype': 'text/plain'
-#             })
-#         except Exception as e:
-#             error['Error'] = str(e)
-#             is_error = True
+        # Create incoming txt
+        try:
+            api_log['incoming_txt'] = request.env['ir.attachment'].create({
+                'name': str(api_log['name']) + '_in.txt',
+                'type': 'binary',
+                'datas': base64.b64encode(bytes(str(payload), 'utf-8')),
+                'res_model': 'api_ven.api_ven',
+                'res_id': api_log['id'],
+                'company_id': self.env.context['allowed_company_ids'][0],
+                'mimetype': 'text/plain'
+            })
+        except Exception as e:
+            error['Error'] = str(e)
+            is_error = True
         
-#         # Post API request
-#         r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
+        # Post API request
+        r = requests.post(apiurl, data=json.dumps(payload), headers=headers)
 
-#         api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
-#         api_log['response_date'] = datetime.now()
+        api_log['response_msg'] = base64.b64encode(bytes(str(r.text), 'utf-8'))
+        api_log['response_date'] = datetime.now()
         
-#         if r.status_code == 200:
-#             api_log['status'] = 'success'
-#         else:
-#             api_log['status'] = 'error'
+        if r.status_code == 200:
+            api_log['status'] = 'success'
+        else:
+            api_log['status'] = 'error'
         
-#         # Create response txt
-#         api_log['response_txt'] = request.env['ir.attachment'].create({
-#             'name': str(api_log['name']) + '_out.txt',
-#             'type': 'binary',
-#             'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
-#             'res_model': 'api_ven.api_ven',
-#             'res_id': api_log['id'],
-#             'company_id': self.env.context['allowed_company_ids'][0],
-#             'mimetype': 'text/plain'
-#         })
+        # Create response txt
+        api_log['response_txt'] = request.env['ir.attachment'].create({
+            'name': str(api_log['name']) + '_out.txt',
+            'type': 'binary',
+            'datas': base64.b64encode(bytes(str(r.text), 'utf-8')),
+            'res_model': 'api_ven.api_ven',
+            'res_id': api_log['id'],
+            'company_id': self.env.context['allowed_company_ids'][0],
+            'mimetype': 'text/plain'
+        })
     
-#     def send_api(self):        
-#         # raise UserError("Test")
-#         res = self.api_dw_rcpt(self)
-#         return res
+    def send_api(self):        
+        # raise UserError("Test")
+        res = self.api_dw_rcpt(self)
+        return res
         
 # CUSTOMER  ==========================================================================
 class ApiControllerPartner(models.Model):
