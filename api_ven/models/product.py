@@ -127,40 +127,41 @@ class ProductTemplateExt(models.Model):
         
     # Override product template's write() =============================
     def write(self, vals):
-        # Get the old values before updating
-        old_vals = {
-                rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())
-        }
-        
-        # Call the super() method
-        res = super(ProductTemplateExt, self).write(vals)
-
-        if self.categ_id:               
-            # Checking if user access the parent category or not
-            if not self.categ_id.parent_id:
-                # raise UserError(f"parent: {self.categ_id.parent_id.name} || Child: {self.categ_id.name}")
-                raise UserError(f"Can't edit product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
-        
-        # If the product's write_date and create_date are different, we are doing an update, so we can proceed
-        if self.write_date != self.create_date:
-            # The result of the super() method is a bool, so we need to search for the product template object 
-            # to pass to the api function
-            product = request.env['product.template'].search([('id', '=', self.id)], limit=1)
+        if len(self) <= 1:
+            # Get the old values before updating
+            old_vals = {
+                    rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())
+            }
             
-            # Get test_import
-            test_import = self._context.get('test_import')
-            # Get copy_context
-            copy_context = self._context.get('copy_context')
+            # Call the super() method
+            res = super(ProductTemplateExt, self).write(vals)
+    
+            if self.categ_id:               
+                # Checking if user access the parent category or not
+                if not self.categ_id.parent_id:
+                    # raise UserError(f"parent: {self.categ_id.parent_id.name} || Child: {self.categ_id.name}")
+                    raise UserError(f"Can't edit product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
             
-            # If we are not testing or duplicating, send api
-            if not test_import and not copy_context:
-                # Get the new values after product update
-                new_vals = {rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())}
-                # Create activity log for product update
-                self.create_activity_logs(self, "write", new_vals=new_vals, old_vals=old_vals)
-                # Send API to WMS 
-                self.env['product.template'].api_dw_product(product)
-        return res
+            # If the product's write_date and create_date are different, we are doing an update, so we can proceed
+            if self.write_date != self.create_date:
+                # The result of the super() method is a bool, so we need to search for the product template object 
+                # to pass to the api function            
+                product = request.env['product.template'].search([('id', '=', self.id)], limit=1)
+                
+                # Get test_import
+                test_import = self._context.get('test_import')
+                # Get copy_context
+                copy_context = self._context.get('copy_context')
+                
+                # If we are not testing or duplicating, send api
+                if not test_import and not copy_context:
+                    # Get the new values after product update
+                    new_vals = {rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())}
+                    # Create activity log for product update
+                    self.create_activity_logs(self, "write", new_vals=new_vals, old_vals=old_vals)
+                    # Send API to WMS 
+                    self.env['product.template'].api_dw_product(product)
+            return res
     
     
     # Create activity log =============================
