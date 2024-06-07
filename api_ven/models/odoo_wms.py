@@ -1321,6 +1321,6 @@ class StockWarehouse(models.Model):
     _inherit = 'stock.warehouse'
 
     code = fields.Char(
-        size=10,
+        size=12,
         required=False
     )
