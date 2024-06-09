@@ -62,71 +62,71 @@ class ProductTemplateExt(models.Model):
         return res
     
     
-    # Override product template's create() =============================
-    @api.model_create_multi
-    def create(self, vals_list):
-        # If copy_context is False (not duplicating) and test_import has not been set (not importing or testing import)
-        if not self._context.get('copy_context') and 'test_import' not in self._context:
-            # Get on_the_fly_context from product.product's create()
-            otf_context = self._context.get('on_the_fly_context')
+    # # Override product template's create() =============================
+    # @api.model_create_multi
+    # def create(self, vals_list):
+    #     # If copy_context is False (not duplicating) and test_import has not been set (not importing or testing import)
+    #     if not self._context.get('copy_context') and 'test_import' not in self._context:
+    #         # Get on_the_fly_context from product.product's create()
+    #         otf_context = self._context.get('on_the_fly_context')
             
-            # If otf_context has value, then we are creating a product on the fly
-            if otf_context:
-                # Get the product's default_code and standard_price
-                otf_context = otf_context.split("-")
-                vals_list[0]['default_code'] = otf_context[0]
-                vals_list[0]['standard_price'] = otf_context[1]
+    #         # If otf_context has value, then we are creating a product on the fly
+    #         if otf_context:
+    #             # Get the product's default_code and standard_price
+    #             otf_context = otf_context.split("-")
+    #             vals_list[0]['default_code'] = otf_context[0]
+    #             vals_list[0]['standard_price'] = otf_context[1]
             
-            # If default_code is null, raise user error
-            if vals_list[0]['default_code'] is False:
-                raise UserError(('Internal reference cannot be null (product template-create)'))
-            vals_list[0]['default_code'] = vals_list[0]['default_code'].upper()
+    #         # If default_code is null, raise user error
+    #         if vals_list[0]['default_code'] is False:
+    #             raise UserError(('Internal reference cannot be null (product template-create)'))
+    #         vals_list[0]['default_code'] = vals_list[0]['default_code'].upper()
 
             
-            # If standard_price is null, raise user error
-            if vals_list[0]['standard_price'] is False:
-                raise UserError(('Cost cannot be null (product template-create)'))
+    #         # If standard_price is null, raise user error
+    #         if vals_list[0]['standard_price'] is False:
+    #             raise UserError(('Cost cannot be null (product template-create)'))
 
-            vals_list[0]['company_id'] = self.env.context['allowed_company_ids'][0]
+    #         vals_list[0]['company_id'] = self.env.context['allowed_company_ids'][0]
                         
-        # Call the super() method
-        products = super(ProductTemplateExt, self).create(vals_list)
+    #     # Call the super() method
+    #     products = super(ProductTemplateExt, self).create(vals_list)
         
-        if products.categ_id:                        
-            # Checking if user access the parent category or not            
-            if not products.categ_id.parent_id:
-                raise UserError(f"Can't create product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
+    #     if products.categ_id:                        
+    #         # Checking if user access the parent category or not            
+    #         if not products.categ_id.parent_id:
+    #             raise UserError(f"Can't create product because user using parent category! Please use the child category instead of parent category or contact your consultant!")
         
-        # Get the test_import context
-        test_import = self._context.get('test_import')
+    #     # Get the test_import context
+    #     test_import = self._context.get('test_import')
         
-        # If we are not testing an import, send API to WMS and create activity log
-        if not test_import:
-            # Get the new product's values
-            new_vals = {}
-            for rec in products:
-                for vals, rec in zip(vals_list, products):
-                    new_vals[rec.id] = vals
+    #     # If we are not testing an import, send API to WMS and create activity log
+    #     if not test_import:
+    #         # Get the new product's values
+    #         new_vals = {}
+    #         for rec in products:
+    #             for vals, rec in zip(vals_list, products):
+    #                 new_vals[rec.id] = vals
             
-            # Create activity log
-            self.create_activity_logs(products, "create", new_vals = new_vals)
+    #         # Create activity log
+    #         self.create_activity_logs(products, "create", new_vals = new_vals)
             
-            # Send API to WMS
-            self.env['product.template'].api_dw_product(products)
+    #         # Send API to WMS
+    #         self.env['product.template'].api_dw_product(products)
 
-        # # Set owner_name in product.product based on owner_name in product.template
-        # product_variants = self.env['product.product']
-        # for product_template, vals in zip(products, vals_list):
-        #     owner_name = vals.get('owner_name')
-        #     if owner_name:
-        #         product_variants |= product_template.product_variant_id
-        # product_variants.write({'owner_name': owner_name})     
+    #     # # Set owner_name in product.product based on owner_name in product.template
+    #     # product_variants = self.env['product.product']
+    #     # for product_template, vals in zip(products, vals_list):
+    #     #     owner_name = vals.get('owner_name')
+    #     #     if owner_name:
+    #     #         product_variants |= product_template.product_variant_id
+    #     # product_variants.write({'owner_name': owner_name})     
             
-        return products
+    #     return products
             
         
     # Override product template's write() =============================
-    def write(self, vals):
+    def write(self, vals):        
         if len(self) <= 1:
             # Get the old values before updating
             old_vals = {
@@ -159,8 +159,8 @@ class ProductTemplateExt(models.Model):
                     new_vals = {rec["id"]: rec for rec in self.with_context(prefetch_fields=False).read(vals.keys())}
                     # Create activity log for product update
                     self.create_activity_logs(self, "write", new_vals=new_vals, old_vals=old_vals)
-                    # Send API to WMS 
-                    self.env['product.template'].api_dw_product(product)
+                    # Send API to WMS                                                 
+                    self.env['product.template'].api_dw_product(product)                                        
             return res
     
     

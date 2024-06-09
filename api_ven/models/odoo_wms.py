@@ -1199,7 +1199,7 @@ class ApiControllerPartner(models.Model):
         })
 
 # PRODUCT  ==========================================================================
-class ApiControllerProduct(models.Model):
+class ApiControllerProduct(models.Model):    
     _inherit = "product.template"
     
     def api_dw_product(self, record):
@@ -1216,7 +1216,20 @@ class ApiControllerProduct(models.Model):
         elif self.env.context['allowed_company_ids'][0] == 5: 
             owner_code = "AVO"     
             owner_code_flag = 0
+
+        # raise UserError(record['id'])        
+
+        ProductTemplate = self.env['product.template']
         
+        # Search for the product template with the matching ID
+        product_template = ProductTemplate.search([('id', '=', record['id'])], limit=1)
+        
+        if not product_template:
+            raise UserError("Product template not found for ID: %s" % record_id)
+        
+        # Retrieve the default_code of the matched product template
+        default_code = product_template.default_code
+                        
         # Create payload
         # There is the access token for WMS, this needs to be changed to prd's access token if we want to patch to prd
         # There is also the rest of the data that will be sent to WMS. For this part, refer to the mapping documentation
@@ -1227,7 +1240,7 @@ class ApiControllerProduct(models.Model):
                 {
                     "ownerCode": record['owner_name'] if owner_code_flag == 1 else owner_code,                    
                     "warehouseCode": "AVI",
-                    "product": "" if record['default_code'] == False else record['default_code'],
+                    "product": "" if default_code == False else default_code,
                     "desc1": "" if record['name'] == False else record['name'],
                     "brandName": "NA" if record['x_product_brand'] == False else record['x_product_brand'],
                     "baseUOM": "" if record['uom_id']['name'] == False else str(record['uom_id']['name']).upper(),
