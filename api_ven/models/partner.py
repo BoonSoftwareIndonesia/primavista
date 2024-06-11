@@ -60,7 +60,7 @@ class PartnerExt(models.Model):
     
     
     # Function to set default value if null ======================
-    def set_default(self,partners):
+    def set_default(self,partners):        
         if not partners.x_studio_customer_group:
             partners.x_studio_customer_group = "IOC"
         if not partners.street:
@@ -71,8 +71,8 @@ class PartnerExt(models.Model):
             partners.zip = "12345"
         if not partners.country_id:
             partners.country_id = 100
-        if not partners.company_id:
-            partners.company_id = self.env.context['allowed_company_ids'][0]
+        # if not partners.company_id:
+        #     partners.company_id = self.env.context['allowed_company_ids'][0]            
         if not partners.x_studio_customer_id:
             if partners.type == "delivery" and self.env.context['allowed_company_ids'][0] == 1:
                 partners.x_studio_customer_id = self.env['ir.sequence'].next_by_code('pov.ship.no')
@@ -92,34 +92,35 @@ class PartnerExt(models.Model):
     
     # Triggers the api_dw_customer() function that sends an API log when creating new customer ======================
     @api.model_create_multi
-    def create(self, vals_list):
-
+    def create(self, vals_list):        
         # Call the super() method
         partners = super(PartnerExt, self).create(vals_list)
         
         # Set default values if null
         self.set_default(partners)
-        
+
         # Get test_import context
         test_import = self._context.get('test_import')
         
         # If we are not testing (test_import = False), then create customer and send API
         if not test_import:
-            #if we are creating a child partner, create ship_no
-            if vals_list[0]['type'] == "delivery":
-
-                # curr_parent_id = vals_list[0]['parent_id']
-
-                # parent_model = request.env['res.partner'].search([('id', '=', curr_parent_id)], limit=1)
+            type_value = vals_list[0].get('type')
                 
-                # if not parent_model:
-                # raise UserError("Please save customer or vendor first, or contact consultant")
+            #if we are creating a child partner, create ship_no
+            if type_value == "delivery":
+
+                curr_parent_id = vals_list[0]['parent_id']
+
+                parent_model = request.env['res.partner'].search([('id', '=', curr_parent_id)], limit=1)
+                
+                if not parent_model:
+                    raise UserError("Please save customer or vendor first, or contact consultant")
             # else:
                 self.env['res.partner'].api_dw_ship_no(partners)
                 
                 #if not a child partner, Call api_dw_customer to send API to WMS
             else:
-                    # raise UserError("Entry this is a dw_customer")
+                # raise UserError("Entry this is a dw_customer")
                 self.env['res.partner'].api_dw_customer(partners)
             
             # Get the new customer's fields and values
