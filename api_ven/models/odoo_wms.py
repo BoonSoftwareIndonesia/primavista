@@ -403,7 +403,7 @@ class ApiControllerStockPicking(models.Model):
             #Checking where the return is partial or not
             is_partial_return = False
 
-            raise UserError(line['product_uom'])
+            # raise UserError(line['product_uom'])
             
             # Create order line
             item_line = {
