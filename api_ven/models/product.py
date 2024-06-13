@@ -14,6 +14,7 @@ class ProductTemplateExt(models.Model):
     x_product_length = fields.Float(string="Product Length")
     x_product_width = fields.Float(string="Product Width")
     x_is_lot_tracking = fields.Boolean(string="Tracking by Lot")
+    x_wms_product_category = fields.Char(string="WMS Product Category")
 
     # The custom field below is to add owner to products, PO, SO, DO, receipt, stock move, and res.partner. Make sure to change all fields on other models too if there's a change!
     owner_name = fields.Selection([
