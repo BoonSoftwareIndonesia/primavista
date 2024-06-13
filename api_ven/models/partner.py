@@ -2,7 +2,7 @@ from odoo import models, fields, api
 import requests
 from datetime import datetime
 from odoo.http import request, Response
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 class PartnerExt(models.Model):
     _inherit = 'res.partner'
@@ -269,3 +269,45 @@ class PartnerExt(models.Model):
             args.append(('x_owner_name', '=', owner_name))        
 
         return super(PartnerExt, self).search(args, offset=offset, limit=limit, order=order, count=count)
+
+# Logic for when deleting a company. When a company is deleted, all related records to it would be deleted too.
+
+class IrProperty(models.Model):
+    _inherit = 'ir.property'
+
+    company_id = fields.Many2one('res.company', ondelete='cascade')
+
+class StockWarehouse(models.Model):
+    _inherit = 'stock.warehouse'
+
+    company_id = fields.Many2one('res.company', ondelete='cascade')
+
+class StockPickingType(models.Model):
+    _inherit = 'stock.picking.type'
+
+    company_id = fields.Many2one('res.company', ondelete='cascade')
+
+class StockRule(models.Model):
+    _inherit = 'stock.rule'
+
+    company_id = fields.Many2one('res.company', ondelete='cascade')
+
+class ResCompany(models.Model):
+    _inherit = 'res.company'
+
+    def unlink(self):
+        raise ValidationError("Warning! Deleting a company would also delete all related records, to continue, please go to: src/user/api_ven/models/partner.py on line 299 and uncomment the code")
+
+        # Fetch and delete other related records
+        related_models = [
+            'res.partner',
+            # Add other related models here
+        ]
+        
+        for model_name in related_models:
+            related_records = self.env[model_name].search([('company_id', 'in', self.ids)])
+            if related_records:
+                related_records.unlink()
+        
+        # Call the original unlink method
+        return super(ResCompany, self).unlink()
