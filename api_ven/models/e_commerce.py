@@ -254,10 +254,10 @@ class ApiFetchTokPed(models.Model):
             'page': 1,
             'per_page': 1000,
             'fs_id': fs_id,
-            # 'from_date': int(ten_m_before.timestamp()),
-            # 'to_date': int(cur_time.timestamp()),
-            'from_date': int(date1.timestamp()),
-            'to_date': int(date2.timestamp()),        
+            'from_date': int(ten_m_before.timestamp()),
+            'to_date': int(cur_time.timestamp()),
+            # 'from_date': int(date1.timestamp()),
+            # 'to_date': int(date2.timestamp()),        
             # 'shop_id' : 9075286
             # 'shop_id': shop_id
         }
