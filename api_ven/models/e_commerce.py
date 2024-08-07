@@ -470,6 +470,8 @@ class ApiFetchTokPed(models.Model):
                         
                         # Format the string
                         so_name = f"SO-OR/AVI/{now.year}/{now.month:02}/{now.day:02}/{running_code_str}"
+
+                        company_id = self.env.context['allowed_company_ids'][0]
                         
                         request.env['sale.order'].create({
                             'name': so_name,
@@ -479,7 +481,7 @@ class ApiFetchTokPed(models.Model):
                             'partner_id': partner.id,
                             'partner_invoice_id': partner.id,
                             'partner_shipping_id': partner.id,
-                            'company_id': 11,
+                            'company_id': company_id,
                             'date_order': date_order_converter,
                             'picking_policy': "direct",
                             'pricelist_id': 1,
