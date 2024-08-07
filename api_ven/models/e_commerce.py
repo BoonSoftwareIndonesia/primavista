@@ -485,7 +485,7 @@ class ApiFetchTokPed(models.Model):
                             'date_order': date_order_converter,
                             'picking_policy': "direct",
                             'pricelist_id': 1,
-                            'warehouse_id': 17,
+                            'warehouse_id': 1323,
                             'x_ecommerce_code': "TKP",
                             'x_buyer_id': buyer_id,
                             'x_shop_id': order.get("shop_id"),
