@@ -311,3 +311,26 @@ class ResCompany(models.Model):
         
         # Call the original unlink method
         return super(ResCompany, self).unlink()
+
+# Added this piece of code so that when creating a new company on production, the value "('bi', 'Bank Indonesia')" is not missing.
+
+class ResCompany(models.Model):
+    _inherit = 'res.company'
+
+    # Define the new selection field with all provided options
+    currency_provider = fields.Selection([
+        ('ecb', 'European Central Bank'),
+        ('fta', 'Federal Tax Administration (Switzerland)'),
+        ('banxico', 'Mexican Bank'),
+        ('boc', 'Bank Of Canada'),
+        ('xe_com', 'xe.com'),
+        ('bnr', 'National Bank Of Romania'),
+        ('mindicador', 'Chilean mindicador.cl'),
+        ('bcrp', 'SUNAT (replaces Bank of Peru)'),
+        ('cbuae', 'UAE Central Bank'),
+        ('cbegy', 'Central Bank of Egypt'),
+        ('nbp', 'National Bank of Poland'),
+        ('bnb', 'Bulgaria National Bank'),
+        ('bnm', 'Bank Negara Malaysia'),
+        ('bi', 'Bank Indonesia')        
+    ], string='Currency Provider')
