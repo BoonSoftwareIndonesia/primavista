@@ -1268,3 +1268,135 @@ class ApiVen(http.Controller):
         
         # return message
         return response
+
+    @http.route('/web/api/get_product_by_id', type='json', auth='user', methods=['POST'])
+    def get_product(self):
+        # Retrieve the product data from the JSON payload
+        product_data = request.jsonrequest.get('product', {})
+        if not product_data:
+            return {'message': 'Invalid data format', 'data': {}}
+        default_code = product_data.get('default_code')
+        name = product_data.get('name')
+        categ_id = product_data.get('categ_id')
+        if not default_code:
+            return {'message': 'Default code is required', 'data': {}}
+        # Retrieve the product.template record based on the default code
+        product_template = request.env['product.template'].search([('default_code', '=', default_code)], limit=1)
+        if not product_template:
+            return {'message': 'Product not found', 'data': {}}
+        # Get all field values of the product_template
+        response_data = product_template.read()[0]
+ 
+        response = {'message': 'Success', 'data': response_data}
+        return response
+
+    @http.route('/web/api/update_product_name', type='json', auth='user', methods=['POST'])
+    def update_product_name(self):
+        # Retrieve the product data from the JSON payload
+        product_data = request.jsonrequest.get('product', {})
+        if not product_data:
+            return {'message': 'Invalid data format', 'data': {}}
+        default_code = product_data.get('default_code')
+        new_name = product_data.get('name')
+    
+        if not default_code or not new_name:
+            return {'message': 'Default code and new name are required', 'data': {}}
+    
+        # Retrieve the product.template record based on the default code
+        # product_template = request.env['product.template'].search([('default_code', '=', default_code)], limit=1)
+
+        # Set context with allowed company IDs
+        context = dict(request.env.context, allowed_company_ids=request.env.user.company_ids.ids)
+    
+        # Retrieve the product.template record based on the default code
+        product_template = request.env['product.template'].with_context(context).search([('default_code', '=', default_code)], limit=1)
+        
+        if not product_template:
+            return {'message': 'Product not found', 'data': {}}
+    
+        # Update the product name
+        product_template.write({'name': new_name})
+    
+        # Retrieve the updated product data
+        response_data = product_template.read()[0]
+    
+        response = {'message': 'Success', 'data': response_data}
+        return response
+
+    @http.route('/web/api/update_product_categ', type='json', auth='user', methods=['POST'])
+    def update_product_categ(self):
+        # Retrieve the product data from the JSON payload
+        product_data = request.jsonrequest.get('product', {})
+        if not product_data:
+            return {'message': 'Invalid data format', 'data': {}}
+    
+        default_code = product_data.get('default_code')
+        new_categ_id = product_data.get('categ_id')
+    
+        # Validate required fields
+        if not default_code or not new_categ_id:
+            return {'message': 'Default code and category ID are required', 'data': {}}
+
+        # Set context with allowed company IDs
+        context = dict(request.env.context, allowed_company_ids=request.env.user.company_ids.ids)
+    
+        # Retrieve the product.template record based on the default code
+        product_template = request.env['product.template'].with_context(context).search([('default_code', '=', default_code)], limit=1)
+        
+        if not product_template:
+            return {'message': 'Product not found', 'data': {}}
+        
+        # Validate the category ID
+        category = request.env['product.category'].with_context(context).browse(new_categ_id)
+        if not category.exists():
+            return {'message': 'Invalid category ID', 'data': {}}
+
+        # Validate the category ID
+        category = request.env['product.category'].with_context(context).browse(new_categ_id)
+        if not category.exists():
+            return {'message': 'Invalid category ID', 'data': {}}
+    
+        # Update the category ID on the product
+        product_template.write({'categ_id': new_categ_id})
+    
+        # Get all field values of the product_template
+        response_data = product_template.read()[0]
+    
+        response = {'message': 'Categ_id updated successfully', 'data': response_data}
+        return response
+
+
+    @http.route('/web/api/update_product', type='json', auth='user', methods=['POST'])
+    def update_product(self):
+        # Retrieve the product data from the JSON payload
+        product_data = request.jsonrequest.get('product', {})
+        if not product_data:
+            return {'message': 'Invalid data format', 'data': {}}
+    
+        default_code = product_data.get('default_code')
+        name = product_data.get('name')
+        # categ_id = product_data.get('categ_id')
+    
+        if not default_code or not name:
+            return {'message': 'Default code and new name are required', 'data': {}}
+    
+        # Retrieve the product.template re  cord based on the default code
+        # product_template = request.env['product.template'].with_context(allowed_company_ids=[1]).search([('default_code', '=', default_code)], limit=1)
+
+        # Set context with allowed company IDs
+        context = dict(request.env.context, allowed_company_ids=request.env.user.company_ids.ids)
+    
+        # Retrieve the product.template record based on the default code
+        product_template = request.env['product.template'].with_context(context).search([('default_code', '=', default_code)], limit=1)
+
+        if not product_template:
+            return {'message': 'Product not found', 'data': {}}
+      
+        # Update the product name
+        product_template.write({'name': name})
+        # product_template.write({'categ_id': categ_id})
+    
+        response_data = product_template.read()[0]
+        response = {'message': 'Product name updated successfully', 'data': response_data}
+    
+        return response

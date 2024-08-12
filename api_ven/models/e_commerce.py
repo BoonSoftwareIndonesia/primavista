@@ -262,35 +262,35 @@ class ApiFetchTokPed(models.Model):
             # 'shop_id': shop_id
         }
         
-        # Create API log
-        try:
-            api_log = request.env['api_ven.api_ven'].create({
-                'status': 'new',
-                'created_date': datetime.now(),
-                'incoming_msg': params,
-                'message_type': 'FTKPD'
-            })
+        # # Create API log
+        # try:
+        #     api_log = request.env['api_ven.api_ven'].create({
+        #         'status': 'new',
+        #         'created_date': datetime.now(),
+        #         'incoming_msg': params,
+        #         'message_type': 'FTKPD'
+        #     })
 
-            api_log['status'] = 'process'
-        except Exception as e:
-            error['Error'] = str(e)
-            is_error = True
+        #     api_log['status'] = 'process'
+        # except Exception as e:
+        #     error['Error'] = str(e)
+        #     is_error = True
             
-        # Create the incoming txt
-        try:
-            api_log['incoming_txt'] = request.env['ir.attachment'].create({
-                'name': str(api_log['name']) + '_in.txt',
-                'type': 'binary',
-                'datas': base64.b64encode(bytes(str(params), 'utf-8')),
-                'res_model': 'api_ven.api_ven',
-                'res_id': api_log['id'],
-                'company_id': self.env.context['allowed_company_ids'][0],
-                'mimetype': 'text/plain'
-            })
+        # # Create the incoming txt
+        # try:
+        #     api_log['incoming_txt'] = request.env['ir.attachment'].create({
+        #         'name': str(api_log['name']) + '_in.txt',
+        #         'type': 'binary',
+        #         'datas': base64.b64encode(bytes(str(params), 'utf-8')),
+        #         'res_model': 'api_ven.api_ven',
+        #         'res_id': api_log['id'],
+        #         'company_id': self.env.context['allowed_company_ids'][0],
+        #         'mimetype': 'text/plain'
+        #     })
             
-        except Exception as e:
-            error['Error'] = str(e)
-            is_error = True
+        # except Exception as e:
+        #     error['Error'] = str(e)
+        #     is_error = True
             
         # Fetch the data for get order list
         resp = requests.get('https://fs.tokopedia.net/v2/order/list', params=params, headers=headers)
@@ -301,25 +301,25 @@ class ApiFetchTokPed(models.Model):
         # raise UserError(resp.content)
         # ===================================================================
         
-        # This section will record the response if the respon is success or not
-        api_log['response_msg'] = base64.b64encode(bytes(str(resp.text), 'utf-8'))
-        api_log['response_date'] = datetime.now()
+        # # This section will record the response if the respon is success or not
+        # api_log['response_msg'] = base64.b64encode(bytes(str(resp.text), 'utf-8'))
+        # api_log['response_date'] = datetime.now()
         
-        if resp.status_code == 200:
-            api_log['status'] = 'success'
-        else:
-            api_log['status'] = 'error'
+        # if resp.status_code == 200:
+        #     api_log['status'] = 'success'
+        # else:
+        #     api_log['status'] = 'error'
             
-        # Create the response txt
-        api_log['response_txt'] = request.env['ir.attachment'].create({
-            'name': str(api_log['name']) + '_out.txt',
-            'type': 'binary',
-            'datas': base64.b64encode(bytes(str(resp.text), 'utf-8')),
-            'res_model': 'api_ven.api_ven',
-            'res_id': api_log['id'],
-            'company_id': self.env.context['allowed_company_ids'][0],
-            'mimetype': 'text/plain'
-        })
+        # # Create the response txt
+        # api_log['response_txt'] = request.env['ir.attachment'].create({
+        #     'name': str(api_log['name']) + '_out.txt',
+        #     'type': 'binary',
+        #     'datas': base64.b64encode(bytes(str(resp.text), 'utf-8')),
+        #     'res_model': 'api_ven.api_ven',
+        #     'res_id': api_log['id'],
+        #     'company_id': self.env.context['allowed_company_ids'][0],
+        #     'mimetype': 'text/plain'
+        # })
     
         # ================================================================================
         
@@ -422,7 +422,7 @@ class ApiFetchTokPed(models.Model):
                     
                     # This variable will search for the sale order base on invoice_ref_num from TokPed
                     # and compare it with the reference document (origin) in Odoo.
-                    sale_order_m = request.env['sale.order'].search([('origin', '=', order.get("invoice_ref_num"))], limit=1)                    
+                    sale_order_m = self.env['sale.order'].search([('origin', '=', order.get("invoice_ref_num"))], limit=1)                    
 
                     # raise UserError(running_code)                    
                     
@@ -434,7 +434,7 @@ class ApiFetchTokPed(models.Model):
                         # if the order status is other that 400. Systems will pass it and looking for next list
                         running_code = self.env['ir.sequence'].next_by_code('avi.sales.order')   
                         running_code_str = str(running_code)
-                        partner = request.env['res.partner'].search([('name', '=', "TOKOPEDIA CUSTOMER SHIP ADDRESS")], limit=1)                                                       
+                        partner = self.env['res.partner'].search([('name', '=', "TOKOPEDIA CUSTOMER SHIP ADDRESS")], limit=1)                                                       
                         if not partner:                            
                             # Handle the case where the partner does not exist
                             raise ValueError("Partner not found: TOKOPEDIA CUSTOMER SHIP ADDRESS")                        
@@ -473,7 +473,7 @@ class ApiFetchTokPed(models.Model):
 
                         company_id = self.env.context['allowed_company_ids'][0]
                         
-                        request.env['sale.order'].create({
+                        self.env['sale.order'].create({
                             'name': so_name,
                             'x_shop_name': shop_name,
                             'origin': order.get("invoice_ref_num"),
@@ -485,7 +485,7 @@ class ApiFetchTokPed(models.Model):
                             'date_order': date_order_converter,
                             'picking_policy': "direct",
                             'pricelist_id': 1,
-                            'warehouse_id': 1323,
+                            'warehouse_id': 17,
                             'x_ecommerce_code': "TKP",
                             'x_buyer_id': buyer_id,
                             'x_shop_id': order.get("shop_id"),
@@ -520,7 +520,7 @@ class ApiFetchTokPed(models.Model):
                     
                     # Because we need to get the new sales order (current created sales order). So we will
                     # search it first to get the value.
-                    new_sale_order_m = request.env['sale.order'].search([('origin', '=', order.get("invoice_ref_num"))], limit=1)                    
+                    new_sale_order_m = self.env['sale.order'].search([('origin', '=', order.get("invoice_ref_num"))], limit=1)                    
 
                     if not new_sale_order_m:
                         continue
@@ -533,13 +533,13 @@ class ApiFetchTokPed(models.Model):
                     for product in order.get("products"):
                         
                         # Checking if the product existing or not                        
-                        is_product = request.env['product.template'].search([('name', '=', product.get("name"))], limit=1)                        
+                        is_product = self.env['product.template'].search([('name', '=', product.get("name"))], limit=1)                        
                         
                         # If the product doesn't existing in Odoo. Systems will auto create the product
                         if not is_product:   
                             raise UserError(product.get("name") + " does not exist!")
                             
-                            is_product = request.env['product.template'].search([('name', '=', product.get("name"))], limit=1)                            
+                            is_product = self.env['product.template'].search([('name', '=', product.get("name"))], limit=1)                            
                             # NOTE if please re-mapping all this mapping:
                             """
                             - categ_id -> Please hardcode this into sale_able product category first
@@ -552,7 +552,7 @@ class ApiFetchTokPed(models.Model):
                             
                             if not is_product:
                                                               
-                                request.env['product.template'].create({
+                                self.env['product.template'].create({
                                     'categ_id': 2,
                                     'company_id': self.env.context['allowed_company_ids'][0],
                                     'detailed_type': "product",
@@ -568,10 +568,10 @@ class ApiFetchTokPed(models.Model):
                                 })                               
                             
                         # After the product created. We will store the product information first using search feature.                                                    
-                        product_detail = request.env['product.product'].search([('default_code', '=', product.get("sku"))], limit=1)
+                        product_detail = self.env['product.product'].search([('default_code', '=', product.get("sku"))], limit=1)
                         
                         if not product_detail:                            
-                            product_detail = request.env['product.product'].search([('name', '=', product.get("name"))], limit=1) 
+                            product_detail = self.env['product.product'].search([('name', '=', product.get("name"))], limit=1) 
                         
                         # This code will make sure there is no error in Odoo creating Product process
                         if not product_detail:
@@ -598,11 +598,11 @@ class ApiFetchTokPed(models.Model):
 
                         # After creating the sales order line. We need to update the price json.
                         # In odoo 14 and 15, It's call as tax_totals_json.                                                                                              
-                        new_amount_total = total_amount - total_discount - total_cashback
+                        # new_amount_total = total_amount - total_discount - total_cashback
                                                 
-                        new_sale_order_m.update({
-                            'amount_total': new_amount_total
-                        })
+                        # new_sale_order_m.update({
+                        #     'amount_total': new_amount_total
+                        # })
                         
                         # new_sale_order_m._compute_tax_totals_json()
                         
