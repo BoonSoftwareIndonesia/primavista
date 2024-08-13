@@ -14,6 +14,21 @@ import hmac
 import hashlib
 import requests
 
+"""
+#####     API FLOW     #####
+1. Authorization
+2. Get Tokopedia Order
+3. Process Data
+4. Create new Sales Order and Sales Order Line
+
+Note: If the product retrieved from the Order doesn't exist, it would return an error and the user have to create the product manually
+
+#####     SCHEDULER     #####
+The function would run automatically every 10 minutes (To configure the scheduler, go to Technical -> Automation -> Scheduled Action).
+
+PLEASE NOTE THAT WHEN THERE IS AN ERROR ON AN AUTOMATED FUNCTION, IT WOULD NOT SHOW UP ON THE UI! INSTEAD, USE LOGS TO DEBUG
+"""
+
 class SaleOrderExt(models.Model):
     _inherit = "sale.order"
 

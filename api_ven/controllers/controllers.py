@@ -1350,11 +1350,6 @@ class ApiVen(http.Controller):
         category = request.env['product.category'].with_context(context).browse(new_categ_id)
         if not category.exists():
             return {'message': 'Invalid category ID', 'data': {}}
-
-        # Validate the category ID
-        category = request.env['product.category'].with_context(context).browse(new_categ_id)
-        if not category.exists():
-            return {'message': 'Invalid category ID', 'data': {}}
     
         # Update the category ID on the product
         product_template.write({'categ_id': new_categ_id})

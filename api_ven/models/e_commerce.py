@@ -18,6 +18,7 @@ import requests
 Summary Brief:
 - This model will control the integration between Odoo and Indonesia E-Commerce like Shopee and Tokopedia.
 - For now, the API that working is Tokopedia. But, at 23-02-2024 this API is down due to there is an issue in Tokopedia platform. Latest developer can't rise ticket because we can't access Tokopedia technical ticket trello.
+- As of 13-08-2024, the Tokopedia API is working with scheduler, for more details open scheduler.py
 - The Shopee can't be implement due to there is an error in access token. Current Developer (VL) already try to communicated with Shopee team but not get the right answer.
     
 Logic:
@@ -621,7 +622,7 @@ class ApiFetchShopee(models.Model):
 
     def get_token_shop_level(self):
         tmp_partner_key = "6f767666617044757861436d6a776e556f51595056624e61526c595667785059"
-        code = "67654c6f6c6e7153424c646e46624d77"
+        code = "506250566d4141784f444f5672475053"
         shop_id = 118595
         partner_id = 1036815
         timest = int(time.time())
