@@ -13,7 +13,7 @@ import re
 
 class PurchaseOrderExt(models.Model):
     _inherit = 'purchase.order'
-    x_studio_doc_trans_code = fields.Selection([("PODR", "PODR"),("SAMPLE", "SAMPLE")],string="Doc Trans Code", default='PODR')
+    x_studio_doc_trans_code = fields.Selection([("PODR", "PODR"),("SAMPLE", "SAMPLE")],string="Doc Trans Code", default='')
 
 # Override for PO and SO return ======================
 # Override stock move creation process when a PO is confirmed. 

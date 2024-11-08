@@ -14,3 +14,5 @@ from . import odoo_sap
 from . import odoo_wms
 from . import running_number_logic
 from . import scheduler
+from . import product_search
+from . import test

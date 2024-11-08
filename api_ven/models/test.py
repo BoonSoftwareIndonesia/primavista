@@ -32,12 +32,13 @@ PLEASE NOTE THAT WHEN THERE IS AN ERROR ON AN AUTOMATED FUNCTION, IT WOULD NOT S
 class SaleOrderExt(models.Model):
     _inherit = "sale.order"
 
-    def get_tokped_order_list_scheduler(self):
-                
+    def x_get_tokped_order_list_scheduler(self):
+        
         # Initialize fs basic information
         # Note: We need to change this variable if there is a changing in
         #       client Tokopedia Data
-        fs_id = 17859
+        fs_id = 17859                    
+        # raise UserError("Tes")
 
         # =================================================================
         
@@ -92,7 +93,7 @@ class SaleOrderExt(models.Model):
             'to_date': int(date2.timestamp()),        
             # 'shop_id' : 9075286
             # 'shop_id': shop_id
-        } 
+        }
         
         # # Create API log
         # try:
@@ -175,10 +176,10 @@ class SaleOrderExt(models.Model):
         # After checking if there is a new data. If there is a new data, systems
         # will create the new SO
 
-        company_id = self.env.user.company_id.id        
-        # raise UserError("Test")
+        company_id = self.env.user.company_id.id
+        # raise UserError(company_id)
                 
-        if need_updated:                                
+        if need_updated:                    
             try:
                 for order in sales_order_list:                                        
                     
@@ -268,9 +269,9 @@ class SaleOrderExt(models.Model):
                         # If the order status is 400. Systems will create the sales.order
                         # if the order status is other that 400. Systems will pass it and looking for next list
                         running_code = self.env['ir.sequence'].next_by_code('avi.sales.order')   
-                        running_code_str = str(running_code)                        
+                        running_code_str = str(running_code)
                         partner = self.env['res.partner'].search([('name', '=', "TOKOPEDIA CUSTOMER SHIP ADDRESS")], limit=1)                                                       
-                        if not partner:                            
+                        if not partner:                              
                             # Handle the case where the partner does not exist
                             raise ValueError("Partner not found: TOKOPEDIA CUSTOMER SHIP ADDRESS")                        
                         

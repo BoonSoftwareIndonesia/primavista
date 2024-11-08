@@ -15,7 +15,7 @@ import hashlib
 import requests
 
 """
-Summary Brief:
+Summary Brie f:
 - This model will control the integration between Odoo and Indonesia E-Commerce like Shopee and Tokopedia.
 - For now, the API that working is Tokopedia. But, at 23-02-2024 this API is down due to there is an issue in Tokopedia platform. Latest developer can't rise ticket because we can't access Tokopedia technical ticket trello.
 - As of 13-08-2024, the Tokopedia API is working with scheduler, for more details open scheduler.py
@@ -100,7 +100,7 @@ class ApiFetchTokPed(models.Model):
     def get_tokped_access_token(self):
         """
         This function has a purpose to Request tokopedia access token,
-        token type, and expired date. After that, load it as a variable
+        token type, and expired date. After that, loa d it as a variable
         """
         # =================================================================
         
@@ -208,8 +208,8 @@ class ApiFetchTokPed(models.Model):
         # Initialize fs basic information
         # Note: We need to change this variable if there is a changing in
         #       client Tokopedia Data
-        fs_id = 17859                
-
+        fs_id = 17859                   
+ 
         # =================================================================
         
         # Request access token, expired_date, and token type
@@ -621,14 +621,19 @@ class ApiFetchShopee(models.Model):
     _inherit = "sale.order"
 
     def get_token_shop_level(self):
-        tmp_partner_key = "6f767666617044757861436d6a776e556f51595056624e61526c595667785059"
-        code = "506250566d4141784f444f5672475053"
-        shop_id = 118595
-        partner_id = 1036815
+        tmp_partner_key = "544b656550666861546f4a615575515561784e414c556f5245707068464d5261"
+        # tmp_partner_key = "6f767666617044757861436d6a776e556f51595056624e61526c595667785059"
+        code = "5855437043676277446c6d6c55547070"
+        shop_id = 118595        
+        # main_account_id = 12713
+        partner_id = 2006514
+        # partner_id = 1036815
         timest = int(time.time())
+        # host = "https://partner.test-stable.shopeemobile.com"
         host = "https://partner.shopeemobile.com"
         path = "/api/v2/auth/token/get"
         body = {"code": code, "shop_id": shop_id, "partner_id": partner_id}
+        # body = {"code": code, "main_account_id": main_account_id, "partner_id": partner_id}
         tmp_base_string = "%s%s%s" % (partner_id, path, timest)
         base_string = tmp_base_string.encode()
         partner_key = tmp_partner_key.encode()
@@ -643,13 +648,13 @@ class ApiFetchShopee(models.Model):
         raise UserError(resp.content)
         return access_token, new_refresh_token
     
-    def shop_auth(self):        
+    def shop_auth(self):
         timest = int(time.time())
         host = "https://partner.shopeemobile.com"
         path = "/api/v2/shop/auth_partner"
         redirect_url = "https://www.baidu.com/"
-        partner_id = 1036815
-        tmp = "6f767666617044757861436d6a776e556f51595056624e61526c595667785059"
+        partner_id = 2006514
+        tmp = "4f55656454545052524b7a757a736643584c626563684254434b764e58636f70"
         partner_key = tmp.encode()
         tmp_base_string = "%s%s%s" % (partner_id, path, timest)
         base_string = tmp_base_string.encode()
@@ -673,7 +678,7 @@ class ApiFetchShopee(models.Model):
         return sign
     
     def get_shopee_order_list(self):
-        self.shop_auth()
+        # self.shop_auth()
         # ======================================================================
         # Basic information
         host = "https://partner.test-stable.shopeemobile.com"
@@ -681,12 +686,14 @@ class ApiFetchShopee(models.Model):
         tmp = "6f767666617044757861436d6a776e556f51595056624e61526c595667785059"
         
         # Shop information
-        shop_id = 89935
+        shop_id = 118595
         
         # Basic authentication
-        code = "4677547467766269556468564d6c5468"
-        access_token = "564948784462685872694b786a6b6353"
-        refresh_token = "42466e6d485572795559474d4149506b"
+        code = "5855437043676277446c6d6c55547070"
+        # access_token = "5363565043697561616f464d6e6d6549"
+        # refresh_token = "6e4f4358656f675a566f6344484c4d6d"
+
+        access_token, refresh_token = self.get_token_shop_level()
         # =================================================================
 
         # This section has a purpose to fetch order list information from Shopee
@@ -700,13 +707,12 @@ class ApiFetchShopee(models.Model):
 
         path = "/api/v2/order/get_order_list"
                 
-        sign = self.generate_shopee_sign(partner_id, path, timespam, access_token, shop_id)
-        raise UserError(sign)
+        sign = self.generate_shopee_sign(partner_id, path, timespam, access_token, shop_id)        
                 
         cur_utc = dt.datetime.now(dt.timezone.utc)
     
         cur_time = cur_utc
-        cur_time += dt.timedelta(hours=+7)
+        cur_time += dt.timedelta(hours=+7)  
         ts_cur_time = datetime.timestamp(cur_time)
     
         before_time = cur_utc
@@ -790,7 +796,7 @@ class ApiFetchShopee(models.Model):
         if resp.status_code == 200:
             api_log['status'] = 'success'
         else:
-            api_log['status'] = 'error'
+            api_log['status'] = 'error'  
 
         # Create the response txt
         api_log['response_txt'] = request.env['ir.attachment'].create({
@@ -921,3 +927,4 @@ class ApiFetchShopee(models.Model):
                     
             except Exception as e:
                 raise UserError(str(e))
+                
